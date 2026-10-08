@@ -4,6 +4,7 @@ class NSGame {
     if (!canvas) throw new Error('A canvas is required.');
     this.canvas=canvas; this.host=host; this.listeners=[]; this.input={}; this.frames=[];
     this.destroyed=false; this.started=false; this.running=false; this.debug=false;
+    this.soundVolume=.55;this.soundMuted=false;
     this.world=new NSWorld('NEXT-STOP'); this.sim=new NSSimulation(this.world);this.exploration=new NSExploration(this.world);
     this.railway=new NSRailway(this.world);
     this.renderer=new NSGlyphRenderer(canvas,this.world);
@@ -34,6 +35,8 @@ class NSGame {
     this.listen(this.el['reduced-motion'],'change',()=>{this.sim.settings.reducedMotion=this.el['reduced-motion'].checked;this.syncSettings();});
     this.listen(this.el['high-contrast'],'change',()=>{this.sim.settings.highContrast=this.el['high-contrast'].checked;this.syncSettings();});
     this.listen(document.getElementById('fire-assist'),'change',event=>{this.railway.assisted=event.target.checked;this.railway.apply(this.sim);});
+    this.listen(document.getElementById('sound-volume'),'input',event=>{this.soundVolume=Number(event.target.value)/100;this.syncAudio();});
+    this.listen(document.getElementById('sound-muted'),'change',event=>{this.soundMuted=event.target.checked;this.syncAudio();});
     this.listen(this.el.debug,'change',()=>{this.debug=this.el.debug.checked;this.el.diagnostics.hidden=!this.debug;});
     this.click('regenerate',()=>{try{this.regenerate(this.el.seed.value);this.notify('New valley ready. Start beside your train.');}catch(error){this.report(error);}});
     this.click('recover',()=>{this.notify(this.sim.recover()||'Returned to a safe station.');});
@@ -73,11 +76,13 @@ class NSGame {
     this.notify(message);
   }
   soundWhistle(){
+    if(this.soundMuted||this.soundVolume===0)return;
     const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
-    this.audio??=new Audio();if(this.audio.state==='suspended')this.audio.resume();
-    const gain=this.audio.createGain(),now=this.audio.currentTime;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.045,now+.12);gain.gain.linearRampToValueAtTime(0,now+1.3);gain.connect(this.audio.destination);
+    if(!this.audio){this.audio=new Audio();this.audioMaster=this.audio.createGain();this.audioMaster.connect(this.audio.destination);this.syncAudio();}if(this.audio.state==='suspended')this.audio.resume();
+    const gain=this.audio.createGain(),now=this.audio.currentTime;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.045,now+.12);gain.gain.linearRampToValueAtTime(0,now+1.3);gain.connect(this.audioMaster);
     for(let i=0;i<3;i++){const tone=this.audio.createOscillator();tone.type='sine';tone.frequency.setValueAtTime(264+i*132,now);tone.connect(gain);tone.start(now);tone.stop(now+1.35);tone.onended=()=>{tone.disconnect();if(i===2)gain.disconnect();};}
   }
+  syncAudio(){if(this.audioMaster)this.audioMaster.gain.setValueAtTime(this.soundMuted?0:this.soundVolume,this.audio.currentTime);}
   pause(){this.running=false;this.input={};this.dragging=false;this.lastPointer=null;this.accumulator=0;if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
   resume(){if(this.destroyed)return;this.started=true;this.running=true;this.accumulator=0;this.previous=performance.now();this.el.menu.hidden=true;this.el['pause-button'].textContent='Pause';this.canvas.focus({preventScroll:true});}
   menuItems(root=this.el.menu){return[...root.querySelectorAll('button,input,select,summary')].filter(n=>!n.closest('[hidden]')&&!n.hidden&&!n.disabled&&(n.type!=='radio'||n.checked));}
@@ -119,7 +124,7 @@ class NSGame {
     if(now>this.toastUntil)this.el.toast.classList.remove('visible');
     if(this.debug){const d=this.renderer.diagnostics(),sorted=this.frames.slice().sort((a,b)=>a-b),mid=sorted[Math.floor(sorted.length/2)]||0,p95=sorted[Math.floor(sorted.length*.95)]||0;this.el.diagnostics.textContent=`DIRECT GLYPH CELLS\n${JSON.stringify(d,null,2)}\nFrame median ${mid.toFixed(1)} ms / p95 ${p95.toFixed(1)} ms\nSeed checksum ${this.world.checksum()}\nF3 toggles diagnostics`;}
   }
-  syncSettings(){this.el.quality.value=this.sim.settings.quality||'standard';this.el.weather.value=this.sim.settings.weatherMode||'auto';this.el.seed.value=this.world.seed;this.el['reduced-motion'].checked=!!this.sim.settings.reducedMotion;this.el['high-contrast'].checked=!!this.sim.settings.highContrast;document.body.classList.toggle('reduced-motion',!!this.sim.settings.reducedMotion);document.body.classList.toggle('high-contrast',!!this.sim.settings.highContrast);}
+  syncSettings(){document.getElementById('sound-volume').value=Math.round(this.soundVolume*100);document.getElementById('sound-muted').checked=this.soundMuted;this.el.quality.value=this.sim.settings.quality||'standard';this.el.weather.value=this.sim.settings.weatherMode||'auto';this.el.seed.value=this.world.seed;this.el['reduced-motion'].checked=!!this.sim.settings.reducedMotion;this.el['high-contrast'].checked=!!this.sim.settings.highContrast;document.body.classList.toggle('reduced-motion',!!this.sim.settings.reducedMotion);document.body.classList.toggle('high-contrast',!!this.sim.settings.highContrast);}
   syncJournal(){
     const signature=this.world.seed+'|'+this.exploration.serialize().visited.join(',')+'|'+this.exploration.selected;
     if(signature===this.journalSignature)return;this.journalSignature=signature;
