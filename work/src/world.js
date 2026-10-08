@@ -381,7 +381,7 @@ class NSSimulation {
   _trainStep(dt) {
     const t = this.train, p = this.world.routeAt(t.s), mass = 52000;
     const speed = t.speed, sign = Math.sign(speed), abs = Math.abs(speed);
-    const traction = t.direction * 34000 * t.throttle * Math.max(.18, 1 - abs / 9);
+    const traction = t.direction * 34000 * t.throttle * Math.max(.18, 1 - abs / 9)*(this.tractionScale??1);
     const gradeForce = -9.81 * p.grade * mass;
     const brakeForce = 100000 * t.brake;
     const rolling = 1350, drag = 90 * speed * speed;
@@ -402,7 +402,7 @@ class NSSimulation {
     if (this.train.speed === 0) return 0;
     // Predict only a private train descriptor. Reuse the exact force model and
     // sample route grade as the train moves, without advancing the live world.
-    const prediction = { world: this.world, maxSpeed: this.maxSpeed, train: { ...this.train, brake: 1 } };
+    const prediction = { world: this.world, maxSpeed: this.maxSpeed, tractionScale:this.tractionScale??1, train: { ...this.train, brake: 1 } };
     const length = this.world.routeLength;
     let distance = 0;
     for (let step = 0; step < 600 && prediction.train.speed !== 0; step++) {
