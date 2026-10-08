@@ -1,0 +1,767 @@
+/* Next Stop: numerical world -> integer character records -> numeric glyph masks.
+ * This renderer never creates a conventional world-colour image or samples fonts.
+ */
+(function (global) {
+  'use strict';
+
+  const MAX_OBJECTS = 256;
+  const CELL_PRESETS = Object.freeze({ coarse: [12, 18], standard: [8, 12], fine: [6, 9] });
+  const VERTEX = `#version 300 es
+  precision highp float;
+  out vec2 v_uv;
+  void main() {
+    vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+    v_uv = p;
+    gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+  }`;
+
+  const SCENE = `#version 300 es
+  precision highp float;
+  precision highp int;
+  precision highp sampler2D;
+  layout(location=0) out uvec4 out_record;
+  layout(location=1) out uvec4 out_foreground;
+  layout(location=2) out uvec4 out_background;
+
+  uniform sampler2D u_terrain;
+  uniform sampler2D u_objects;
+  uniform int u_resolution;
+  uniform int u_objectCount;
+  uniform int u_shadowCount;
+  uniform float u_size;
+  uniform float u_water;
+  uniform vec2 u_heightRange;
+  uniform vec2 u_viewport;
+  uniform vec2 u_cellSize;
+  uniform vec3 u_eye;
+  uniform vec3 u_forward;
+  uniform vec3 u_right;
+  uniform vec3 u_up;
+  uniform vec3 u_sun;
+  uniform vec3 u_headPosition;
+  uniform vec3 u_headDirection;
+  uniform float u_time;
+  uniform vec2 u_weather;
+  uniform float u_motion;
+  uniform float u_far;
+
+  struct Hit { float t; vec3 p; vec3 n; int material; vec3 local; };
+
+  float hash21(vec2 p) {
+    vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+    q += dot(q, q.yzx + 33.33);
+    return fract((q.x + q.y) * q.z);
+  }
+  float heightAt(vec2 p) {
+    vec2 q = clamp((p + u_size * 0.5) / u_size * float(u_resolution - 1),
+                   vec2(0.0), vec2(float(u_resolution - 1) - 0.00001));
+    ivec2 c = ivec2(floor(q));
+    vec2 f = fract(q);
+    float a = texelFetch(u_terrain, c, 0).r;
+    float b = texelFetch(u_terrain, c + ivec2(1,0), 0).r;
+    float d = texelFetch(u_terrain, c + ivec2(0,1), 0).r;
+    float e = texelFetch(u_terrain, c + ivec2(1,1), 0).r;
+    return mix(mix(a,b,f.x), mix(d,e,f.x), f.y);
+  }
+  vec3 safeInverse(vec3 direction) {
+    return 1.0 / mix(vec3(0.000001), direction,
+      greaterThan(abs(direction), vec3(0.000001)));
+  }
+  vec2 boxInterval(vec3 ro, vec3 rd, vec3 lo, vec3 hi) {
+    vec3 a = (lo - ro) * safeInverse(rd);
+    vec3 b = (hi - ro) * safeInverse(rd);
+    vec3 m = min(a,b), n = max(a,b);
+    return vec2(max(max(m.x,m.y),m.z), min(min(n.x,n.y),n.z));
+  }
+
+  // Exact bilinear heightfield intersection. Traverse XZ cells, then solve the
+  // quadratic ray/height equation inside each cell. Vertical height error is
+  // never interpreted as a distance estimate, so steep slopes are not skipped.
+  bool terrainHit(vec3 ro, vec3 rd, float limit, int budget, out Hit hit) {
+    float halfSize = u_size * 0.5;
+    vec2 interval = boxInterval(ro, rd,
+      vec3(-halfSize,u_heightRange.x-0.1,-halfSize),
+      vec3(halfSize,u_heightRange.y+0.1,halfSize));
+    float t = max(0.025, interval.x);
+    float end = min(limit, interval.y);
+    if (end < t) return false;
+    float spacing = u_size / float(u_resolution - 1);
+    vec3 entry = ro + rd * (t + 0.0001);
+    ivec2 c = clamp(ivec2(floor((entry.xz + halfSize) / spacing)),
+                   ivec2(0), ivec2(u_resolution-2));
+    ivec2 stepCell = ivec2(rd.x >= 0.0 ? 1 : -1, rd.z >= 0.0 ? 1 : -1);
+    vec2 cellOrigin = vec2(c) * spacing - halfSize;
+    vec2 boundary = cellOrigin + vec2(rd.x >= 0.0 ? spacing : 0.0,
+                                    rd.z >= 0.0 ? spacing : 0.0);
+    vec2 nextT = vec2(abs(rd.x) > 0.000001 ? (boundary.x-ro.x)/rd.x : 1e9,
+                      abs(rd.z) > 0.000001 ? (boundary.y-ro.z)/rd.z : 1e9);
+    vec2 deltaT = vec2(abs(rd.x) > 0.000001 ? spacing/abs(rd.x) : 1e9,
+                       abs(rd.z) > 0.000001 ? spacing/abs(rd.z) : 1e9);
+    vec2 velocity = rd.xz / spacing;
+    for (int iteration=0; iteration<192; iteration++) {
+      if (iteration >= budget || t > end || c.x < 0 || c.y < 0 ||
+          c.x >= u_resolution-1 || c.y >= u_resolution-1) break;
+      float stop = min(end, min(nextT.x,nextT.y));
+      float extent = max(0.0,stop-t);
+      float h00 = texelFetch(u_terrain,c,0).r;
+      float h10 = texelFetch(u_terrain,c+ivec2(1,0),0).r;
+      float h01 = texelFetch(u_terrain,c+ivec2(0,1),0).r;
+      float h11 = texelFetch(u_terrain,c+ivec2(1,1),0).r;
+      float maxH = max(max(h00,h10),max(h01,h11));
+      float minRayY = min(ro.y+rd.y*t, ro.y+rd.y*stop);
+      if (minRayY <= maxH + 0.0001) {
+        vec2 origin = (ro.xz + rd.xz*t - (vec2(c)*spacing-halfSize))/spacing;
+        float hx=h10-h00, hz=h01-h00, crossH=h00-h10-h01+h11;
+        float A = -crossH*velocity.x*velocity.y;
+        float B = rd.y-hx*velocity.x-hz*velocity.y-
+                  crossH*(origin.x*velocity.y+origin.y*velocity.x);
+        float C = ro.y+rd.y*t-h00-hx*origin.x-hz*origin.y-crossH*origin.x*origin.y;
+        float root = 1e9;
+        if (abs(A)<0.0000001) {
+          if (abs(B)>0.000001) root=-C/B;
+        } else {
+          float discriminant=B*B-4.0*A*C;
+          if (discriminant>=0.0) {
+            float q = sqrt(discriminant);
+            float r0=(-B-q)/(2.0*A), r1=(-B+q)/(2.0*A);
+            if (r0>r1) { float swap=r0; r0=r1; r1=swap; }
+            if (r0>=-0.0001 && r0<=extent+0.0001) root=r0;
+            else if (r1>=-0.0001 && r1<=extent+0.0001) root=r1;
+          }
+        }
+        if (root>=-0.0001 && root<=extent+0.0001) {
+          hit.t=t+clamp(root,0.0,extent);
+          hit.p=ro+rd*hit.t;
+          vec2 f=clamp(origin+velocity*clamp(root,0.0,extent),0.0,1.0);
+          hit.n=normalize(vec3(-(hx+crossH*f.y)/spacing,1.0,-(hz+crossH*f.x)/spacing));
+          hit.material=(hit.n.y<0.88 || hit.p.y<u_water+1.3) ? 2 : 1;
+          hit.local=hit.p;
+          return true;
+        }
+      }
+      bool advanceX=nextT.x<=nextT.y;
+      bool advanceZ=nextT.y<=nextT.x;
+      t=stop;
+      if (advanceX) { c.x+=stepCell.x; nextT.x+=deltaT.x; }
+      if (advanceZ) { c.y+=stepCell.y; nextT.y+=deltaT.y; }
+      if (stop>=end) break;
+    }
+    return false;
+  }
+
+  bool objectHit(vec3 ro, vec3 rd, int index, float limit, out Hit hit) {
+    vec4 centre = texelFetch(u_objects,ivec2(0,index),0);
+    vec3 offset=centre.xyz-ro;
+    float along=dot(offset,rd);
+    if (along+centre.w<0.025 || along-centre.w>limit ||
+        dot(offset,offset)-along*along>centre.w*centre.w) return false;
+    vec4 shape=texelFetch(u_objects,ivec2(1,index),0);
+    vec4 data=texelFetch(u_objects,ivec2(2,index),0);
+    vec3 p=ro-centre.xyz;
+    vec3 localRo=vec3(data.x*p.x-data.y*p.z,p.y,data.y*p.x+data.x*p.z);
+    vec3 localRd=vec3(data.x*rd.x-data.y*rd.z,rd.y,data.y*rd.x+data.x*rd.z);
+    float t; vec3 normal;
+    if (shape.w>0.5) {
+      vec3 a=localRo/shape.xyz, b=localRd/shape.xyz;
+      float A=dot(b,b), B=dot(a,b), C=dot(a,a)-1.0;
+      float disc=B*B-A*C;
+      if (disc<0.0) return false;
+      float q=sqrt(disc);
+      t=(-B-q)/A;
+      if (t<0.025) t=(-B+q)/A;
+      if (t<0.025 || t>limit) return false;
+      normal=normalize((localRo+localRd*t)/(shape.xyz*shape.xyz));
+    } else {
+      vec2 interval=boxInterval(localRo,localRd,-shape.xyz,shape.xyz);
+      if (interval.x>interval.y || interval.y<0.025) return false;
+      t=interval.x>=0.025 ? interval.x : interval.y;
+      if (t>limit) return false;
+      vec3 localP=localRo+localRd*t;
+      vec3 ratio=abs(localP/shape.xyz);
+      // Explicit branches avoid ANGLE D3D11 draw-time compilation failure for
+      // nested vector ternaries while preserving the same nearest-face normal.
+      normal=vec3(0.0,sign(localP.y),0.0);
+      if (ratio.x>ratio.y && ratio.x>ratio.z) {
+        normal=vec3(sign(localP.x),0.0,0.0);
+      } else if (ratio.z>ratio.y) {
+        normal=vec3(0.0,0.0,sign(localP.z));
+      }
+    }
+    hit.t=t; hit.p=ro+rd*t;
+    hit.n=normalize(vec3(data.x*normal.x+data.y*normal.z,normal.y,
+                        -data.y*normal.x+data.x*normal.z));
+    hit.local=localRo+localRd*t;
+    hit.material=int(data.z+0.5);
+    return true;
+  }
+
+  bool sceneHit(vec3 ro,vec3 rd,float limit,bool waterAllowed,int objectBudget,int terrainBudget,out Hit hit) {
+    Hit ground; bool found=terrainHit(ro,rd,limit,terrainBudget,ground);
+    if (found) { hit=ground; limit=ground.t; }
+    if (waterAllowed && abs(rd.y)>0.000001) {
+      float t=(u_water-ro.y)/rd.y;
+      vec3 p=ro+rd*t;
+      if (t>0.025 && t<limit && abs(p.x)<u_size*0.5 && abs(p.z)<u_size*0.5 &&
+          heightAt(p.xz)<u_water-0.025) {
+        hit.t=t; hit.p=p; hit.material=3; hit.local=p;
+        hit.n=normalize(vec3(0.045*cos(p.x*0.19+u_time*1.2)+0.02*cos(p.z*.37-u_time*.6),
+          1.0,0.035*sin(p.z*.22+u_time*.8)+0.02*cos(p.x*.32-u_time*.7)));
+        limit=t; found=true;
+      }
+    }
+    for (int i=0;i<256;i++) {
+      if (i>=u_objectCount || i>=objectBudget) break;
+      Hit object;
+      if (objectHit(ro,rd,i,limit,object)) { hit=object; limit=object.t; found=true; }
+    }
+    return found;
+  }
+
+  vec3 sky(vec3 rd) {
+    float day=smoothstep(-0.18,0.25,u_sun.y);
+    vec3 zenith=mix(vec3(.018,.026,.071),vec3(.15,.35,.50),day);
+    vec3 horizon=mix(vec3(.08,.08,.15),vec3(.51,.64,.66),day);
+    vec3 colour=mix(horizon,zenith,pow(clamp(rd.y+0.12,0.0,1.0),0.55));
+    float dusk=1.0-smoothstep(0.05,0.42,abs(u_sun.y));
+    colour+=vec3(.20,.074,.028)*dusk*pow(1.0-max(rd.y,0.0),5.0);
+    float cloud=sin(rd.x*13.0+rd.z*6.0+u_time*.005)*sin(rd.z*18.0-rd.y*14.0+u_time*.009);
+    colour=mix(colour,mix(vec3(.13,.16,.20),vec3(.58,.64,.65),day),
+                smoothstep(.28,.68,cloud)*(.36+u_weather.x*.38));
+    colour=mix(colour,mix(vec3(.07,.085,.11),vec3(.35,.43,.45),day),u_weather.x*.48);
+    float sunDisc=pow(max(0.0,dot(rd,u_sun)),900.0);
+    colour+=vec3(1.0,.70,.24)*sunDisc*day;
+    return colour;
+  }
+  vec3 palette(int material,vec3 p) {
+    if (material==1) return mix(vec3(.19,.34,.13),vec3(.35,.40,.18),.5+.5*sin(p.x*.035+p.z*.047));
+    if (material==2) return vec3(.46,.46,.41);
+    if (material==3) return vec3(.065,.24,.28);
+    if (material==4) return vec3(.64,.48,.31);
+    if (material==5) return vec3(.50,.23,.18);
+    if (material==6) return vec3(.40,.28,.16);
+    if (material==7) return vec3(.64,.67,.65);
+    if (material==8) return vec3(.73,.15,.095);
+    if (material==9) return vec3(1.0,.73,.22);
+    if (material==10) return vec3(.54,.51,.42);
+    if (material==11) return vec3(.35,.24,.12);
+    if (material==12) return mix(vec3(.075,.25,.12),vec3(.21,.36,.15),.5+.5*sin(p.y*.8+p.x*.3));
+    if (material==13) return vec3(.36,.39,.40);
+    return vec3(.55);
+  }
+
+  float shadow(Hit hit) {
+    if (u_sun.y<=.025 || dot(hit.n,u_sun)<=0.0 || hit.t>140.0) return 1.0;
+    vec3 ro=hit.p+hit.n*.10;
+    for (int i=0;i<48;i++) {
+      if (i>=u_shadowCount) break;
+      Hit blocker;
+      if (objectHit(ro,u_sun,i,26.0,blocker)) return .46;
+    }
+    // One short terrain query is budgeted only for nearby non-water surfaces.
+    if (hit.t<45.0 && hit.material!=3) {
+      Hit ground;
+      if (terrainHit(ro,u_sun,18.0,12,ground)) return .65;
+    }
+    return 1.0;
+  }
+  vec3 illuminate(Hit hit,bool allowShadow) {
+    vec3 base=palette(hit.material,hit.p);
+    float day=smoothstep(-.15,.25,u_sun.y);
+    float ambient=mix(.20,.49,day)*(1.0-u_weather.x*.23);
+    float diffuse=max(0.0,dot(hit.n,u_sun))*max(0.0,u_sun.y)*.92*(1.0-u_weather.x*.45);
+    if (allowShadow) diffuse*=shadow(hit);
+    vec3 colour=base*(vec3(.69,.78,.94)*ambient+vec3(1.0,.91,.73)*diffuse);
+    vec3 lampToSurface=hit.p-u_headPosition;
+    float lampDistance=length(lampToSurface);
+    float beam=smoothstep(.89,.978,dot(lampToSurface/max(.001,lampDistance),u_headDirection));
+    float lamp=beam*max(0.0,1.0-lampDistance/95.0);
+    lamp*=lamp*max(.08,dot(hit.n,-lampToSurface/max(.001,lampDistance)))*mix(1.9,.32,day);
+    colour+=base*vec3(1.0,.83,.49)*lamp;
+    if (hit.material==9) colour=base*mix(1.12,.62,day);
+    return colour;
+  }
+
+  uint glyphFor(Hit h,float light) {
+    float pattern=hash21(floor(h.p.xz*1.6)+floor(h.p.y)*7.0);
+    bool side=abs(h.n.y)<.5;
+    if (h.material==1) return pattern>.78 ? 34u : pattern>.40 ? 44u : 46u;
+    if (h.material==2) return h.n.y<.6 ? (h.n.x*h.n.z>0.0 ? 47u : 92u) : pattern>.55 ? 37u : 58u;
+    if (h.material==3) return pattern>.67 ? 126u : pattern>.31 ? 61u : 45u;
+    if (h.material==4) return side ? (fract(h.local.y*.60)>.7 ? 45u : 124u) : 58u;
+    if (h.material==5) return h.n.x>0.1 ? 47u : h.n.x<-.1 ? 92u : 61u;
+    if (h.material==6) return side ? 124u : 61u;
+    if (h.material==7) return side ? 124u : 61u;
+    if (h.material==8) return side ? (pattern>.60 ? 72u : 35u) : 61u;
+    if (h.material==9) return light>.65 ? 35u : 43u;
+    if (h.material==10) return side ? 45u : pattern>.5 ? 58u : 46u;
+    if (h.material==11) return side ? 124u : 43u;
+    if (h.material==12) return pattern>.73 ? 64u : pattern>.35 ? 42u : 43u;
+    if (h.material==13) return side ? 72u : 61u;
+    return 63u;
+  }
+  uvec4 colourRecord(vec3 c) { return uvec4(round(clamp(c,0.0,1.0)*255.0),255u); }
+
+  void main() {
+    vec2 logicalCentre=gl_FragCoord.xy*u_cellSize;
+    vec2 screen=logicalCentre/u_viewport*2.0-1.0;
+    vec3 rd=normalize(u_forward+u_right*screen.x*(u_viewport.x/u_viewport.y)*.64+u_up*screen.y*.64);
+    Hit hit;
+    bool found=sceneHit(u_eye,rd,u_far,true,256,192,hit);
+    vec3 skyColour=sky(rd);
+    vec3 foreground, background;
+    uint glyph=46u;
+    int material=0;
+    float distance=u_far;
+    if (!found) {
+      float stars=hash21(floor(vec2(atan(rd.x,rd.z),asin(clamp(rd.y,-1.0,1.0)))*320.0));
+      float cloud=sin(rd.x*13.0+rd.z*6.0+u_time*.005)*sin(rd.z*18.0-rd.y*14.0+u_time*.009);
+      glyph=cloud>.4 ? 126u : 46u;
+      background=skyColour*.70;
+      foreground=skyColour*.98;
+      if (u_sun.y<-.08 && stars>.994 && rd.y>.02) { glyph=42u; foreground=vec3(.77,.81,.85); }
+      if (dot(rd,u_sun)>.996) { glyph=64u; foreground=vec3(1.0,.87,.45); }
+    } else {
+      material=hit.material; distance=hit.t;
+      vec3 colour=illuminate(hit,true);
+      if (material==3) {
+        // Exactly one secondary scene query, no recursive reflections. It can
+        // see analytical moving carriages and the same authoritative shoreline.
+        vec3 reflected=reflect(rd,hit.n);
+        Hit reflectedHit;
+        vec3 reflection=sky(reflected);
+        bool reflectionFound=sceneHit(hit.p+hit.n*.12,reflected,185.0,false,160,80,reflectedHit);
+        if (reflectionFound) {
+          reflection=illuminate(reflectedHit,false);
+          reflection=mix(reflection,sky(reflected),1.0-exp(-reflectedHit.t*(.0015+u_weather.y*.018)));
+        }
+        float fresnel=.30+.64*pow(1.0-max(0.0,dot(-rd,hit.n)),3.0);
+        colour=mix(colour,reflection,fresnel);
+        if (reflectionFound && reflectedHit.material==8) colour+=vec3(.045,.0,.0);
+      }
+      float light=dot(colour,vec3(.2126,.7152,.0722));
+      glyph=glyphFor(hit,light);
+      foreground=colour*1.28+vec3(.022);
+      background=colour*.31;
+      if (material==7) { foreground+=vec3(.11,.12,.12); background*=.45; }
+      if (material==9) background=colour*.24;
+      float fogDensity=.00075+u_weather.y*.017+u_weather.x*.0018;
+      float fog=1.0-exp(-distance*fogDensity);
+      foreground=mix(foreground,skyColour*.90,fog);
+      background=mix(background,skyColour*.67,fog);
+    }
+    // Sparse rain records live in cell state. Near surfaces occlude drops;
+    // depth and deterministic column phase prevent a uniform full-screen veil.
+    if (u_weather.x>.02 && distance>4.0) {
+      vec2 cell=floor(gl_FragCoord.xy);
+      float fall=floor(u_time*16.0*u_motion);
+      float rain=hash21(vec2(cell.x+floor(fall*.25),floor((cell.y+fall)/3.0)));
+      if (rain>1.0-u_weather.x*.075 && mod(cell.y+fall,3.0)<1.0) {
+        glyph=47u;
+        foreground=mix(foreground,vec3(.57,.70,.75),.61);
+      }
+    }
+    out_record=uvec4(glyph,uint(material),uint(clamp(distance/u_far*255.0,0.0,255.0)),255u);
+    out_foreground=colourRecord(foreground);
+    out_background=colourRecord(background);
+  }`;
+
+  const DISPLAY = `#version 300 es
+  precision highp float;
+  precision highp int;
+  precision highp usampler2D;
+  out vec4 out_colour;
+  uniform usampler2D u_records;
+  uniform usampler2D u_foreground;
+  uniform usampler2D u_background;
+  uniform usampler2D u_masks;
+  uniform vec2 u_viewport;
+  uniform vec2 u_cellSize;
+  uniform vec2 u_physical;
+  uniform ivec2 u_grid;
+  uniform bool u_debug;
+  void main() {
+    vec2 logical=gl_FragCoord.xy/u_physical*u_viewport;
+    ivec2 cell=clamp(ivec2(floor(logical/u_cellSize)),ivec2(0),u_grid-ivec2(1));
+    vec2 inside=fract(logical/u_cellSize);
+    uint glyph=texelFetch(u_records,cell,0).r;
+    vec3 foreground=vec3(texelFetch(u_foreground,cell,0).rgb)/255.0;
+    vec3 background=vec3(texelFetch(u_background,cell,0).rgb)/255.0;
+    vec2 ink=(inside-vec2(.15,.18))/vec2(.70,.64);
+    bool on=false;
+    if (ink.x>=0.0 && ink.x<1.0 && ink.y>=0.0 && ink.y<1.0) {
+      ivec2 bit=ivec2(floor(ink*vec2(5.0,7.0)));
+      uint mask=texelFetch(u_masks,ivec2(int(glyph),6-bit.y),0).r;
+      on=(mask & (1u << uint(4-bit.x)))!=0u;
+    }
+    vec3 colour=on ? foreground : background;
+    if (u_debug && inside.x<.045 && inside.y<.065)
+      colour=vec3(float(glyph&7u)/7.0,float((glyph>>3)&7u)/7.0,float(glyph>>6));
+    out_colour=vec4(colour,1.0);
+  }`;
+
+  // Five bits per row, top row first. Numeric tables are data, not image assets.
+  const GLYPHS = Object.freeze({
+    ' ': [0,0,0,0,0,0,0], '.': [0,0,0,0,0,12,12], ',': [0,0,0,0,12,12,8],
+    ':': [0,12,12,0,12,12,0], ';': [0,12,12,0,12,12,8],
+    '-': [0,0,0,31,0,0,0], '=': [0,0,31,0,31,0,0], '+': [0,4,4,31,4,4,0],
+    '*': [0,21,14,31,14,21,0], '#': [10,31,10,10,31,10,0],
+    '%': [25,26,2,4,8,11,19], '@': [14,17,23,21,23,16,14],
+    '/': [1,2,2,4,8,8,16], '\\': [16,8,8,4,2,2,1], '|': [4,4,4,4,4,4,4],
+    '_': [0,0,0,0,0,0,31], '~': [0,0,9,22,0,0,0], '"': [10,10,10,0,0,0,0],
+    '!': [4,4,4,4,4,0,4], '?': [14,17,1,2,4,0,4], '<': [2,4,8,16,8,4,2],
+    '>': [8,4,2,1,2,4,8], '[': [14,8,8,8,8,8,14], ']': [14,2,2,2,2,2,14],
+    '(': [2,4,8,8,8,4,2], ')': [8,4,2,2,2,4,8], '^': [4,10,17,0,0,0,0],
+    '0': [14,17,19,21,25,17,14], '1': [4,12,4,4,4,4,14],
+    '2': [14,17,1,2,4,8,31], '3': [30,1,1,14,1,1,30], '4': [2,6,10,18,31,2,2],
+    '5': [31,16,16,30,1,1,30], '6': [14,16,16,30,17,17,14],
+    '7': [31,1,2,4,8,8,8], '8': [14,17,17,14,17,17,14], '9': [14,17,17,15,1,1,14],
+    'A': [14,17,17,31,17,17,17], 'B': [30,17,17,30,17,17,30],
+    'C': [14,17,16,16,16,17,14], 'D': [30,17,17,17,17,17,30],
+    'E': [31,16,16,30,16,16,31], 'F': [31,16,16,30,16,16,16],
+    'G': [14,17,16,23,17,17,15], 'H': [17,17,17,31,17,17,17],
+    'I': [14,4,4,4,4,4,14], 'J': [7,2,2,2,18,18,12], 'K': [17,18,20,24,20,18,17],
+    'L': [16,16,16,16,16,16,31], 'M': [17,27,21,21,17,17,17],
+    'N': [17,25,21,19,17,17,17], 'O': [14,17,17,17,17,17,14],
+    'P': [30,17,17,30,16,16,16], 'Q': [14,17,17,17,21,18,13],
+    'R': [30,17,17,30,20,18,17], 'S': [15,16,16,14,1,1,30],
+    'T': [31,4,4,4,4,4,4], 'U': [17,17,17,17,17,17,14],
+    'V': [17,17,17,17,17,10,4], 'W': [17,17,17,21,21,21,10],
+    'X': [17,17,10,4,10,17,17], 'Y': [17,17,10,4,4,4,4],
+    'Z': [31,1,2,4,8,16,31]
+  });
+
+  function shader(gl, type, source) {
+    const value = gl.createShader(type);
+    gl.shaderSource(value, source);
+    gl.compileShader(value);
+    if (!gl.getShaderParameter(value, gl.COMPILE_STATUS)) {
+      const reason = gl.getShaderInfoLog(value) || 'Unknown compilation error';
+      gl.deleteShader(value);
+      throw new Error('Next Stop glyph shader failed: ' + reason);
+    }
+    return value;
+  }
+  function program(gl, source) {
+    const vertex = shader(gl, gl.VERTEX_SHADER, VERTEX);
+    let fragment = null, value = null;
+    try {
+      fragment = shader(gl, gl.FRAGMENT_SHADER, source);
+      value = gl.createProgram();
+      gl.attachShader(value, vertex); gl.attachShader(value, fragment); gl.linkProgram(value);
+      if (!gl.getProgramParameter(value, gl.LINK_STATUS)) {
+        const reason = gl.getProgramInfoLog(value) || 'Unknown link error';
+        throw new Error('Next Stop glyph program failed: ' + reason);
+      }
+      return value;
+    } catch (error) {
+      if (value) gl.deleteProgram(value);
+      throw error;
+    } finally {
+      gl.deleteShader(vertex);
+      if (fragment) gl.deleteShader(fragment);
+    }
+  }
+  function uniforms(gl, value, names) {
+    const result = Object.create(null);
+    for (const name of names) result[name] = gl.getUniformLocation(value, 'u_' + name);
+    return result;
+  }
+  function texture(gl) {
+    const value = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, value);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return value;
+  }
+  function unit(gl, index, value) {
+    gl.activeTexture(gl.TEXTURE0 + index); gl.bindTexture(gl.TEXTURE_2D, value);
+  }
+  function normalise(v) {
+    const length = Math.hypot(v[0], v[1], v[2]) || 1;
+    return [v[0]/length,v[1]/length,v[2]/length];
+  }
+
+  class NSGlyphRenderer {
+    constructor(canvas, world) {
+      this.canvas = canvas;
+      this.gl = canvas.getContext('webgl2', {
+        alpha: false, antialias: false, depth: false, stencil: false,
+        premultipliedAlpha: false, powerPreference: 'high-performance'
+      });
+      if (!this.gl) throw new Error('Next Stop requires WebGL2. Enable hardware acceleration or use a browser with WebGL2 support.');
+      this.width = 1; this.height = 1; this.quality = 'standard';
+      this.columns = 1; this.rows = 1; this.frames = 0; this.lost = false;
+      this.destroyed = false; this.objectCount = 0; this.shadowCount = 0;
+      this.frameTimes = []; this.objectData = new Float32Array(MAX_OBJECTS * 12);
+      this._lost = event => {
+        event.preventDefault(); this.lost = true;
+        if (typeof this.onContextLost === 'function') this.onContextLost();
+      };
+      this._restored = () => {
+        if (this.destroyed) return;
+        try {
+          this.lost = false;
+          this._initialise(); this.setWorld(this.world);
+          this.resize(this.width,this.height,this.quality);
+          if (typeof this.onContextRestored === 'function') this.onContextRestored();
+        } catch (error) {
+          this.destroy();
+          this.lost = true;
+          if (typeof this.onError === 'function') this.onError(error);
+        }
+      };
+      canvas.addEventListener('webglcontextlost', this._lost);
+      canvas.addEventListener('webglcontextrestored', this._restored);
+      try {
+        this._initialise(); this.setWorld(world);
+        this.resize(canvas.clientWidth || 1280,canvas.clientHeight || 720,'standard');
+      } catch (error) {
+        this.destroy();
+        throw error;
+      }
+    }
+
+    _initialise() {
+      const gl = this.gl;
+      // Context restoration has already invalidated old handles. Track each
+      // fresh allocation immediately so a partial failure can release it.
+      this.sceneProgram = null; this.displayProgram = null; this.vao = null;
+      this.terrainTexture = null; this.objectTexture = null; this.maskTexture = null;
+      this.cellTextures = []; this.framebuffer = null; this._selection = [];
+      this.sceneProgram = program(gl,SCENE);
+      this.displayProgram = program(gl,DISPLAY);
+      this.sceneUniforms = uniforms(gl,this.sceneProgram,[
+        'terrain','objects','resolution','objectCount','shadowCount','size','water',
+        'heightRange','viewport','cellSize','eye','forward','right','up','sun',
+        'headPosition','headDirection','time','weather','motion','far'
+      ]);
+      this.displayUniforms = uniforms(gl,this.displayProgram,[
+        'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
+      ]);
+      this.vao = gl.createVertexArray();
+      this.terrainTexture = texture(gl); this.objectTexture = texture(gl);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,3,MAX_OBJECTS,0,gl.RGBA,gl.FLOAT,null);
+      this.maskTexture = texture(gl);
+      const masks = new Uint8Array(128 * 7);
+      for (const [character,rows] of Object.entries(GLYPHS)) {
+        for (let y=0;y<7;y++) masks[y*128+character.charCodeAt(0)] = rows[y];
+      }
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.R8UI,128,7,0,gl.RED_INTEGER,gl.UNSIGNED_BYTE,masks);
+      this.cellTextures = [texture(gl),texture(gl),texture(gl)];
+      this.framebuffer = gl.createFramebuffer();
+      gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
+      gl.useProgram(this.sceneProgram);
+      gl.uniform1i(this.sceneUniforms.terrain,0); gl.uniform1i(this.sceneUniforms.objects,1);
+      gl.useProgram(this.displayProgram);
+      gl.uniform1i(this.displayUniforms.records,0); gl.uniform1i(this.displayUniforms.foreground,1);
+      gl.uniform1i(this.displayUniforms.background,2); gl.uniform1i(this.displayUniforms.masks,3);
+      this._selection = []; this._selectionPosition = null; this._selectionCapacity=-1; this._validated=false;
+    }
+
+    setWorld(world) {
+      if (!world || !(world.heights instanceof Float32Array) ||
+          world.heights.length !== world.resolution * world.resolution)
+        throw new Error('Renderer needs a square Float32Array authoritative heightfield.');
+      this.world = world;
+      let min = Infinity, max = -Infinity;
+      for (const height of world.heights) { min=Math.min(min,height); max=Math.max(max,height); }
+      this.heightRange = [min,max];
+      this.staticObjects = (world.objects || []).map(object => ({
+        object, radius: Math.hypot(object.hx,object.hy,object.hz)
+      }));
+      this._selectionPosition = null; this._selectionCapacity=-1;
+      if (this.lost) return;
+      const gl = this.gl;
+      gl.bindTexture(gl.TEXTURE_2D,this.terrainTexture);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,world.resolution,world.resolution,0,gl.RED,gl.FLOAT,world.heights);
+    }
+
+    resize(width,height,quality=this.quality) {
+      this.width = Math.max(1,Math.round(Number(width) || 1));
+      this.height = Math.max(1,Math.round(Number(height) || 1));
+      this.quality = CELL_PRESETS[quality] ? quality : 'standard';
+      this.cellSize = CELL_PRESETS[this.quality];
+      this.columns = Math.max(1,Math.ceil(this.width/this.cellSize[0]));
+      this.rows = Math.max(1,Math.ceil(this.height/this.cellSize[1]));
+      this.dpr = Math.min(2,Math.max(1,global.devicePixelRatio || 1));
+      this.canvas.width = Math.max(1,Math.round(this.width*this.dpr));
+      this.canvas.height = Math.max(1,Math.round(this.height*this.dpr));
+      if (this.lost || this.destroyed) return;
+      const gl = this.gl;
+      if (this.columns>gl.getParameter(gl.MAX_TEXTURE_SIZE) || this.rows>gl.getParameter(gl.MAX_TEXTURE_SIZE))
+        throw new Error('Character grid exceeds this browser GPU texture limit.');
+      gl.bindFramebuffer(gl.FRAMEBUFFER,this.framebuffer);
+      for (let i=0;i<3;i++) {
+        gl.bindTexture(gl.TEXTURE_2D,this.cellTextures[i]);
+        gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8UI,this.columns,this.rows,0,gl.RGBA_INTEGER,gl.UNSIGNED_BYTE,null);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0+i,gl.TEXTURE_2D,this.cellTextures[i],0);
+      }
+      gl.drawBuffers([gl.COLOR_ATTACHMENT0,gl.COLOR_ATTACHMENT1,gl.COLOR_ATTACHMENT2]);
+      if (gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)
+        throw new Error('Character-record framebuffer is incomplete. This WebGL2 implementation cannot render RGBA8UI cells.');
+      gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+    }
+
+    _uploadObjects(sim,eye) {
+      const dynamic=typeof sim.dynamicObjects==='function' ? sim.dynamicObjects() : [];
+      const staticCapacity=Math.max(0,MAX_OBJECTS-dynamic.length);
+      const previous=this._selectionPosition;
+      if (!previous || this._selectionCapacity!==staticCapacity ||
+          Math.hypot(eye[0]-previous[0],eye[2]-previous[1])>5) {
+        const candidates=[];
+        for (const entry of this.staticObjects) {
+          const o=entry.object;
+          const distance=Math.hypot(o.x-eye[0],o.z-eye[2]);
+          if (distance-entry.radius>420) continue;
+          // Preserve station/building/tree silhouettes before filling the local
+          // numerical track corridor. All candidates remain authoritative data.
+          candidates.push({ entry,distance,score:distance+(o.material===7 ? 28 : 0) });
+        }
+        candidates.sort((a,b)=>a.score-b.score);
+        this._selection=candidates.slice(0,staticCapacity);
+        this._selection.sort((a,b)=>{
+          const aRail=a.entry.object.material===7 || a.entry.object.material===13;
+          const bRail=b.entry.object.material===7 || b.entry.object.material===13;
+          return Number(aRail)-Number(bRail) || a.distance-b.distance;
+        });
+        this._selectionPosition=[eye[0],eye[2]];
+        this._selectionCapacity=staticCapacity;
+      }
+      let count=0;
+      const write=object => {
+        if (count>=MAX_OBJECTS) return;
+        const i=count++*12;
+        this.objectData[i]=object.x; this.objectData[i+1]=object.y; this.objectData[i+2]=object.z;
+        this.objectData[i+3]=Math.hypot(object.hx,object.hy,object.hz);
+        this.objectData[i+4]=Math.max(.015,object.hx); this.objectData[i+5]=Math.max(.015,object.hy);
+        this.objectData[i+6]=Math.max(.015,object.hz); this.objectData[i+7]=object.type || 0;
+        this.objectData[i+8]=Math.cos(object.yaw || 0); this.objectData[i+9]=Math.sin(object.yaw || 0);
+        this.objectData[i+10]=object.material; this.objectData[i+11]=0;
+      };
+      for (const object of dynamic) write(object);
+      for (const candidate of this._selection) write(candidate.entry.object);
+      this.objectCount=count;
+      this.shadowCount=Math.min(48,count);
+      const gl=this.gl;
+      gl.bindTexture(gl.TEXTURE_2D,this.objectTexture);
+      if (count) gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,3,count,gl.RGBA,gl.FLOAT,this.objectData.subarray(0,count*12));
+    }
+
+    render(sim,camera,options={}) {
+      if (this.lost || this.destroyed || !this.world) return;
+      if (options.quality && options.quality!==this.quality) this.resize(this.width,this.height,options.quality);
+      const begin=performance.now();
+      const eye=camera.position || [0,5,0];
+      let forward;
+      if (camera.target) forward=normalise(camera.target.map((value,i)=>value-eye[i]));
+      else {
+        const yaw=camera.yaw || 0,pitch=camera.pitch || 0;
+        forward=[Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch)];
+      }
+      const right=normalise([forward[2],0,-forward[0]]);
+      const up=normalise([
+        forward[1]*right[2]-forward[2]*right[1],
+        forward[2]*right[0]-forward[0]*right[2],
+        forward[0]*right[1]-forward[1]*right[0]
+      ]);
+      this._uploadObjects(sim,eye);
+      const time=Number(sim.time) || 0;
+      const angle=1.05+time*Math.PI*2/720;
+      const sun=normalise([Math.cos(angle)*.67,Math.sin(angle),.36]);
+      const train=sim.train || {s:0,direction:1};
+      const pose=this.world.routeAt(train.s || 0);
+      const direction=train.direction===-1 ? -1 : 1;
+      const headDirection=[Math.sin(pose.yaw)*direction,-.035,Math.cos(pose.yaw)*direction];
+      const headPosition=[pose.x+headDirection[0]*4.7,pose.y+2.1,pose.z+headDirection[2]*4.7];
+      const weather=sim.weather || {};
+      const rain=typeof weather==='string' ? Number(weather==='rain') : Math.max(0,Math.min(1,weather.rain || 0));
+      const fog=typeof weather==='string' ? Number(weather==='fog') : Math.max(0,Math.min(1,weather.fog || 0));
+      const gl=this.gl,u=this.sceneUniforms;
+      gl.bindVertexArray(this.vao);
+      gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
+      gl.bindFramebuffer(gl.FRAMEBUFFER,this.framebuffer);
+      gl.viewport(0,0,this.columns,this.rows); gl.useProgram(this.sceneProgram);
+      unit(gl,0,this.terrainTexture); unit(gl,1,this.objectTexture);
+      gl.uniform1i(u.resolution,this.world.resolution); gl.uniform1i(u.objectCount,this.objectCount);
+      gl.uniform1i(u.shadowCount,this.shadowCount); gl.uniform1f(u.size,this.world.size);
+      gl.uniform1f(u.water,this.world.waterLevel); gl.uniform2fv(u.heightRange,this.heightRange);
+      gl.uniform2f(u.viewport,this.width,this.height); gl.uniform2fv(u.cellSize,this.cellSize);
+      gl.uniform3fv(u.eye,eye); gl.uniform3fv(u.forward,forward); gl.uniform3fv(u.right,right); gl.uniform3fv(u.up,up);
+      gl.uniform3fv(u.sun,sun); gl.uniform3fv(u.headPosition,headPosition); gl.uniform3fv(u.headDirection,headDirection);
+      gl.uniform1f(u.time,time); gl.uniform2f(u.weather,rain,fog);
+      gl.uniform1f(u.motion,options.reducedMotion ? .15 : 1); gl.uniform1f(u.far,600);
+      gl.drawArrays(gl.TRIANGLES,0,3);
+      gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+      gl.viewport(0,0,this.canvas.width,this.canvas.height); gl.useProgram(this.displayProgram);
+      for (let i=0;i<3;i++) unit(gl,i,this.cellTextures[i]);
+      unit(gl,3,this.maskTexture);
+      const d=this.displayUniforms;
+      gl.uniform2f(d.viewport,this.width,this.height); gl.uniform2fv(d.cellSize,this.cellSize);
+      gl.uniform2f(d.physical,this.canvas.width,this.canvas.height); gl.uniform2i(d.grid,this.columns,this.rows);
+      gl.uniform1i(d.debug,Boolean(options.debug)); gl.drawArrays(gl.TRIANGLES,0,3);
+      if (!this._validated) {
+        const error=gl.getError();
+        if (error!==gl.NO_ERROR) throw new Error('WebGL could not draw the glyph scene (GPU error '+error+').');
+        this._validated=true;
+      }
+      this.frames++;
+      this.frameTimes.push(performance.now()-begin);
+      if (this.frameTimes.length>180) this.frameTimes.shift();
+    }
+
+    diagnostics() {
+      const sorted=this.frameTimes.slice().sort((a,b)=>a-b);
+      return {
+        pipeline:'numerical scene -> RGBA8UI glyph/foreground/background -> 5x7 mask display',
+        quality:this.quality, columns:this.columns,rows:this.rows,cells:this.columns*this.rows,
+        cellSize:this.cellSize.slice(),viewport:[this.width,this.height],dpr:this.dpr,
+        objects:this.objectCount,worldObjects:this.staticObjects.length,maxObjects:MAX_OBJECTS,
+        terrainBudget:192,reflectionBudget:{queries:1,distance:185,objects:160,terrainCells:80},
+        shadowObjects:this.shadowCount,frames:this.frames,lost:this.lost,
+        cpuSubmitMedianMs:sorted.length ? sorted[Math.floor(sorted.length*.5)] : 0,
+        cpuSubmitP95Ms:sorted.length ? sorted[Math.min(sorted.length-1,Math.floor(sorted.length*.95))] : 0
+      };
+    }
+
+    // Explicit diagnostics only; the normal frame path never reads GPU pixels.
+    inspectCells() {
+      if (this.lost || this.destroyed) throw new Error('Character records unavailable while renderer context is lost or destroyed.');
+      const gl=this.gl;
+      const data=new Uint8Array(this.columns*this.rows*4);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER,this.framebuffer);
+      gl.readBuffer(gl.COLOR_ATTACHMENT0);
+      gl.readPixels(0,0,this.columns,this.rows,gl.RGBA_INTEGER,gl.UNSIGNED_BYTE,data);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER,null);
+      const ids=[],materials=[],samples=[];
+      for (let i=0;i<data.length;i+=4) {
+        ids.push(data[i]); materials.push(data[i+1]);
+        if (samples.length<64 && (i===0 || data[i]!==data[i-4]))
+          samples.push({index:i/4,glyph:data[i],character:String.fromCharCode(data[i]),material:data[i+1],depth:data[i+2]});
+      }
+      return {columns:this.columns,rows:this.rows,ids,materials,distinctGlyphs:[...new Set(ids)],samples};
+    }
+
+    destroy() {
+      if (this.destroyed) return;
+      this.destroyed=true;
+      this.canvas.removeEventListener('webglcontextlost',this._lost);
+      this.canvas.removeEventListener('webglcontextrestored',this._restored);
+      if (!this.lost) {
+        const gl=this.gl;
+        if (this.sceneProgram) gl.deleteProgram(this.sceneProgram);
+        if (this.displayProgram) gl.deleteProgram(this.displayProgram);
+        if (this.vao) gl.deleteVertexArray(this.vao);
+        if (this.framebuffer) gl.deleteFramebuffer(this.framebuffer);
+        for (const value of [this.terrainTexture,this.objectTexture,this.maskTexture,...(this.cellTextures || [])])
+          if (value) gl.deleteTexture(value);
+      }
+      this.frameTimes.length=0;
+      if (this._selection) this._selection.length=0;
+    }
+  }
+
+  global.NSGlyphRenderer=NSGlyphRenderer;
+})(typeof window!=='undefined' ? window : globalThis);

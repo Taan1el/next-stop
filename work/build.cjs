@@ -1,0 +1,11 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const parts=['world.js','journey.js','exploration.js','renderer.js','app.js'].map(name=>fs.readFileSync(path.join(__dirname,'src',name),'utf8'));
+const shell=fs.readFileSync(path.join(__dirname,'src','shell.html'),'utf8');
+if(parts.some(code=>code.includes('</script>')))throw new Error('Embedded source contains a closing script tag.');
+const html=shell.replace('/*__CODE__*/',`'use strict';\n(()=>{\n${parts.join('\n\n')}\n})();`);
+if(Buffer.byteLength(html)>2000000)throw new Error('Standalone HTML exceeds the 2,000,000-byte game budget.');
+fs.mkdirSync(path.join(root,'outputs'),{recursive:true});
+fs.writeFileSync(path.join(root,'outputs','next-stop.html'),html);
+console.log(`Built outputs/next-stop.html (${Buffer.byteLength(html)} bytes, no runtime dependencies).`);

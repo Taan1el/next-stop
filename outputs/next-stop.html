@@ -1,0 +1,1647 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; base-uri 'none'">
+<meta name="color-scheme" content="dark">
+<title>Next Stop · A world in letters</title>
+<style>
+:root{--ink:#111b22;--paper:#f0e6c9;--muted:#c5c7b9;--gold:#efbb64;--glass:rgba(16,26,33,.88);--line:rgba(239,230,201,.25);font-family:ui-monospace,Consolas,"Courier New",monospace;color:var(--paper);background:var(--ink)}
+*{box-sizing:border-box}body{margin:0;overflow:hidden}button,input,select{font:inherit}button,input,select{color:var(--paper);border:1px solid var(--line);background:#19272e;border-radius:3px;padding:.68rem .85rem}button{cursor:pointer}button:hover{background:#2e3b3e;border-color:var(--gold)}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:3px}button.primary{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:bold}button.primary:hover{background:#ffce83}button.small{font-size:11px;padding:7px 10px}button:disabled{opacity:.4;cursor:default}#world{display:block;width:100vw;height:100vh;touch-action:none}header{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:19px 25px;background:linear-gradient(#111b22e6,#111b2200);pointer-events:none}.brand{font-size:21px;letter-spacing:-1px;font-weight:bold}.brand span{display:block;font-size:9px;letter-spacing:2.5px;font-weight:normal;margin-top:5px;color:var(--muted)}nav{display:flex;gap:6px;pointer-events:auto}#hud{position:absolute;left:24px;bottom:25px;right:24px;display:flex;align-items:end;justify-content:space-between;gap:22px;pointer-events:none}.ticket{border:1px solid var(--line);border-left:3px solid var(--gold);background:var(--glass);padding:13px 17px;max-width:520px;box-shadow:0 8px 30px #0003}.eyebrow{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold)}#objective{font-size:15px;line-height:1.4;margin:6px 0}#hint{font-size:11px;color:var(--muted);line-height:1.5}#instruments{display:flex;gap:20px;background:var(--glass);border:1px solid var(--line);padding:12px 17px;min-width:240px}.gauge label{display:block;font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:6px}.gauge strong{font-size:23px;font-weight:normal}.gauge small{font-size:10px}#status{position:absolute;right:25px;top:72px;font-size:10px;color:var(--muted);background:var(--glass);padding:7px 10px;border:1px solid var(--line)}#toast{position:absolute;top:112px;left:50%;transform:translateX(-50%);background:var(--glass);border:1px solid var(--gold);padding:11px 18px;font-size:12px;text-align:center;max-width:90vw;pointer-events:none;opacity:0;transition:opacity .2s}#toast.visible{opacity:1}#diagnostics{position:absolute;top:112px;left:25px;background:var(--glass);border:1px solid var(--line);font-size:10px;padding:12px;white-space:pre;pointer-events:none}#menu{position:absolute;inset:0;background:#0e192174;display:grid;place-items:center;padding:18px}#menu[hidden],.view[hidden],[hidden]{display:none!important}.card{width:min(490px,100%);max-height:calc(100vh - 36px);overflow:auto;background:#142128f5;border:1px solid var(--line);box-shadow:0 22px 70px #0006;padding:30px}.card h1{font-family:Georgia,serif;font-size:64px;line-height:1;margin:17px 0;font-weight:normal;letter-spacing:-2px}.card h2{font-family:Georgia,serif;font-size:32px;font-weight:normal;margin:9px 0 18px}.card p{font-size:12px;line-height:1.9;color:var(--muted)}.divider{border:0;border-top:1px dashed var(--line);margin:21px 0}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.field{display:block;margin:15px 0;font-size:12px;color:var(--muted)}.field span{display:block;margin-bottom:8px}.field input:not([type=checkbox]),.field select{width:100%}.field.check{display:flex;align-items:center;gap:10px}.field.check input{width:17px;height:17px;accent-color:var(--gold)}.route-strip{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10px;margin:22px 0 26px}.route-strip i{height:1px;flex:1;background:var(--gold)}kbd{display:inline-block;border:1px solid var(--line);padding:2px 5px;border-radius:2px;color:var(--paper);font:inherit}.controls{display:grid;grid-template-columns:105px 1fr;gap:11px;font-size:11px;line-height:1.5;color:var(--muted)}.controls dt{color:var(--paper)}.controls dd{margin:0}.note{font-size:10px!important}.menu-status{min-height:18px;color:var(--gold)!important}.high-contrast{--muted:#eee;--line:#a1abb0;--glass:rgba(5,12,18,.96)}.reduced-motion *{transition:none!important}#fatal{position:absolute;inset:0;display:grid;place-items:center;background:#142128;padding:25px}#fatal .card{max-width:620px}#fatal pre{white-space:pre-wrap;font-size:11px;color:#e7ae90}
+@media(max-width:760px){header{padding:13px 14px}.brand{font-size:17px}.brand span{font-size:7px;letter-spacing:1.7px}nav{gap:4px}nav button.small{padding:6px 8px;font-size:10px}#hud{left:14px;right:14px;bottom:14px;gap:8px;align-items:stretch}.ticket{padding:10px 12px;max-width:65%}#objective{font-size:12px}#hint{font-size:10px}#instruments{min-width:125px;gap:10px;padding:10px 12px;flex-wrap:wrap}.gauge strong{font-size:18px}.gauge label{font-size:8px}#status{top:60px;right:14px}.card{padding:24px}.card h1{font-size:52px}#diagnostics{left:14px;top:93px}}
+#journey-ticket[data-approach=brake]{border-left-color:#ff9e70}#journey-ticket[data-approach=brake] #hint{color:#ffba91;font-weight:bold}#journey-ticket[data-approach=ready] #hint{color:var(--gold)}.high-contrast #journey-ticket[data-approach=brake] #hint{color:#fff}
+#field-hint{font-size:10px;color:var(--gold);margin-top:7px}#journal-list{padding:0;list-style:none;margin:18px 0 22px}#journal-list li{border-top:1px dashed var(--line);padding:15px 0 0;margin:14px 0}#journal-list strong{font-size:12px;color:var(--muted)}#journal-list .discovered strong{color:var(--gold)}#journal-list p{margin-bottom:0}
+@media(max-width:460px){.brand span{display:none}nav button.small{font-size:9px;padding:6px}#hud{flex-direction:column;gap:5px}.ticket{max-width:100%}#instruments{min-width:0;justify-content:space-between;gap:12px;padding:8px 12px}.gauge label{display:inline;margin-right:6px}.gauge strong{font-size:16px}.card h1{font-size:46px}.route-strip{font-size:9px}.card{padding:20px}}
+</style>
+</head>
+<body>
+<!-- Launch: open this file locally in a WebGL2 browser. No server or assets required.
+Controls: WASD walk; E board/deliver/leave; driving W/S throttle, Space brake,
+R reverse while stopped, C camera; mouse capture or drag/arrow-key look; Esc pause; J field journal; F centre train camera. -->
+<canvas id="world" aria-label="Next Stop three-dimensional world rendered as coloured glyph cells" tabindex="0"></canvas>
+<header><div class="brand">NEXT STOP<span>A WORLD IN LETTERS</span></div><nav aria-label="Game menu"><button id="journal-button" class="small">Journal</button><button id="help-button" class="small">Help</button><button id="settings-button" class="small">Settings</button><button id="pause-button" class="small">Pause</button></nav></header>
+<div id="status">Generating valley…</div>
+<section id="hud" aria-label="Journey status"><div class="ticket" id="journey-ticket"><div class="eyebrow" id="journey-label">Your first departure</div><div id="objective">Find your train.</div><div id="hint">WASD walk · E board · H help</div><div id="field-hint" hidden></div></div><div id="instruments"><div class="gauge"><label>SPEED</label><strong id="speed">0.0</strong> <small>km/h</small></div><div class="gauge"><label>POWER</label><strong id="throttle">0</strong><small>%</small></div><div class="gauge"><label>BRAKE</label><strong id="brake">0</strong><small>%</small></div></div></section>
+<div id="toast" role="status" aria-live="polite"></div><pre id="diagnostics" hidden></pre>
+<section id="menu" aria-label="Journey menu"><div class="card" role="dialog" aria-modal="true" aria-labelledby="menu-heading">
+<div id="start-view" class="view"><div class="eyebrow">Procedural railway journeys · 01</div><h1 id="menu-heading">Next Stop</h1><p>A valley made of letters. Three stations. One small train.<br>Take a delivery through changing skies and find your way home.</p><div class="route-strip"><span>● DEPARTURE</span><i></i><span>● DELIVERY</span><i></i><span>● HOME</span></div><div class="row"><button id="start-button" class="primary">Start journey</button><button id="start-help">Controls</button></div><hr class="divider"><p class="note">A complete circuit takes about 5–10 minutes.<br>One file. No images. Every view built from glyphs.</p></div>
+<div id="pause-view" class="view" hidden><div class="eyebrow">Time stands still</div><h2>Journey paused</h2><p>Your train and delivery are right where you left them.</p><div class="row"><button class="primary resume-button">Resume journey</button><button id="pause-settings">Settings</button></div></div>
+<div id="help-view" class="view" hidden><div class="eyebrow">Pocket guide</div><h2>How to travel</h2><dl class="controls"><dt><kbd>W A S D</kbd></dt><dd>Walk. In the cab, W/S raises or lowers power.</dd><dt><kbd>E</kbd></dt><dd>Board nearby train. At the destination, deliver while stopped. Otherwise leave while stopped.</dd><dt><kbd>Space</kbd></dt><dd>Hold to brake. Begin braking before the platform.</dd><dt><kbd>C</kbd> / <kbd>R</kbd></dt><dd>Switch cab/chase view. Reverse direction while stopped.</dd><dt>Mouse / arrows</dt><dd>Click world to capture mouse. Drag to look if capture is unavailable. Arrow keys also look.</dd><dt><kbd>Esc</kbd> / <kbd>H</kbd></dt><dd>Pause / guide. Escape releases mouse.</dd><dt><kbd>F</kbd></dt><dd>Centre the train camera on the railway.</dd><dt><kbd>J</kbd></dt><dd>Open the field journal. Discover places on foot along station platforms.</dd></dl><hr class="divider"><p class="note">Destination and interaction hints appear at the bottom. Settings provides weather, portable saves, and recovery.</p><button class="primary close-menu">Back to journey</button></div>
+<div id="settings-view" class="view" hidden><div class="eyebrow">Make yourself at home</div><h2>Journey settings</h2><label class="field"><span>Glyph size</span><select id="quality"><option value="coarse">Large · faster</option><option value="standard" selected>Classic · balanced</option><option value="fine">Small · more detail</option></select></label><label class="field"><span>Weather</span><select id="weather"><option value="auto">Changing skies</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="fog">Fog</option></select></label><label class="field check"><input type="checkbox" id="reduced-motion">Reduced camera motion</label><label class="field check"><input type="checkbox" id="high-contrast">High-contrast interface</label><label class="field check"><input type="checkbox" id="debug">Show glyph IDs and diagnostics</label><label class="field"><span>World seed · new valley resets journey</span><input id="seed" maxlength="64" value="NEXT-STOP" autocomplete="off"></label><div class="row"><button id="regenerate">New valley</button><button id="recover">Return to safe station</button></div><hr class="divider"><div class="row"><button id="export">Export save</button><button id="import">Import save</button><input type="file" id="save-file" accept="application/json,.json" hidden></div><p class="note">JSON saves travel with you, even when browser storage is unavailable.</p><p id="menu-status" class="menu-status" role="status"></p><button class="primary close-menu">Back to journey</button></div>
+<div id="journal-view" class="view" hidden><div class="eyebrow">Letters from the valley</div><h2>Field journal</h2><p id="journal-count">0 of 3 places discovered</p><p>Leave the cab and walk along each station platform. Find a place, keep a note. Your journal travels in your JSON save.</p><p class="note">Delivery stops come first. After the circuit, your chosen place guides the train.</p><ol id="journal-list"></ol><button class="primary close-menu">Back to journey</button></div>
+</div></section><section id="fatal" hidden><div class="card"><div class="eyebrow">Unable to depart</div><h2>Rendering unavailable</h2><p id="fatal-message"></p><pre id="fatal-detail"></pre><p>Open this file in a browser with WebGL2 enabled. No download or server is required.</p></div></section>
+<script>
+'use strict';
+(()=>{
+/* Next Stop numerical world and simulation. No DOM or graphics dependencies.
+   Terrain: row-major vertex heights; bilinear interpolation over [-500,500].
+   Route coordinates are metres of arc length; +Y up, yaw 0 faces +Z. */
+class NSWorld {
+  constructor(seed = 'Next Stop') {
+    this.seed = String(seed).trim().slice(0, 80) || 'Next Stop';
+    this.version = 1;
+    this.size = 1000;
+    this.resolution = 129;
+    this.waterLevel = 0;
+    this.heights = new Float32Array(this.resolution * this.resolution);
+    this.objects = [];
+    this.route = [];
+    this.stations = [];
+    this._seedHash = NSWorld.hash(this.seed);
+    this._rngState = this._seedHash || 1;
+    this._phase = this.random() * Math.PI * 2;
+    this._a = 302 + this.random() * 16;
+    this._b = 231 + this.random() * 12;
+    this._buildRoute();
+    this._buildTerrain();
+    this._buildRailway();
+    this._buildStations();
+    this._buildScenery();
+    this.maxHeight = this.heights.reduce((a, b) => Math.max(a, b), -Infinity);
+    this.minHeight = this.heights.reduce((a, b) => Math.min(a, b), Infinity);
+    this._checksum = this._makeChecksum();
+  }
+  static hash(value) {
+    let h = 2166136261;
+    for (let i = 0; i < value.length; i++) h = Math.imul(h ^ value.charCodeAt(i), 16777619);
+    return h >>> 0;
+  }
+  random() {
+    let x = this._rngState;
+    x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+    this._rngState = x >>> 0;
+    return this._rngState / 4294967296;
+  }
+  _noise(x, z, scale) {
+    x /= scale; z /= scale;
+    const ix = Math.floor(x), iz = Math.floor(z);
+    let u = x - ix, v = z - iz;
+    u = u * u * (3 - 2 * u); v = v * v * (3 - 2 * v);
+    const sample = (a, b) => {
+      let n = Math.imul(a, 374761393) ^ Math.imul(b, 668265263) ^ this._seedHash;
+      n = Math.imul(n ^ (n >>> 13), 1274126177);
+      return ((n ^ (n >>> 16)) >>> 0) / 4294967295;
+    };
+    const a = sample(ix, iz), b = sample(ix + 1, iz);
+    const c = sample(ix, iz + 1), d = sample(ix + 1, iz + 1);
+    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+  }
+  _buildRoute() {
+    const count = 512;
+    let distance = 0;
+    for (let i = 0; i <= count; i++) {
+      const t = i / count * Math.PI * 2;
+      const ripple = 1 + .025 * Math.sin(3 * t + this._phase);
+      const p = { x: Math.sin(t) * this._a * ripple,
+        z: Math.cos(t) * this._b * ripple,
+        y: 2.65 + .8 * Math.sin(t + this._phase * .3) + .32 * Math.sin(2 * t), s: 0 };
+      if (i) {
+        const prev = this.route[i - 1];
+        distance += Math.hypot(p.x - prev.x, p.y - prev.y, p.z - prev.z);
+      }
+      p.s = distance;
+      this.route.push(p);
+    }
+    this.routeLength = distance;
+    for (let i = 0; i < count; i++) {
+      const p = this.route[i], n = this.route[i + 1];
+      p.yaw = Math.atan2(n.x - p.x, n.z - p.z);
+      p.grade = (n.y - p.y) / (n.s - p.s);
+    }
+    Object.assign(this.route[count], { yaw: this.route[0].yaw, grade: this.route[0].grade });
+  }
+  routeAt(distance) {
+    const s = ((distance % this.routeLength) + this.routeLength) % this.routeLength;
+    let lo = 0, hi = this.route.length - 1;
+    while (lo + 1 < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (this.route[mid].s <= s) lo = mid; else hi = mid;
+    }
+    const a = this.route[lo], b = this.route[lo + 1];
+    const u = (s - a.s) / (b.s - a.s);
+    const yawDelta = Math.atan2(Math.sin(b.yaw - a.yaw), Math.cos(b.yaw - a.yaw));
+    return { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u,
+      z: a.z + (b.z - a.z) * u, yaw: a.yaw + yawDelta * u, grade: a.grade + (b.grade - a.grade) * u, s };
+  }
+  _nearestRoute(x, z) {
+    let index = 0, best = Infinity;
+    for (let i = 0; i < 512; i += 8) {
+      const p = this.route[i], d = (x - p.x) ** 2 + (z - p.z) ** 2;
+      if (d < best) { best = d; index = i; }
+    }
+    let height = 0;
+    for (let j = -8; j <= 8; j++) {
+      const i = (index + j + 512) % 512, a = this.route[i], b = this.route[i + 1];
+      const dx = b.x - a.x, dz = b.z - a.z;
+      const u = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz)));
+      const d = (x - a.x - dx * u) ** 2 + (z - a.z - dz * u) ** 2;
+      if (d <= best) { best = d; height = a.y + (b.y - a.y) * u; }
+    }
+    return { distance: Math.sqrt(best), height };
+  }
+  _buildTerrain() {
+    const n = this.resolution, half = this.size / 2;
+    for (let z = 0; z < n; z++) for (let x = 0; x < n; x++) {
+      const wx = x / (n - 1) * this.size - half, wz = z / (n - 1) * this.size - half;
+      const noise = (this._noise(wx, wz, 185) - .5) * 7 + (this._noise(wx, wz, 65) - .5) * 3;
+      const edge = Math.max(0, (Math.max(Math.abs(wx), Math.abs(wz)) / half - .65) / .35);
+      let h = 4.5 + noise + edge * edge * (57 + this._noise(wx, wz, 110) * 24);
+      const lake = ((wx - 55) / 188) ** 2 + ((wz + 157) / 121) ** 2;
+      if (lake < 1.24) {
+        const basin = -3.5 + Math.min(lake, 1) * 2 + this._noise(wx, wz, 36) * .25;
+        const blend = Math.max(0, Math.min(1, (lake - 1) / .24));
+        h = basin + (h - basin) * blend * blend * (3 - 2 * blend);
+      }
+      const rail = this._nearestRoute(wx, wz);
+      // Preserve the water basin under bridge spans; elsewhere cut a rail shelf.
+      if (rail.distance < 23 && lake >= 1.10) {
+        let blend = Math.max(0, Math.min(1, (23 - rail.distance) / 16));
+        blend = blend * blend * (3 - 2 * blend);
+        h += (rail.height - .43 - h) * blend;
+      }
+      this.heights[z * n + x] = h;
+    }
+  }
+  heightAt(x, z) {
+    const n = this.resolution, k = (n - 1) / this.size;
+    const gx = Math.max(0, Math.min(n - 1, (x + this.size / 2) * k));
+    const gz = Math.max(0, Math.min(n - 1, (z + this.size / 2) * k));
+    const ix = Math.min(n - 2, Math.floor(gx)), iz = Math.min(n - 2, Math.floor(gz));
+    const u = gx - ix, v = gz - iz, i = iz * n + ix, h = this.heights;
+    return h[i] * (1 - u) * (1 - v) + h[i + 1] * u * (1 - v) +
+      h[i + n] * (1 - u) * v + h[i + n + 1] * u * v;
+  }
+  _object(x, y, z, hx, hy, hz, yaw, material, type = 0, flags = {}) {
+    const object = { x, y, z, hx, hy, hz, yaw, material, type, ...flags };
+    this.objects.push(object);
+    return object;
+  }
+  _buildRailway() {
+    const segments = 96, step = this.routeLength / segments;
+    for (let i = 0; i < segments; i++) {
+      const a = this.routeAt(i * step), b = this.routeAt((i + 1) * step);
+      const x = (a.x + b.x) / 2, y = (a.y + b.y) / 2, z = (a.z + b.z) / 2;
+      const yaw = Math.atan2(b.x - a.x, b.z - a.z), length = Math.hypot(b.x - a.x, b.z - a.z);
+      const bridge = this.heightAt(x, z) < this.waterLevel + .15;
+      this._object(x, y - .27, z, 1.55, .20, length / 2 + .33, yaw, bridge ? 13 : 6, 0, { support: true, rail: true });
+      for (const offset of [-.78, .78]) this._object(x + Math.cos(yaw) * offset, y - .015,
+        z - Math.sin(yaw) * offset, .075, .075, length / 2 + .34, yaw, 7, 0, { rail: true });
+      if (bridge && i % 3 === 0) {
+        const ground = this.heightAt(x, z), bottom = Math.max(-4, ground);
+        this._object(x, (y - .48 + bottom) / 2, z, .6, (y - .48 - bottom) / 2, .8, yaw, 13, 0, { solid: true });
+      }
+    }
+  }
+  _buildStations() {
+    const names = ['Pinebank', 'Bellweather', 'Stonehaven'];
+    for (let i = 0; i < 3; i++) {
+      const p = this.routeAt(this.routeLength * i / 3), rx = Math.cos(p.yaw), rz = -Math.sin(p.yaw);
+      const station = { name: names[i], s: p.s, x: p.x, y: p.y, z: p.z, yaw: p.yaw, radius: 25,
+        platformX: p.x + rx * 4.4, platformZ: p.z + rz * 4.4 };
+      this.stations.push(station);
+      this._object(p.x + rx * 4.8, p.y - .12, p.z + rz * 4.8, 2.25, .22, 27, p.yaw, 10, 0, { support: true });
+      const bx = p.x + rx * 11, bz = p.z + rz * 11, floor = this.heightAt(bx, bz);
+      this._object(bx, floor + 2.8, bz, 3.5, 2.8, 8, p.yaw, 4, 0, { solid: true, station: true });
+      this._object(bx, floor + 5.9, bz, 4.0, .35, 8.7, p.yaw, 5);
+      for (const along of [-4, 4]) this._object(bx - rx * 3.54 + Math.sin(p.yaw) * along,
+        floor + 2.8, bz - rz * 3.54 + Math.cos(p.yaw) * along, .06, .85, 1.2, p.yaw, 9);
+      this._object(p.x + rx * 6.5, p.y + 2.3, p.z + rz * 6.5, .08, 2.2, .08, p.yaw, 7, 0, { solid: true });
+      this._object(p.x + rx * 6.5, p.y + 3.3, p.z + rz * 6.5, .18, .50, 1.7, p.yaw, 6);
+      if (i === 1) {
+        const tx = bx + Math.sin(p.yaw) * 12, tz = bz + Math.cos(p.yaw) * 12;
+        this._object(tx, floor + 7, tz, 2, 7, 2, p.yaw, 4, 0, { solid: true });
+        this._object(tx, floor + 14.4, tz, 2.5, .5, 2.5, p.yaw, 5);
+      }
+      if (i === 2) {
+        this._object(bx + rx * 7, floor + 1.8, bz + rz * 7, 4, 1.8, 4, p.yaw, 2, 0, { solid: true });
+      }
+    }
+  }
+  _buildScenery() {
+    for (let s = 0; s < 3; s++) {
+      const station = this.stations[s], p = this.routeAt(station.s), rx = Math.cos(p.yaw), rz = -Math.sin(p.yaw);
+      for (let i = 0; i < 5; i++) {
+        const along = (i - 2) * 19 + (this.random() - .5) * 5, side = 26 + this.random() * 21;
+        const x = p.x + rx * side + Math.sin(p.yaw) * along;
+        const z = p.z + rz * side + Math.cos(p.yaw) * along;
+        const y = this.heightAt(x, z), h = 2.8 + this.random() * 1.5, width = 4 + this.random() * 2;
+        this._object(x, y + h, z, width, h, 5, p.yaw, 4, 0, { solid: true });
+        this._object(x, y + h * 2 + .45, z, width + .4, .45, 5.7, p.yaw, 5);
+        this._object(x - rx * (width + .025), y + h, z - rz * (width + .025), .06, .8, 1.0, p.yaw, 9);
+      }
+    }
+    let trees = 0, tries = 0;
+    while (trees < 32 && tries++ < 250) {
+      const x = (this.random() - .5) * 780, z = (this.random() - .5) * 780;
+      const y = this.heightAt(x, z);
+      if (y < 1 || this._nearestRoute(x, z).distance < 13) continue;
+      if (this.objects.some(o => o.solid && Math.hypot(o.x - x, o.z - z) < 12)) continue;
+      const height = 7 + this.random() * 5;
+      this._object(x, y + height * .3, z, .45, height * .3, .45, 0, 11, 0, { solid: true });
+      this._object(x, y + height * .65, z, height * .27, height * .35, height * .27, 0, 12, 1);
+      this._object(x, y + height * .91, z, height * .17, height * .22, height * .17, 0, 12, 1);
+      trees++;
+    }
+  }
+  _inside(object, x, z, margin = 0) {
+    const dx = x - object.x, dz = z - object.z, c = Math.cos(object.yaw), s = Math.sin(object.yaw);
+    return Math.abs(dx * c - dz * s) < object.hx + margin && Math.abs(dx * s + dz * c) < object.hz + margin;
+  }
+  surfaceAt(x, z) {
+    let height = this.heightAt(x, z), material = height > 27 ? 2 : 1, support = false;
+    for (const o of this.objects) if (o.support && this._inside(o, x, z)) {
+      const top = o.y + o.hy;
+      if (top > height) { height = top; material = o.material; support = true; }
+    }
+    return { height, material, walkable: height > this.waterLevel + .08 || support, support };
+  }
+  blocked(x, y, z, radius = .36, bodyHeight = 1.7) {
+    return this.objects.some(o => o.solid && this._inside(o, x, z, radius) &&
+      y + bodyHeight > o.y - o.hy + .08 && y < o.y + o.hy - .08);
+  }
+  stationAt(distance) {
+    for (let i = 0; i < this.stations.length; i++) {
+      const station = this.stations[i];
+      let delta = Math.abs(distance - station.s) % this.routeLength;
+      delta = Math.min(delta, this.routeLength - delta);
+      if (delta < station.radius) return { ...station, index: i, distance: delta };
+    }
+    return null;
+  }
+  _makeChecksum() {
+    let h = this._seedHash;
+    const update = value => { h = Math.imul(h ^ Math.round(value * 1000), 16777619) >>> 0; };
+    this.heights.forEach(update);
+    for (const o of this.objects) for (const key of ['x', 'y', 'z', 'hx', 'hy', 'hz', 'yaw', 'material', 'type']) update(o[key]);
+    for (const p of this.route) for (const key of ['x', 'y', 'z', 's']) update(p[key]);
+    return h.toString(16).padStart(8, '0');
+  }
+  checksum() { return this._checksum; }
+}
+
+class NSSimulation {
+  constructor(world) {
+    this.world = world;
+    this.time = 0;
+    this.weather = { rain: 0, fog: .08 };
+    this.weatherTarget = 'clear';
+    this.train = { s: 0, speed: 0, throttle: 0, brake: 1, direction: 1 };
+    this.player = { x: 0, y: 0, z: 0, yaw: 0, pitch: -.05, mode: 'foot' };
+    this.cameraMode = 'chase';
+    this.delivery = { index: 0, completed: 0, started: false, finished: false };
+    this.settings = { quality: 'standard', reducedMotion: false, weatherMode: 'auto', highContrast: false };
+    this.maxSpeed = 6.5;
+    this._camera = null;
+    this._lastRouteYaw = world.routeAt(0).yaw;
+    this._spawnFoot(0);
+    this.renderAlpha = 1;
+    this._previousS = 0;
+    this._previousPlayer = { ...this.player };
+  }
+  static angle(value) { return Math.atan2(Math.sin(value), Math.cos(value)); }
+  _spawnFoot(distance) {
+    const p = this.world.routeAt(distance), rx = Math.cos(p.yaw), rz = -Math.sin(p.yaw);
+    let chosen = null;
+    for (const offset of [4.4, -4.4, 2.2, -2.2]) {
+      const x = p.x + rx * offset, z = p.z + rz * offset, surface = this.world.surfaceAt(x, z);
+      if (surface.walkable && !this.world.blocked(x, surface.height, z)) { chosen = { x, y: surface.height, z }; break; }
+    }
+    if (!chosen) return false;
+    Object.assign(this.player, chosen, { mode: 'foot', yaw: Math.atan2(p.x - chosen.x, p.z - chosen.z), pitch: -.05 });
+    this._camera = null;
+    return true;
+  }
+  step(dt, input = {}) {
+    if (!Number.isFinite(dt) || dt <= 0) return;
+    dt = Math.min(dt, 1 / 15);
+    this._previousS = this.train.s;
+    this._previousPlayer = { ...this.player };
+    this.time += dt;
+    const mode = this.settings.weatherMode;
+    this.weatherTarget = mode === 'auto' ? ['clear', 'rain', 'clear', 'fog'][Math.floor(this.time / 160) % 4] : mode;
+    if (!['clear', 'rain', 'fog'].includes(this.weatherTarget)) this.weatherTarget = 'clear';
+    const rain = this.weatherTarget === 'rain' ? 1 : 0;
+    const fog = this.weatherTarget === 'fog' ? .88 : this.weatherTarget === 'rain' ? .43 : .08;
+    const weatherBlend = 1 - Math.exp(-dt / 8);
+    this.weather.rain += (rain - this.weather.rain) * weatherBlend;
+    this.weather.fog += (fog - this.weather.fog) * weatherBlend;
+    const lookX = Number.isFinite(input.lookX) ? Math.max(-2000, Math.min(2000, input.lookX)) : 0;
+    const lookY = Number.isFinite(input.lookY) ? Math.max(-2000, Math.min(2000, input.lookY)) : 0;
+    this.player.yaw = NSSimulation.angle(this.player.yaw + lookX * .0022 +
+      ((input.lookRight ? 1 : 0) - (input.lookLeft ? 1 : 0)) * dt * 1.45);
+    this.player.pitch = Math.max(-1.15, Math.min(1.15, this.player.pitch - lookY * .0022 +
+      ((input.lookUp ? 1 : 0) - (input.lookDown ? 1 : 0)) * dt));
+    if (this.player.mode === 'train') {
+      this.train.throttle = Math.max(0, Math.min(1, this.train.throttle +
+        ((input.forward ? 1 : 0) - (input.backward ? 1 : 0)) * dt * .42));
+      this.train.brake = input.brake ? 1 : 0;
+    } else {
+      // An unattended locomotive stays safely braked.
+      this.train.throttle = 0; this.train.brake = 1;
+      this._walk(dt, input);
+    }
+    this._trainStep(dt);
+    if (this.player.mode === 'train') {
+      const p = this.world.routeAt(this.train.s);
+      this.player.yaw = NSSimulation.angle(this.player.yaw + NSSimulation.angle(p.yaw - this._lastRouteYaw));
+      Object.assign(this.player, { x: p.x, y: p.y, z: p.z });
+      this._lastRouteYaw = p.yaw;
+    }
+  }
+  _walk(dt, input) {
+    let f = (input.forward ? 1 : 0) - (input.backward ? 1 : 0);
+    let r = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+    const norm = Math.hypot(f, r);
+    if (!norm) return;
+    f /= norm; r /= norm;
+    const speed = 4.2, yaw = this.player.yaw;
+    const dx = (Math.sin(yaw) * f + Math.cos(yaw) * r) * speed * dt;
+    const dz = (Math.cos(yaw) * f - Math.sin(yaw) * r) * speed * dt;
+    const attempt = (x, z) => {
+      const limit = this.world.size / 2 - 8;
+      if (Math.abs(x) > limit || Math.abs(z) > limit) return false;
+      const surface = this.world.surfaceAt(x, z);
+      if (!surface.walkable || surface.height - this.player.y > .55 || this.player.y - surface.height > 1.8) return false;
+      if (this.world.blocked(x, surface.height, z) || this._blockedByTrain(x, surface.height, z)) return false;
+      Object.assign(this.player, { x, y: surface.height, z });
+      return true;
+    };
+    if (!attempt(this.player.x + dx, this.player.z + dz)) {
+      attempt(this.player.x + dx, this.player.z);
+      attempt(this.player.x, this.player.z + dz);
+    }
+  }
+  _blockedByTrain(x, y, z, distance = this.train.s) {
+    for (let carriage = 0; carriage <= 2; carriage++) {
+      const p = this.world.routeAt(distance - carriage * 11.3);
+      const dx = x - p.x, dz = z - p.z, c = Math.cos(p.yaw), s = Math.sin(p.yaw);
+      if (Math.abs(dx * c - dz * s) < 1.55 && Math.abs(dx * s + dz * c) < 4.85 &&
+          y + 1.7 > p.y + .1 && y < p.y + 3.75) return true;
+    }
+    return false;
+  }
+  _trainStep(dt) {
+    const t = this.train, p = this.world.routeAt(t.s), mass = 52000;
+    const speed = t.speed, sign = Math.sign(speed), abs = Math.abs(speed);
+    const traction = t.direction * 34000 * t.throttle * Math.max(.18, 1 - abs / 9);
+    const gradeForce = -9.81 * p.grade * mass;
+    const brakeForce = 100000 * t.brake;
+    const rolling = 1350, drag = 90 * speed * speed;
+    const drive = traction + gradeForce;
+    // Static resistance and applied brake hold the train on a slope.
+    if (abs < .025 && Math.abs(drive) <= brakeForce + 4200) { t.speed = 0; return; }
+    const motionSign = sign || Math.sign(drive);
+    const force = drive - motionSign * (brakeForce + rolling + drag);
+    let next = speed + force / mass * dt;
+    // Brake and friction cannot propel a train through rest into reverse.
+    if (speed && Math.sign(next) !== sign && Math.abs(drive) <= brakeForce + rolling + drag) next = 0;
+    if (!speed && Math.sign(next) !== Math.sign(drive)) next = 0;
+    next = Math.max(-this.maxSpeed, Math.min(this.maxSpeed, next));
+    t.speed = next;
+    t.s = ((t.s + (speed + next) * .5 * dt) % this.world.routeLength + this.world.routeLength) % this.world.routeLength;
+  }
+  stoppingDistance() {
+    if (this.train.speed === 0) return 0;
+    // Predict only a private train descriptor. Reuse the exact force model and
+    // sample route grade as the train moves, without advancing the live world.
+    const prediction = { world: this.world, maxSpeed: this.maxSpeed, train: { ...this.train, brake: 1 } };
+    const length = this.world.routeLength;
+    let distance = 0;
+    for (let step = 0; step < 600 && prediction.train.speed !== 0; step++) {
+      const before = prediction.train.s;
+      this._trainStep.call(prediction, 1 / 60);
+      let delta = prediction.train.s - before;
+      if (delta > length / 2) delta -= length;
+      if (delta < -length / 2) delta += length;
+      distance += Math.abs(delta);
+    }
+    return distance;
+  }
+  action(name) {
+    if (name === 'recover') return this.recover();
+    if (name === 'camera') {
+      this.cameraMode = this.cameraMode === 'cab' ? 'chase' : 'cab'; this._camera = null;
+      return this.player.mode === 'train' ? `${this.cameraMode === 'cab' ? 'Cab' : 'Chase'} camera.` : 'Camera setting saved for boarding.';
+    }
+    if (name === 'recenter') {
+      if(this.player.mode!=='train')return 'Camera centre is available aboard the train.';
+      this.player.yaw=this.world.routeAt(this.train.s).yaw;this.player.pitch=-.04;this._camera=null;
+      return 'Camera centred on the railway.';
+    }
+    if (name === 'reverse') {
+      if (this.player.mode !== 'train') return 'Board the locomotive first.';
+      if (Math.abs(this.train.speed) > .12) return 'Stop fully before changing direction.';
+      this.train.speed = 0; this.train.throttle = 0; this.train.direction *= -1;
+      return this.train.direction === 1 ? 'Forward selected.' : 'Reverse selected.';
+    }
+    if (name !== 'interact') return '';
+    const p = this.world.routeAt(this.train.s);
+    if (this.player.mode === 'foot') {
+      if (Math.hypot(this.player.x - p.x, this.player.z - p.z) > 8) return 'Move beside the locomotive to board.';
+      if (Math.abs(this.train.speed) > .12) return 'Wait for the train to stop.';
+      Object.assign(this.player, { mode: 'train', x: p.x, y: p.y, z: p.z, yaw: p.yaw, pitch: -.04 });
+      this._lastRouteYaw = p.yaw; this._camera = null;
+      if (!this.delivery.started && this.world.stationAt(this.train.s)?.index === 0) {
+        Object.assign(this.delivery, { started: true, index: 1 });
+        return `Cargo loaded. Next stop: ${this.world.stations[1].name}. Hold W to add throttle.`;
+      }
+      return 'Aboard. Hold W to add throttle; Space applies the brake.';
+    }
+    if (Math.abs(this.train.speed) > .22) return 'Apply the brake and stop before delivering or leaving.';
+    const station = this.world.stationAt(this.train.s);
+    if (station && station.index === this.delivery.index && !this.delivery.finished) {
+      if (!this.delivery.started && station.index === 0) {
+        Object.assign(this.delivery, { started: true, index: 1 });
+        return `Cargo loaded. Next stop: ${this.world.stations[1].name}.`;
+      }
+      if (this.delivery.started) {
+        this.delivery.completed++;
+        this.delivery.index = this.delivery.completed === 1 ? 2 : 0;
+        if (this.delivery.completed >= 3) {
+          this.delivery.finished = true;
+          return 'Circuit complete. Three deliveries made. Explore freely or begin a new seed.';
+        }
+        return `Delivery ${this.delivery.completed}/3 complete. Next stop: ${this.world.stations[this.delivery.index].name}.`;
+      }
+    }
+    if (!this._spawnFoot(this.train.s)) return 'Bridge crossing. Leave at a station or dry ground.';
+    this.train.speed = 0; this.train.throttle = 0; this.train.brake = 1;
+    return station ? `On foot at ${station.name}.` : 'On foot. E boards the locomotive.';
+  }
+  recover() {
+    Object.assign(this.train, { s: 0, speed: 0, throttle: 0, brake: 1, direction: 1 });
+    this._lastRouteYaw = this.world.routeAt(0).yaw;
+    this._spawnFoot(0);
+    this._previousS = 0; this._previousPlayer = { ...this.player };
+    return 'Recovered to Pinebank. Delivery progress preserved.';
+  }
+  objective() {
+    if (this.delivery.finished) return 'Circuit complete: 3/3 deliveries. The valley is yours to explore.';
+    if (!this.delivery.started) return 'Board the locomotive at Pinebank to collect your first delivery.';
+    return `Next stop: ${this.world.stations[this.delivery.index].name}. Stop at its platform, then press E to deliver (${this.delivery.completed}/3).`;
+  }
+  hint() {
+    if (this.player.mode === 'foot') {
+      const p = this.world.routeAt(this.train.s);
+      return Math.hypot(this.player.x - p.x, this.player.z - p.z) < 8 ? 'E: board locomotive · WASD: walk · Arrows: look' : 'WASD: explore · Arrows: look · Recovery returns to Pinebank';
+    }
+    const station = this.world.stationAt(this.train.s);
+    if (Math.abs(this.train.speed) > .22) return 'W/S: throttle · Space: brake · C: camera';
+    if (station && station.index === this.delivery.index && !this.delivery.finished) return this.delivery.started ? `E: deliver at ${station.name} · W: depart` : 'E: collect cargo · W: depart';
+    return 'E: leave train · W/S: throttle · R: direction · C: camera';
+  }
+  camera(dt = 1 / 60) {
+    let position, target;
+    const alpha = Math.max(0, Math.min(1, Number.isFinite(this.renderAlpha) ? this.renderAlpha : 1));
+    const p = { ...this.player };
+    if (p.mode === 'foot' && this._previousPlayer.mode === 'foot') {
+      for (const key of ['x', 'y', 'z']) p[key] = this._previousPlayer[key] + (p[key] - this._previousPlayer[key]) * alpha;
+    }
+    const rail = this._presentationRoute();
+    if (p.mode === 'train') p.yaw += NSSimulation.angle(rail.yaw - this.world.routeAt(this.train.s).yaw);
+    const cp = Math.cos(p.pitch), sx = Math.sin(p.yaw), cz = Math.cos(p.yaw);
+    if (p.mode === 'foot') {
+      position = [p.x, p.y + 1.68, p.z];
+      target = [p.x + sx * cp * 12, p.y + 1.68 + Math.sin(p.pitch) * 12, p.z + cz * cp * 12];
+    } else {
+      if (this.cameraMode === 'cab') {
+        // Eye ahead of the enclosed cabin, above the numerical boiler.
+        position = [rail.x + Math.sin(rail.yaw) * 2.9, rail.y + 3.55, rail.z + Math.cos(rail.yaw) * 2.9];
+        target = [position[0] + sx * cp * 14, position[1] + Math.sin(p.pitch) * 14, position[2] + cz * cp * 14];
+      } else {
+        position = [rail.x - sx * 16, rail.y + Math.max(4, 8 - p.pitch * 9), rail.z - cz * 16];
+        position[1] = Math.max(position[1], this.world.heightAt(position[0], position[2]) + 2.3);
+        for (const o of this.world.objects) if (o.solid && this.world._inside(o, position[0], position[2], .5)) position[1] = Math.max(position[1], o.y + o.hy + 1.1);
+        target = [rail.x + Math.sin(rail.yaw) * 3, rail.y + 1.9, rail.z + Math.cos(rail.yaw) * 3];
+      }
+    }
+    if (!this._camera || this.settings.reducedMotion || p.mode === 'foot' || this.cameraMode === 'cab') this._camera = { position: position.slice(), target: target.slice() };
+    else {
+      const blend = 1 - Math.exp(-Math.max(0, Math.min(.1, dt)) / .13);
+      for (let i = 0; i < 3; i++) {
+        this._camera.position[i] += (position[i] - this._camera.position[i]) * blend;
+        this._camera.target[i] += (target[i] - this._camera.target[i]) * blend;
+      }
+      this._camera.position[1] = Math.max(this._camera.position[1], this.world.heightAt(this._camera.position[0], this._camera.position[2]) + 1.9);
+      // Interpolation can cross a solid even when its desired endpoint is clear.
+      for (const o of this.world.objects) if (o.solid && this.world._inside(o, this._camera.position[0], this._camera.position[2], .5))
+        this._camera.position[1] = Math.max(this._camera.position[1], o.y + o.hy + 1.1);
+    }
+    return this._camera;
+  }
+  _presentationRoute(offset = 0) {
+    const length = this.world.routeLength;
+    let delta = this.train.s - this._previousS;
+    if (delta > length / 2) delta -= length;
+    if (delta < -length / 2) delta += length;
+    const alpha = Math.max(0, Math.min(1, Number.isFinite(this.renderAlpha) ? this.renderAlpha : 1));
+    return this.world.routeAt(this._previousS + delta * alpha + offset);
+  }
+  dynamicObjects() {
+    const objects = [], add = (p, along, up, hx, hy, hz, material, type = 0, side = 0) => {
+      objects.push({ x: p.x + Math.sin(p.yaw) * along + Math.cos(p.yaw) * side, y: p.y + up,
+        z: p.z + Math.cos(p.yaw) * along - Math.sin(p.yaw) * side, hx, hy, hz, yaw: p.yaw, material, type, train: true });
+    };
+    const loco = this._presentationRoute();
+    add(loco, 0, .58, 1.13, .42, 4.5, 7);
+    add(loco, 1.2, 1.7, 1.03, 1.03, 2.75, 8, 1);
+    add(loco, -2.85, 2.15, 1.19, 1.4, 1.55, 8);
+    add(loco, -2.85, 3.62, 1.28, .16, 1.72, 7);
+    add(loco, 3.7, 2.55, .26, .75, .26, 7);
+    add(loco, 4.0, 1.68, .32, .30, .12, 9);
+    for (const side of [-1.205, 1.205]) add(loco, -2.4, 2.65, .035, .65, .8, 9, 0, side);
+    for (const side of [-1.06, 1.06]) for (const along of [-3.1, 2.5]) add(loco, along, .43, .18, .4, .4, 7, 1, side);
+    for (let carriage = 1; carriage <= 2; carriage++) {
+      const p = this._presentationRoute(-carriage * 11.3);
+      add(p, 0, .58, 1.15, .40, 4.55, 7);
+      add(p, 0, 2.1, 1.19, 1.23, 4.55, 8);
+      add(p, 0, 3.37, 1.29, .15, 4.7, 7);
+      for (const side of [-1.205, 1.205]) add(p, 0, 2.42, .035, .64, 3.8, 9, 0, side);
+      for (const side of [-1.06, 1.06]) for (const along of [-3.2, 3.2]) add(p, along, .43, .18, .4, .4, 7, 1, side);
+    }
+    return objects;
+  }
+  serialize() {
+    return { version: 1, world: { seed: this.world.seed, version: this.world.version, checksum: this.world.checksum() },
+      time: this.time, weather: { ...this.weather }, weatherTarget: ['clear', 'rain', 'fog'].includes(this.weatherTarget) ? this.weatherTarget : 'clear',
+      train: { ...this.train }, player: { ...this.player }, cameraMode: this.cameraMode,
+      delivery: { ...this.delivery }, settings: { ...this.settings } };
+  }
+  restore(input) {
+    // Validate into an isolated snapshot; no live state changes until every check passes.
+    let data;
+    try {
+      const json = typeof input === 'string' ? input : JSON.stringify(input);
+      if (!json || json.length > 65536) throw new Error('Save exceeds the 64 KB limit.');
+      data = JSON.parse(json);
+    } catch (error) { throw new Error(`Invalid save JSON: ${error.message}`); }
+    const fail = message => { throw new Error(`Invalid save: ${message}`); };
+    const object = (value, name) => { if (!value || typeof value !== 'object' || Array.isArray(value)) fail(`${name} is missing.`); return value; };
+    const number = (value, min, max, name) => { if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) fail(`${name} is out of range.`); return value; };
+    const bool = (value, name) => { if (typeof value !== 'boolean') fail(`${name} must be true or false.`); return value; };
+    const choice = (value, choices, name) => { if (!choices.includes(value)) fail(`${name} is unsupported.`); return value; };
+    object(data, 'save');
+    if (data.version !== 1) fail('unsupported format version.');
+    const w = object(data.world, 'world');
+    if (typeof w.seed !== 'string' || w.seed.length < 1 || w.seed.length > 80 || w.seed !== this.world.seed || w.version !== this.world.version || w.checksum !== this.world.checksum()) fail('world seed, version, or checksum does not match.');
+    const time = number(data.time, 0, 1e9, 'time');
+    const weather = object(data.weather, 'weather');
+    const restoredWeather = { rain: number(weather.rain, 0, 1, 'rain'), fog: number(weather.fog, 0, 1, 'fog') };
+    const weatherTarget = choice(data.weatherTarget, ['clear', 'rain', 'fog'], 'weather target');
+    const t = object(data.train, 'train');
+    const train = { s: number(t.s, 0, this.world.routeLength - 1e-8, 'route distance'), speed: number(t.speed, -this.maxSpeed, this.maxSpeed, 'speed'),
+      throttle: number(t.throttle, 0, 1, 'throttle'), brake: number(t.brake, 0, 1, 'brake'), direction: choice(t.direction, [-1, 1], 'direction') };
+    const p = object(data.player, 'player'), half = this.world.size / 2;
+    const player = { x: number(p.x, -half + 4, half - 4, 'player x'), y: number(p.y, -10, 150, 'player y'), z: number(p.z, -half + 4, half - 4, 'player z'),
+      yaw: NSSimulation.angle(number(p.yaw, -1e6, 1e6, 'yaw')), pitch: number(p.pitch, -1.15, 1.15, 'pitch'), mode: choice(p.mode, ['foot', 'train'], 'player mode') };
+    if (player.mode === 'foot') {
+      const surface = this.world.surfaceAt(player.x, player.z);
+      if (!surface.walkable || Math.abs(player.y - surface.height) > .6 || this.world.blocked(player.x, surface.height, player.z) ||
+          this._blockedByTrain(player.x, surface.height, player.z, train.s)) fail('walking position is unsafe.');
+      player.y = surface.height;
+    } else {
+      const rail = this.world.routeAt(train.s);
+      if (Math.hypot(player.x - rail.x, player.y - rail.y, player.z - rail.z) > 1) fail('player and locomotive positions disagree.');
+      Object.assign(player, { x: rail.x, y: rail.y, z: rail.z });
+    }
+    if (player.mode === 'foot' && Math.abs(train.speed) > .22) fail('unattended train is moving.');
+    const cameraMode = choice(data.cameraMode, ['cab', 'chase'], 'camera mode');
+    const d = object(data.delivery, 'delivery');
+    const delivery = { index: choice(d.index, [0, 1, 2], 'station index'), completed: choice(d.completed, [0, 1, 2, 3], 'completed deliveries'),
+      started: bool(d.started, 'delivery started'), finished: bool(d.finished, 'delivery finished') };
+    const expected = delivery.completed === 0 ? (delivery.started ? 1 : 0) : delivery.completed === 1 ? 2 : 0;
+    if (delivery.index !== expected || delivery.finished !== (delivery.completed === 3) || (!delivery.started && delivery.completed !== 0)) fail('delivery progression is inconsistent.');
+    const s = object(data.settings, 'settings');
+    const settings = { quality: choice(s.quality, ['coarse', 'standard', 'fine'], 'quality'), reducedMotion: bool(s.reducedMotion, 'reduced motion'),
+      weatherMode: choice(s.weatherMode, ['auto', 'clear', 'rain', 'fog'], 'weather mode'), highContrast: s.highContrast === undefined ? false : bool(s.highContrast, 'high contrast') };
+    Object.assign(this, { time, weather: restoredWeather, weatherTarget, train, player, cameraMode, delivery, settings });
+    this._lastRouteYaw = this.world.routeAt(train.s).yaw; this._camera = null;
+    this._previousS = train.s; this._previousPlayer = { ...player }; this.renderAlpha = 1;
+    return 'Journey restored.';
+  }
+}
+
+
+// Player-facing railway guidance, derived from authoritative simulation state.
+class NSJourney {
+  static approach(sim,explorationStation=null) {
+    const deliveryTarget=explorationStation===null;
+    if (sim.player.mode !== 'train' || (deliveryTarget&&(!sim.delivery.started||sim.delivery.finished))) return null;
+    const train = sim.train, world = sim.world, targetIndex=deliveryTarget?sim.delivery.index:explorationStation;
+    const station = world.stations[targetIndex];
+    const length = world.routeLength;
+    const wrap = value => ((value % length) + length) % length;
+    const direction = Math.abs(train.speed) > .025 ? Math.sign(train.speed) : train.direction;
+    const signed = (wrap(station.s - train.s + length / 2) - length / 2) * direction;
+    const distance = wrap((station.s - train.s) * direction);
+    const inside = world.stationAt(train.s)?.index === targetIndex;
+    const stopped = Math.abs(train.speed) <= .22;
+    const stoppingDistance = sim.stoppingDistance();
+    // Allow reaction time and aim short of the platform centre, inside its zone.
+    const brakeAt = stoppingDistance + Math.max(8, Math.abs(train.speed) * 1.1) + 5;
+    const passed = !inside && signed < -station.radius && signed > -station.radius - 100;
+    let phase = 'cruise', hint;
+    if (inside && stopped) {
+      phase = 'ready'; hint = deliveryTarget?`At ${station.name} platform · E: deliver · Hold Space to stay stopped`:`At ${station.name} platform · E: leave train · Explore on foot`;
+    } else if (inside || (!passed && distance <= brakeAt && !stopped)) {
+      phase = 'brake'; hint = `BRAKE NOW · Hold Space · ${station.name} platform${inside ? '' : ` in ${Math.ceil(distance)} m`}`;
+    } else if (passed) {
+      phase = 'passed'; hint = 'Platform passed · Stop with Space, then R to reverse';
+    } else if (stopped && train.throttle===0) {
+      phase = 'departure';hint = `${station.name} · ${Math.ceil(distance)} m ${direction===-1?'in reverse':'ahead'} · Hold W to add power`;
+    } else if (distance < 100) {
+      phase = 'approach'; hint = `${station.name} · ${Math.ceil(distance)} m to platform centre · Space: brake`;
+    } else {
+      hint = `${station.name} · ${Math.ceil(distance)} m ahead · W/S: power · Space: brake · C: camera`;
+    }
+    return { phase, hint, distance: inside ? 0 : distance, signedDistance: signed,
+      inside, stoppingDistance, brakeAt, station: station.name, direction,kind:deliveryTarget?'delivery':'exploration' };
+  }
+
+  static label(sim) {
+    if (sim.delivery.finished) return 'Circuit complete';
+    if (sim.player.mode === 'train') return `Delivery ${sim.delivery.completed + 1} of 3 · ${sim.cameraMode} · ${sim.train.direction === 1 ? 'forward' : 'reverse'}`;
+    let closest = null, distance = Infinity;
+    for (const station of sim.world.stations) {
+      const d = Math.hypot(sim.player.x - station.x, sim.player.z - station.z);
+      if (d < distance) { distance = d; closest = station; }
+    }
+    return distance < 70 ? `On foot · ${closest.name}` : 'On foot · open valley';
+  }
+}
+
+
+// Optional walking discoveries from existing, authoritative station geometry.
+class NSExploration {
+  constructor(world) {
+    this.world=world;this.visited=new Set();this.selected=null;
+    const notes=[
+      ['pinebank-outlook','Pinebank outlook','From the end of this platform, the first departure feels smaller than the valley around it.'],
+      ['bellweather-tower','Bellweather tower','The tower watches the bend. A good place to leave the cab and see the railway from the ground.'],
+      ['stonehaven-storehouse','Stonehaven storehouse','Warm windows beside the last delivery. Stay a while before taking the letters home.']
+    ];
+    this.records=world.stations.map((station,index)=>{
+      let anchor=null;
+      for(const along of [18,-18,12,-12,0]){
+        const x=station.platformX+Math.sin(station.yaw)*along;
+        const z=station.platformZ+Math.cos(station.yaw)*along;
+        const surface=world.surfaceAt(x,z);
+        if(surface.walkable&&!world.blocked(x,surface.height,z)){
+          anchor={x,y:surface.height,z};break;
+        }
+      }
+      if(!anchor)throw new Error(`No safe field-note position at ${station.name}.`);
+      const [id,name,description]=notes[index];
+      return {id,name,description,station:station.name,anchor,radius:8};
+    });
+  }
+  get total(){return this.records.length;}
+  get count(){return this.visited.size;}
+  static bearing(player,target){
+    const angle=Math.atan2(target.x-player.x,target.z-player.z)-player.yaw;
+    const delta=Math.atan2(Math.sin(angle),Math.cos(angle));
+    return Math.abs(delta)<.6?'ahead':Math.abs(delta)>2.4?'behind':delta>0?'right':'left';
+  }
+  discover(player){
+    if(player.mode!=='foot')return null;
+    for(const record of this.records){
+      if(!this.visited.has(record.id)&&Math.hypot(player.x-record.anchor.x,player.z-record.anchor.z)<=record.radius&&Math.abs(player.y-record.anchor.y)<2){
+        this.visited.add(record.id);if(this.selected===record.id)this.selected=null;return record;
+      }
+    }
+    return null;
+  }
+  nextTarget(player){
+    let result=null;
+    for(const record of this.records){
+      if(this.visited.has(record.id))continue;
+      const distance=Math.hypot(player.x-record.anchor.x,player.z-record.anchor.z);
+      if(!result||distance<result.distance)result={record,distance};
+    }
+    return result;
+  }
+  select(id){
+    if(id!==null&&(!this.records.some(r=>r.id===id)||this.visited.has(id)))throw new Error('Choose an undiscovered journal place.');
+    this.selected=id;
+  }
+  target(player){
+    const selected=this.records.find(r=>r.id===this.selected);
+    return selected?{record:selected,distance:Math.hypot(player.x-selected.anchor.x,player.z-selected.anchor.z)}:this.nextTarget(player);
+  }
+  serialize(){return{version:1,visited:this.records.filter(r=>this.visited.has(r.id)).map(r=>r.id),selected:this.selected};}
+  restore(data){
+    if(data===undefined){this.visited=new Set();this.selected=null;return;}
+    const fail=()=>{throw new Error('Invalid save: field journal is unsupported or contains invalid discoveries.');};
+    if(!data||typeof data!=='object'||Array.isArray(data)||data.version!==1||!Array.isArray(data.visited)||data.visited.length>this.total)fail();
+    const allowed=new Set(this.records.map(r=>r.id)),candidate=new Set();
+    for(const id of data.visited){if(typeof id!=='string'||!allowed.has(id)||candidate.has(id))fail();candidate.add(id);}
+    const selected=data.selected===undefined?null:data.selected;
+    if(selected!==null&&(typeof selected!=='string'||!allowed.has(selected)||candidate.has(selected)))fail();
+    this.visited=candidate;this.selected=selected;
+  }
+}
+
+
+/* Next Stop: numerical world -> integer character records -> numeric glyph masks.
+ * This renderer never creates a conventional world-colour image or samples fonts.
+ */
+(function (global) {
+  'use strict';
+
+  const MAX_OBJECTS = 256;
+  const CELL_PRESETS = Object.freeze({ coarse: [12, 18], standard: [8, 12], fine: [6, 9] });
+  const VERTEX = `#version 300 es
+  precision highp float;
+  out vec2 v_uv;
+  void main() {
+    vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+    v_uv = p;
+    gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+  }`;
+
+  const SCENE = `#version 300 es
+  precision highp float;
+  precision highp int;
+  precision highp sampler2D;
+  layout(location=0) out uvec4 out_record;
+  layout(location=1) out uvec4 out_foreground;
+  layout(location=2) out uvec4 out_background;
+
+  uniform sampler2D u_terrain;
+  uniform sampler2D u_objects;
+  uniform int u_resolution;
+  uniform int u_objectCount;
+  uniform int u_shadowCount;
+  uniform float u_size;
+  uniform float u_water;
+  uniform vec2 u_heightRange;
+  uniform vec2 u_viewport;
+  uniform vec2 u_cellSize;
+  uniform vec3 u_eye;
+  uniform vec3 u_forward;
+  uniform vec3 u_right;
+  uniform vec3 u_up;
+  uniform vec3 u_sun;
+  uniform vec3 u_headPosition;
+  uniform vec3 u_headDirection;
+  uniform float u_time;
+  uniform vec2 u_weather;
+  uniform float u_motion;
+  uniform float u_far;
+
+  struct Hit { float t; vec3 p; vec3 n; int material; vec3 local; };
+
+  float hash21(vec2 p) {
+    vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+    q += dot(q, q.yzx + 33.33);
+    return fract((q.x + q.y) * q.z);
+  }
+  float heightAt(vec2 p) {
+    vec2 q = clamp((p + u_size * 0.5) / u_size * float(u_resolution - 1),
+                   vec2(0.0), vec2(float(u_resolution - 1) - 0.00001));
+    ivec2 c = ivec2(floor(q));
+    vec2 f = fract(q);
+    float a = texelFetch(u_terrain, c, 0).r;
+    float b = texelFetch(u_terrain, c + ivec2(1,0), 0).r;
+    float d = texelFetch(u_terrain, c + ivec2(0,1), 0).r;
+    float e = texelFetch(u_terrain, c + ivec2(1,1), 0).r;
+    return mix(mix(a,b,f.x), mix(d,e,f.x), f.y);
+  }
+  vec3 safeInverse(vec3 direction) {
+    return 1.0 / mix(vec3(0.000001), direction,
+      greaterThan(abs(direction), vec3(0.000001)));
+  }
+  vec2 boxInterval(vec3 ro, vec3 rd, vec3 lo, vec3 hi) {
+    vec3 a = (lo - ro) * safeInverse(rd);
+    vec3 b = (hi - ro) * safeInverse(rd);
+    vec3 m = min(a,b), n = max(a,b);
+    return vec2(max(max(m.x,m.y),m.z), min(min(n.x,n.y),n.z));
+  }
+
+  // Exact bilinear heightfield intersection. Traverse XZ cells, then solve the
+  // quadratic ray/height equation inside each cell. Vertical height error is
+  // never interpreted as a distance estimate, so steep slopes are not skipped.
+  bool terrainHit(vec3 ro, vec3 rd, float limit, int budget, out Hit hit) {
+    float halfSize = u_size * 0.5;
+    vec2 interval = boxInterval(ro, rd,
+      vec3(-halfSize,u_heightRange.x-0.1,-halfSize),
+      vec3(halfSize,u_heightRange.y+0.1,halfSize));
+    float t = max(0.025, interval.x);
+    float end = min(limit, interval.y);
+    if (end < t) return false;
+    float spacing = u_size / float(u_resolution - 1);
+    vec3 entry = ro + rd * (t + 0.0001);
+    ivec2 c = clamp(ivec2(floor((entry.xz + halfSize) / spacing)),
+                   ivec2(0), ivec2(u_resolution-2));
+    ivec2 stepCell = ivec2(rd.x >= 0.0 ? 1 : -1, rd.z >= 0.0 ? 1 : -1);
+    vec2 cellOrigin = vec2(c) * spacing - halfSize;
+    vec2 boundary = cellOrigin + vec2(rd.x >= 0.0 ? spacing : 0.0,
+                                    rd.z >= 0.0 ? spacing : 0.0);
+    vec2 nextT = vec2(abs(rd.x) > 0.000001 ? (boundary.x-ro.x)/rd.x : 1e9,
+                      abs(rd.z) > 0.000001 ? (boundary.y-ro.z)/rd.z : 1e9);
+    vec2 deltaT = vec2(abs(rd.x) > 0.000001 ? spacing/abs(rd.x) : 1e9,
+                       abs(rd.z) > 0.000001 ? spacing/abs(rd.z) : 1e9);
+    vec2 velocity = rd.xz / spacing;
+    for (int iteration=0; iteration<192; iteration++) {
+      if (iteration >= budget || t > end || c.x < 0 || c.y < 0 ||
+          c.x >= u_resolution-1 || c.y >= u_resolution-1) break;
+      float stop = min(end, min(nextT.x,nextT.y));
+      float extent = max(0.0,stop-t);
+      float h00 = texelFetch(u_terrain,c,0).r;
+      float h10 = texelFetch(u_terrain,c+ivec2(1,0),0).r;
+      float h01 = texelFetch(u_terrain,c+ivec2(0,1),0).r;
+      float h11 = texelFetch(u_terrain,c+ivec2(1,1),0).r;
+      float maxH = max(max(h00,h10),max(h01,h11));
+      float minRayY = min(ro.y+rd.y*t, ro.y+rd.y*stop);
+      if (minRayY <= maxH + 0.0001) {
+        vec2 origin = (ro.xz + rd.xz*t - (vec2(c)*spacing-halfSize))/spacing;
+        float hx=h10-h00, hz=h01-h00, crossH=h00-h10-h01+h11;
+        float A = -crossH*velocity.x*velocity.y;
+        float B = rd.y-hx*velocity.x-hz*velocity.y-
+                  crossH*(origin.x*velocity.y+origin.y*velocity.x);
+        float C = ro.y+rd.y*t-h00-hx*origin.x-hz*origin.y-crossH*origin.x*origin.y;
+        float root = 1e9;
+        if (abs(A)<0.0000001) {
+          if (abs(B)>0.000001) root=-C/B;
+        } else {
+          float discriminant=B*B-4.0*A*C;
+          if (discriminant>=0.0) {
+            float q = sqrt(discriminant);
+            float r0=(-B-q)/(2.0*A), r1=(-B+q)/(2.0*A);
+            if (r0>r1) { float swap=r0; r0=r1; r1=swap; }
+            if (r0>=-0.0001 && r0<=extent+0.0001) root=r0;
+            else if (r1>=-0.0001 && r1<=extent+0.0001) root=r1;
+          }
+        }
+        if (root>=-0.0001 && root<=extent+0.0001) {
+          hit.t=t+clamp(root,0.0,extent);
+          hit.p=ro+rd*hit.t;
+          vec2 f=clamp(origin+velocity*clamp(root,0.0,extent),0.0,1.0);
+          hit.n=normalize(vec3(-(hx+crossH*f.y)/spacing,1.0,-(hz+crossH*f.x)/spacing));
+          hit.material=(hit.n.y<0.88 || hit.p.y<u_water+1.3) ? 2 : 1;
+          hit.local=hit.p;
+          return true;
+        }
+      }
+      bool advanceX=nextT.x<=nextT.y;
+      bool advanceZ=nextT.y<=nextT.x;
+      t=stop;
+      if (advanceX) { c.x+=stepCell.x; nextT.x+=deltaT.x; }
+      if (advanceZ) { c.y+=stepCell.y; nextT.y+=deltaT.y; }
+      if (stop>=end) break;
+    }
+    return false;
+  }
+
+  bool objectHit(vec3 ro, vec3 rd, int index, float limit, out Hit hit) {
+    vec4 centre = texelFetch(u_objects,ivec2(0,index),0);
+    vec3 offset=centre.xyz-ro;
+    float along=dot(offset,rd);
+    if (along+centre.w<0.025 || along-centre.w>limit ||
+        dot(offset,offset)-along*along>centre.w*centre.w) return false;
+    vec4 shape=texelFetch(u_objects,ivec2(1,index),0);
+    vec4 data=texelFetch(u_objects,ivec2(2,index),0);
+    vec3 p=ro-centre.xyz;
+    vec3 localRo=vec3(data.x*p.x-data.y*p.z,p.y,data.y*p.x+data.x*p.z);
+    vec3 localRd=vec3(data.x*rd.x-data.y*rd.z,rd.y,data.y*rd.x+data.x*rd.z);
+    float t; vec3 normal;
+    if (shape.w>0.5) {
+      vec3 a=localRo/shape.xyz, b=localRd/shape.xyz;
+      float A=dot(b,b), B=dot(a,b), C=dot(a,a)-1.0;
+      float disc=B*B-A*C;
+      if (disc<0.0) return false;
+      float q=sqrt(disc);
+      t=(-B-q)/A;
+      if (t<0.025) t=(-B+q)/A;
+      if (t<0.025 || t>limit) return false;
+      normal=normalize((localRo+localRd*t)/(shape.xyz*shape.xyz));
+    } else {
+      vec2 interval=boxInterval(localRo,localRd,-shape.xyz,shape.xyz);
+      if (interval.x>interval.y || interval.y<0.025) return false;
+      t=interval.x>=0.025 ? interval.x : interval.y;
+      if (t>limit) return false;
+      vec3 localP=localRo+localRd*t;
+      vec3 ratio=abs(localP/shape.xyz);
+      // Explicit branches avoid ANGLE D3D11 draw-time compilation failure for
+      // nested vector ternaries while preserving the same nearest-face normal.
+      normal=vec3(0.0,sign(localP.y),0.0);
+      if (ratio.x>ratio.y && ratio.x>ratio.z) {
+        normal=vec3(sign(localP.x),0.0,0.0);
+      } else if (ratio.z>ratio.y) {
+        normal=vec3(0.0,0.0,sign(localP.z));
+      }
+    }
+    hit.t=t; hit.p=ro+rd*t;
+    hit.n=normalize(vec3(data.x*normal.x+data.y*normal.z,normal.y,
+                        -data.y*normal.x+data.x*normal.z));
+    hit.local=localRo+localRd*t;
+    hit.material=int(data.z+0.5);
+    return true;
+  }
+
+  bool sceneHit(vec3 ro,vec3 rd,float limit,bool waterAllowed,int objectBudget,int terrainBudget,out Hit hit) {
+    Hit ground; bool found=terrainHit(ro,rd,limit,terrainBudget,ground);
+    if (found) { hit=ground; limit=ground.t; }
+    if (waterAllowed && abs(rd.y)>0.000001) {
+      float t=(u_water-ro.y)/rd.y;
+      vec3 p=ro+rd*t;
+      if (t>0.025 && t<limit && abs(p.x)<u_size*0.5 && abs(p.z)<u_size*0.5 &&
+          heightAt(p.xz)<u_water-0.025) {
+        hit.t=t; hit.p=p; hit.material=3; hit.local=p;
+        hit.n=normalize(vec3(0.045*cos(p.x*0.19+u_time*1.2)+0.02*cos(p.z*.37-u_time*.6),
+          1.0,0.035*sin(p.z*.22+u_time*.8)+0.02*cos(p.x*.32-u_time*.7)));
+        limit=t; found=true;
+      }
+    }
+    for (int i=0;i<256;i++) {
+      if (i>=u_objectCount || i>=objectBudget) break;
+      Hit object;
+      if (objectHit(ro,rd,i,limit,object)) { hit=object; limit=object.t; found=true; }
+    }
+    return found;
+  }
+
+  vec3 sky(vec3 rd) {
+    float day=smoothstep(-0.18,0.25,u_sun.y);
+    vec3 zenith=mix(vec3(.018,.026,.071),vec3(.15,.35,.50),day);
+    vec3 horizon=mix(vec3(.08,.08,.15),vec3(.51,.64,.66),day);
+    vec3 colour=mix(horizon,zenith,pow(clamp(rd.y+0.12,0.0,1.0),0.55));
+    float dusk=1.0-smoothstep(0.05,0.42,abs(u_sun.y));
+    colour+=vec3(.20,.074,.028)*dusk*pow(1.0-max(rd.y,0.0),5.0);
+    float cloud=sin(rd.x*13.0+rd.z*6.0+u_time*.005)*sin(rd.z*18.0-rd.y*14.0+u_time*.009);
+    colour=mix(colour,mix(vec3(.13,.16,.20),vec3(.58,.64,.65),day),
+                smoothstep(.28,.68,cloud)*(.36+u_weather.x*.38));
+    colour=mix(colour,mix(vec3(.07,.085,.11),vec3(.35,.43,.45),day),u_weather.x*.48);
+    float sunDisc=pow(max(0.0,dot(rd,u_sun)),900.0);
+    colour+=vec3(1.0,.70,.24)*sunDisc*day;
+    return colour;
+  }
+  vec3 palette(int material,vec3 p) {
+    if (material==1) return mix(vec3(.19,.34,.13),vec3(.35,.40,.18),.5+.5*sin(p.x*.035+p.z*.047));
+    if (material==2) return vec3(.46,.46,.41);
+    if (material==3) return vec3(.065,.24,.28);
+    if (material==4) return vec3(.64,.48,.31);
+    if (material==5) return vec3(.50,.23,.18);
+    if (material==6) return vec3(.40,.28,.16);
+    if (material==7) return vec3(.64,.67,.65);
+    if (material==8) return vec3(.73,.15,.095);
+    if (material==9) return vec3(1.0,.73,.22);
+    if (material==10) return vec3(.54,.51,.42);
+    if (material==11) return vec3(.35,.24,.12);
+    if (material==12) return mix(vec3(.075,.25,.12),vec3(.21,.36,.15),.5+.5*sin(p.y*.8+p.x*.3));
+    if (material==13) return vec3(.36,.39,.40);
+    return vec3(.55);
+  }
+
+  float shadow(Hit hit) {
+    if (u_sun.y<=.025 || dot(hit.n,u_sun)<=0.0 || hit.t>140.0) return 1.0;
+    vec3 ro=hit.p+hit.n*.10;
+    for (int i=0;i<48;i++) {
+      if (i>=u_shadowCount) break;
+      Hit blocker;
+      if (objectHit(ro,u_sun,i,26.0,blocker)) return .46;
+    }
+    // One short terrain query is budgeted only for nearby non-water surfaces.
+    if (hit.t<45.0 && hit.material!=3) {
+      Hit ground;
+      if (terrainHit(ro,u_sun,18.0,12,ground)) return .65;
+    }
+    return 1.0;
+  }
+  vec3 illuminate(Hit hit,bool allowShadow) {
+    vec3 base=palette(hit.material,hit.p);
+    float day=smoothstep(-.15,.25,u_sun.y);
+    float ambient=mix(.20,.49,day)*(1.0-u_weather.x*.23);
+    float diffuse=max(0.0,dot(hit.n,u_sun))*max(0.0,u_sun.y)*.92*(1.0-u_weather.x*.45);
+    if (allowShadow) diffuse*=shadow(hit);
+    vec3 colour=base*(vec3(.69,.78,.94)*ambient+vec3(1.0,.91,.73)*diffuse);
+    vec3 lampToSurface=hit.p-u_headPosition;
+    float lampDistance=length(lampToSurface);
+    float beam=smoothstep(.89,.978,dot(lampToSurface/max(.001,lampDistance),u_headDirection));
+    float lamp=beam*max(0.0,1.0-lampDistance/95.0);
+    lamp*=lamp*max(.08,dot(hit.n,-lampToSurface/max(.001,lampDistance)))*mix(1.9,.32,day);
+    colour+=base*vec3(1.0,.83,.49)*lamp;
+    if (hit.material==9) colour=base*mix(1.12,.62,day);
+    return colour;
+  }
+
+  uint glyphFor(Hit h,float light) {
+    float pattern=hash21(floor(h.p.xz*1.6)+floor(h.p.y)*7.0);
+    bool side=abs(h.n.y)<.5;
+    if (h.material==1) return pattern>.78 ? 34u : pattern>.40 ? 44u : 46u;
+    if (h.material==2) return h.n.y<.6 ? (h.n.x*h.n.z>0.0 ? 47u : 92u) : pattern>.55 ? 37u : 58u;
+    if (h.material==3) return pattern>.67 ? 126u : pattern>.31 ? 61u : 45u;
+    if (h.material==4) return side ? (fract(h.local.y*.60)>.7 ? 45u : 124u) : 58u;
+    if (h.material==5) return h.n.x>0.1 ? 47u : h.n.x<-.1 ? 92u : 61u;
+    if (h.material==6) return side ? 124u : 61u;
+    if (h.material==7) return side ? 124u : 61u;
+    if (h.material==8) return side ? (pattern>.60 ? 72u : 35u) : 61u;
+    if (h.material==9) return light>.65 ? 35u : 43u;
+    if (h.material==10) return side ? 45u : pattern>.5 ? 58u : 46u;
+    if (h.material==11) return side ? 124u : 43u;
+    if (h.material==12) return pattern>.73 ? 64u : pattern>.35 ? 42u : 43u;
+    if (h.material==13) return side ? 72u : 61u;
+    return 63u;
+  }
+  uvec4 colourRecord(vec3 c) { return uvec4(round(clamp(c,0.0,1.0)*255.0),255u); }
+
+  void main() {
+    vec2 logicalCentre=gl_FragCoord.xy*u_cellSize;
+    vec2 screen=logicalCentre/u_viewport*2.0-1.0;
+    vec3 rd=normalize(u_forward+u_right*screen.x*(u_viewport.x/u_viewport.y)*.64+u_up*screen.y*.64);
+    Hit hit;
+    bool found=sceneHit(u_eye,rd,u_far,true,256,192,hit);
+    vec3 skyColour=sky(rd);
+    vec3 foreground, background;
+    uint glyph=46u;
+    int material=0;
+    float distance=u_far;
+    if (!found) {
+      float stars=hash21(floor(vec2(atan(rd.x,rd.z),asin(clamp(rd.y,-1.0,1.0)))*320.0));
+      float cloud=sin(rd.x*13.0+rd.z*6.0+u_time*.005)*sin(rd.z*18.0-rd.y*14.0+u_time*.009);
+      glyph=cloud>.4 ? 126u : 46u;
+      background=skyColour*.70;
+      foreground=skyColour*.98;
+      if (u_sun.y<-.08 && stars>.994 && rd.y>.02) { glyph=42u; foreground=vec3(.77,.81,.85); }
+      if (dot(rd,u_sun)>.996) { glyph=64u; foreground=vec3(1.0,.87,.45); }
+    } else {
+      material=hit.material; distance=hit.t;
+      vec3 colour=illuminate(hit,true);
+      if (material==3) {
+        // Exactly one secondary scene query, no recursive reflections. It can
+        // see analytical moving carriages and the same authoritative shoreline.
+        vec3 reflected=reflect(rd,hit.n);
+        Hit reflectedHit;
+        vec3 reflection=sky(reflected);
+        bool reflectionFound=sceneHit(hit.p+hit.n*.12,reflected,185.0,false,160,80,reflectedHit);
+        if (reflectionFound) {
+          reflection=illuminate(reflectedHit,false);
+          reflection=mix(reflection,sky(reflected),1.0-exp(-reflectedHit.t*(.0015+u_weather.y*.018)));
+        }
+        float fresnel=.30+.64*pow(1.0-max(0.0,dot(-rd,hit.n)),3.0);
+        colour=mix(colour,reflection,fresnel);
+        if (reflectionFound && reflectedHit.material==8) colour+=vec3(.045,.0,.0);
+      }
+      float light=dot(colour,vec3(.2126,.7152,.0722));
+      glyph=glyphFor(hit,light);
+      foreground=colour*1.28+vec3(.022);
+      background=colour*.31;
+      if (material==7) { foreground+=vec3(.11,.12,.12); background*=.45; }
+      if (material==9) background=colour*.24;
+      float fogDensity=.00075+u_weather.y*.017+u_weather.x*.0018;
+      float fog=1.0-exp(-distance*fogDensity);
+      foreground=mix(foreground,skyColour*.90,fog);
+      background=mix(background,skyColour*.67,fog);
+    }
+    // Sparse rain records live in cell state. Near surfaces occlude drops;
+    // depth and deterministic column phase prevent a uniform full-screen veil.
+    if (u_weather.x>.02 && distance>4.0) {
+      vec2 cell=floor(gl_FragCoord.xy);
+      float fall=floor(u_time*16.0*u_motion);
+      float rain=hash21(vec2(cell.x+floor(fall*.25),floor((cell.y+fall)/3.0)));
+      if (rain>1.0-u_weather.x*.075 && mod(cell.y+fall,3.0)<1.0) {
+        glyph=47u;
+        foreground=mix(foreground,vec3(.57,.70,.75),.61);
+      }
+    }
+    out_record=uvec4(glyph,uint(material),uint(clamp(distance/u_far*255.0,0.0,255.0)),255u);
+    out_foreground=colourRecord(foreground);
+    out_background=colourRecord(background);
+  }`;
+
+  const DISPLAY = `#version 300 es
+  precision highp float;
+  precision highp int;
+  precision highp usampler2D;
+  out vec4 out_colour;
+  uniform usampler2D u_records;
+  uniform usampler2D u_foreground;
+  uniform usampler2D u_background;
+  uniform usampler2D u_masks;
+  uniform vec2 u_viewport;
+  uniform vec2 u_cellSize;
+  uniform vec2 u_physical;
+  uniform ivec2 u_grid;
+  uniform bool u_debug;
+  void main() {
+    vec2 logical=gl_FragCoord.xy/u_physical*u_viewport;
+    ivec2 cell=clamp(ivec2(floor(logical/u_cellSize)),ivec2(0),u_grid-ivec2(1));
+    vec2 inside=fract(logical/u_cellSize);
+    uint glyph=texelFetch(u_records,cell,0).r;
+    vec3 foreground=vec3(texelFetch(u_foreground,cell,0).rgb)/255.0;
+    vec3 background=vec3(texelFetch(u_background,cell,0).rgb)/255.0;
+    vec2 ink=(inside-vec2(.15,.18))/vec2(.70,.64);
+    bool on=false;
+    if (ink.x>=0.0 && ink.x<1.0 && ink.y>=0.0 && ink.y<1.0) {
+      ivec2 bit=ivec2(floor(ink*vec2(5.0,7.0)));
+      uint mask=texelFetch(u_masks,ivec2(int(glyph),6-bit.y),0).r;
+      on=(mask & (1u << uint(4-bit.x)))!=0u;
+    }
+    vec3 colour=on ? foreground : background;
+    if (u_debug && inside.x<.045 && inside.y<.065)
+      colour=vec3(float(glyph&7u)/7.0,float((glyph>>3)&7u)/7.0,float(glyph>>6));
+    out_colour=vec4(colour,1.0);
+  }`;
+
+  // Five bits per row, top row first. Numeric tables are data, not image assets.
+  const GLYPHS = Object.freeze({
+    ' ': [0,0,0,0,0,0,0], '.': [0,0,0,0,0,12,12], ',': [0,0,0,0,12,12,8],
+    ':': [0,12,12,0,12,12,0], ';': [0,12,12,0,12,12,8],
+    '-': [0,0,0,31,0,0,0], '=': [0,0,31,0,31,0,0], '+': [0,4,4,31,4,4,0],
+    '*': [0,21,14,31,14,21,0], '#': [10,31,10,10,31,10,0],
+    '%': [25,26,2,4,8,11,19], '@': [14,17,23,21,23,16,14],
+    '/': [1,2,2,4,8,8,16], '\\': [16,8,8,4,2,2,1], '|': [4,4,4,4,4,4,4],
+    '_': [0,0,0,0,0,0,31], '~': [0,0,9,22,0,0,0], '"': [10,10,10,0,0,0,0],
+    '!': [4,4,4,4,4,0,4], '?': [14,17,1,2,4,0,4], '<': [2,4,8,16,8,4,2],
+    '>': [8,4,2,1,2,4,8], '[': [14,8,8,8,8,8,14], ']': [14,2,2,2,2,2,14],
+    '(': [2,4,8,8,8,4,2], ')': [8,4,2,2,2,4,8], '^': [4,10,17,0,0,0,0],
+    '0': [14,17,19,21,25,17,14], '1': [4,12,4,4,4,4,14],
+    '2': [14,17,1,2,4,8,31], '3': [30,1,1,14,1,1,30], '4': [2,6,10,18,31,2,2],
+    '5': [31,16,16,30,1,1,30], '6': [14,16,16,30,17,17,14],
+    '7': [31,1,2,4,8,8,8], '8': [14,17,17,14,17,17,14], '9': [14,17,17,15,1,1,14],
+    'A': [14,17,17,31,17,17,17], 'B': [30,17,17,30,17,17,30],
+    'C': [14,17,16,16,16,17,14], 'D': [30,17,17,17,17,17,30],
+    'E': [31,16,16,30,16,16,31], 'F': [31,16,16,30,16,16,16],
+    'G': [14,17,16,23,17,17,15], 'H': [17,17,17,31,17,17,17],
+    'I': [14,4,4,4,4,4,14], 'J': [7,2,2,2,18,18,12], 'K': [17,18,20,24,20,18,17],
+    'L': [16,16,16,16,16,16,31], 'M': [17,27,21,21,17,17,17],
+    'N': [17,25,21,19,17,17,17], 'O': [14,17,17,17,17,17,14],
+    'P': [30,17,17,30,16,16,16], 'Q': [14,17,17,17,21,18,13],
+    'R': [30,17,17,30,20,18,17], 'S': [15,16,16,14,1,1,30],
+    'T': [31,4,4,4,4,4,4], 'U': [17,17,17,17,17,17,14],
+    'V': [17,17,17,17,17,10,4], 'W': [17,17,17,21,21,21,10],
+    'X': [17,17,10,4,10,17,17], 'Y': [17,17,10,4,4,4,4],
+    'Z': [31,1,2,4,8,16,31]
+  });
+
+  function shader(gl, type, source) {
+    const value = gl.createShader(type);
+    gl.shaderSource(value, source);
+    gl.compileShader(value);
+    if (!gl.getShaderParameter(value, gl.COMPILE_STATUS)) {
+      const reason = gl.getShaderInfoLog(value) || 'Unknown compilation error';
+      gl.deleteShader(value);
+      throw new Error('Next Stop glyph shader failed: ' + reason);
+    }
+    return value;
+  }
+  function program(gl, source) {
+    const vertex = shader(gl, gl.VERTEX_SHADER, VERTEX);
+    let fragment = null, value = null;
+    try {
+      fragment = shader(gl, gl.FRAGMENT_SHADER, source);
+      value = gl.createProgram();
+      gl.attachShader(value, vertex); gl.attachShader(value, fragment); gl.linkProgram(value);
+      if (!gl.getProgramParameter(value, gl.LINK_STATUS)) {
+        const reason = gl.getProgramInfoLog(value) || 'Unknown link error';
+        throw new Error('Next Stop glyph program failed: ' + reason);
+      }
+      return value;
+    } catch (error) {
+      if (value) gl.deleteProgram(value);
+      throw error;
+    } finally {
+      gl.deleteShader(vertex);
+      if (fragment) gl.deleteShader(fragment);
+    }
+  }
+  function uniforms(gl, value, names) {
+    const result = Object.create(null);
+    for (const name of names) result[name] = gl.getUniformLocation(value, 'u_' + name);
+    return result;
+  }
+  function texture(gl) {
+    const value = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, value);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return value;
+  }
+  function unit(gl, index, value) {
+    gl.activeTexture(gl.TEXTURE0 + index); gl.bindTexture(gl.TEXTURE_2D, value);
+  }
+  function normalise(v) {
+    const length = Math.hypot(v[0], v[1], v[2]) || 1;
+    return [v[0]/length,v[1]/length,v[2]/length];
+  }
+
+  class NSGlyphRenderer {
+    constructor(canvas, world) {
+      this.canvas = canvas;
+      this.gl = canvas.getContext('webgl2', {
+        alpha: false, antialias: false, depth: false, stencil: false,
+        premultipliedAlpha: false, powerPreference: 'high-performance'
+      });
+      if (!this.gl) throw new Error('Next Stop requires WebGL2. Enable hardware acceleration or use a browser with WebGL2 support.');
+      this.width = 1; this.height = 1; this.quality = 'standard';
+      this.columns = 1; this.rows = 1; this.frames = 0; this.lost = false;
+      this.destroyed = false; this.objectCount = 0; this.shadowCount = 0;
+      this.frameTimes = []; this.objectData = new Float32Array(MAX_OBJECTS * 12);
+      this._lost = event => {
+        event.preventDefault(); this.lost = true;
+        if (typeof this.onContextLost === 'function') this.onContextLost();
+      };
+      this._restored = () => {
+        if (this.destroyed) return;
+        try {
+          this.lost = false;
+          this._initialise(); this.setWorld(this.world);
+          this.resize(this.width,this.height,this.quality);
+          if (typeof this.onContextRestored === 'function') this.onContextRestored();
+        } catch (error) {
+          this.destroy();
+          this.lost = true;
+          if (typeof this.onError === 'function') this.onError(error);
+        }
+      };
+      canvas.addEventListener('webglcontextlost', this._lost);
+      canvas.addEventListener('webglcontextrestored', this._restored);
+      try {
+        this._initialise(); this.setWorld(world);
+        this.resize(canvas.clientWidth || 1280,canvas.clientHeight || 720,'standard');
+      } catch (error) {
+        this.destroy();
+        throw error;
+      }
+    }
+
+    _initialise() {
+      const gl = this.gl;
+      // Context restoration has already invalidated old handles. Track each
+      // fresh allocation immediately so a partial failure can release it.
+      this.sceneProgram = null; this.displayProgram = null; this.vao = null;
+      this.terrainTexture = null; this.objectTexture = null; this.maskTexture = null;
+      this.cellTextures = []; this.framebuffer = null; this._selection = [];
+      this.sceneProgram = program(gl,SCENE);
+      this.displayProgram = program(gl,DISPLAY);
+      this.sceneUniforms = uniforms(gl,this.sceneProgram,[
+        'terrain','objects','resolution','objectCount','shadowCount','size','water',
+        'heightRange','viewport','cellSize','eye','forward','right','up','sun',
+        'headPosition','headDirection','time','weather','motion','far'
+      ]);
+      this.displayUniforms = uniforms(gl,this.displayProgram,[
+        'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
+      ]);
+      this.vao = gl.createVertexArray();
+      this.terrainTexture = texture(gl); this.objectTexture = texture(gl);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,3,MAX_OBJECTS,0,gl.RGBA,gl.FLOAT,null);
+      this.maskTexture = texture(gl);
+      const masks = new Uint8Array(128 * 7);
+      for (const [character,rows] of Object.entries(GLYPHS)) {
+        for (let y=0;y<7;y++) masks[y*128+character.charCodeAt(0)] = rows[y];
+      }
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.R8UI,128,7,0,gl.RED_INTEGER,gl.UNSIGNED_BYTE,masks);
+      this.cellTextures = [texture(gl),texture(gl),texture(gl)];
+      this.framebuffer = gl.createFramebuffer();
+      gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
+      gl.useProgram(this.sceneProgram);
+      gl.uniform1i(this.sceneUniforms.terrain,0); gl.uniform1i(this.sceneUniforms.objects,1);
+      gl.useProgram(this.displayProgram);
+      gl.uniform1i(this.displayUniforms.records,0); gl.uniform1i(this.displayUniforms.foreground,1);
+      gl.uniform1i(this.displayUniforms.background,2); gl.uniform1i(this.displayUniforms.masks,3);
+      this._selection = []; this._selectionPosition = null; this._selectionCapacity=-1; this._validated=false;
+    }
+
+    setWorld(world) {
+      if (!world || !(world.heights instanceof Float32Array) ||
+          world.heights.length !== world.resolution * world.resolution)
+        throw new Error('Renderer needs a square Float32Array authoritative heightfield.');
+      this.world = world;
+      let min = Infinity, max = -Infinity;
+      for (const height of world.heights) { min=Math.min(min,height); max=Math.max(max,height); }
+      this.heightRange = [min,max];
+      this.staticObjects = (world.objects || []).map(object => ({
+        object, radius: Math.hypot(object.hx,object.hy,object.hz)
+      }));
+      this._selectionPosition = null; this._selectionCapacity=-1;
+      if (this.lost) return;
+      const gl = this.gl;
+      gl.bindTexture(gl.TEXTURE_2D,this.terrainTexture);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,world.resolution,world.resolution,0,gl.RED,gl.FLOAT,world.heights);
+    }
+
+    resize(width,height,quality=this.quality) {
+      this.width = Math.max(1,Math.round(Number(width) || 1));
+      this.height = Math.max(1,Math.round(Number(height) || 1));
+      this.quality = CELL_PRESETS[quality] ? quality : 'standard';
+      this.cellSize = CELL_PRESETS[this.quality];
+      this.columns = Math.max(1,Math.ceil(this.width/this.cellSize[0]));
+      this.rows = Math.max(1,Math.ceil(this.height/this.cellSize[1]));
+      this.dpr = Math.min(2,Math.max(1,global.devicePixelRatio || 1));
+      this.canvas.width = Math.max(1,Math.round(this.width*this.dpr));
+      this.canvas.height = Math.max(1,Math.round(this.height*this.dpr));
+      if (this.lost || this.destroyed) return;
+      const gl = this.gl;
+      if (this.columns>gl.getParameter(gl.MAX_TEXTURE_SIZE) || this.rows>gl.getParameter(gl.MAX_TEXTURE_SIZE))
+        throw new Error('Character grid exceeds this browser GPU texture limit.');
+      gl.bindFramebuffer(gl.FRAMEBUFFER,this.framebuffer);
+      for (let i=0;i<3;i++) {
+        gl.bindTexture(gl.TEXTURE_2D,this.cellTextures[i]);
+        gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8UI,this.columns,this.rows,0,gl.RGBA_INTEGER,gl.UNSIGNED_BYTE,null);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0+i,gl.TEXTURE_2D,this.cellTextures[i],0);
+      }
+      gl.drawBuffers([gl.COLOR_ATTACHMENT0,gl.COLOR_ATTACHMENT1,gl.COLOR_ATTACHMENT2]);
+      if (gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)
+        throw new Error('Character-record framebuffer is incomplete. This WebGL2 implementation cannot render RGBA8UI cells.');
+      gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+    }
+
+    _uploadObjects(sim,eye) {
+      const dynamic=typeof sim.dynamicObjects==='function' ? sim.dynamicObjects() : [];
+      const staticCapacity=Math.max(0,MAX_OBJECTS-dynamic.length);
+      const previous=this._selectionPosition;
+      if (!previous || this._selectionCapacity!==staticCapacity ||
+          Math.hypot(eye[0]-previous[0],eye[2]-previous[1])>5) {
+        const candidates=[];
+        for (const entry of this.staticObjects) {
+          const o=entry.object;
+          const distance=Math.hypot(o.x-eye[0],o.z-eye[2]);
+          if (distance-entry.radius>420) continue;
+          // Preserve station/building/tree silhouettes before filling the local
+          // numerical track corridor. All candidates remain authoritative data.
+          candidates.push({ entry,distance,score:distance+(o.material===7 ? 28 : 0) });
+        }
+        candidates.sort((a,b)=>a.score-b.score);
+        this._selection=candidates.slice(0,staticCapacity);
+        this._selection.sort((a,b)=>{
+          const aRail=a.entry.object.material===7 || a.entry.object.material===13;
+          const bRail=b.entry.object.material===7 || b.entry.object.material===13;
+          return Number(aRail)-Number(bRail) || a.distance-b.distance;
+        });
+        this._selectionPosition=[eye[0],eye[2]];
+        this._selectionCapacity=staticCapacity;
+      }
+      let count=0;
+      const write=object => {
+        if (count>=MAX_OBJECTS) return;
+        const i=count++*12;
+        this.objectData[i]=object.x; this.objectData[i+1]=object.y; this.objectData[i+2]=object.z;
+        this.objectData[i+3]=Math.hypot(object.hx,object.hy,object.hz);
+        this.objectData[i+4]=Math.max(.015,object.hx); this.objectData[i+5]=Math.max(.015,object.hy);
+        this.objectData[i+6]=Math.max(.015,object.hz); this.objectData[i+7]=object.type || 0;
+        this.objectData[i+8]=Math.cos(object.yaw || 0); this.objectData[i+9]=Math.sin(object.yaw || 0);
+        this.objectData[i+10]=object.material; this.objectData[i+11]=0;
+      };
+      for (const object of dynamic) write(object);
+      for (const candidate of this._selection) write(candidate.entry.object);
+      this.objectCount=count;
+      this.shadowCount=Math.min(48,count);
+      const gl=this.gl;
+      gl.bindTexture(gl.TEXTURE_2D,this.objectTexture);
+      if (count) gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,3,count,gl.RGBA,gl.FLOAT,this.objectData.subarray(0,count*12));
+    }
+
+    render(sim,camera,options={}) {
+      if (this.lost || this.destroyed || !this.world) return;
+      if (options.quality && options.quality!==this.quality) this.resize(this.width,this.height,options.quality);
+      const begin=performance.now();
+      const eye=camera.position || [0,5,0];
+      let forward;
+      if (camera.target) forward=normalise(camera.target.map((value,i)=>value-eye[i]));
+      else {
+        const yaw=camera.yaw || 0,pitch=camera.pitch || 0;
+        forward=[Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch)];
+      }
+      const right=normalise([forward[2],0,-forward[0]]);
+      const up=normalise([
+        forward[1]*right[2]-forward[2]*right[1],
+        forward[2]*right[0]-forward[0]*right[2],
+        forward[0]*right[1]-forward[1]*right[0]
+      ]);
+      this._uploadObjects(sim,eye);
+      const time=Number(sim.time) || 0;
+      const angle=1.05+time*Math.PI*2/720;
+      const sun=normalise([Math.cos(angle)*.67,Math.sin(angle),.36]);
+      const train=sim.train || {s:0,direction:1};
+      const pose=this.world.routeAt(train.s || 0);
+      const direction=train.direction===-1 ? -1 : 1;
+      const headDirection=[Math.sin(pose.yaw)*direction,-.035,Math.cos(pose.yaw)*direction];
+      const headPosition=[pose.x+headDirection[0]*4.7,pose.y+2.1,pose.z+headDirection[2]*4.7];
+      const weather=sim.weather || {};
+      const rain=typeof weather==='string' ? Number(weather==='rain') : Math.max(0,Math.min(1,weather.rain || 0));
+      const fog=typeof weather==='string' ? Number(weather==='fog') : Math.max(0,Math.min(1,weather.fog || 0));
+      const gl=this.gl,u=this.sceneUniforms;
+      gl.bindVertexArray(this.vao);
+      gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
+      gl.bindFramebuffer(gl.FRAMEBUFFER,this.framebuffer);
+      gl.viewport(0,0,this.columns,this.rows); gl.useProgram(this.sceneProgram);
+      unit(gl,0,this.terrainTexture); unit(gl,1,this.objectTexture);
+      gl.uniform1i(u.resolution,this.world.resolution); gl.uniform1i(u.objectCount,this.objectCount);
+      gl.uniform1i(u.shadowCount,this.shadowCount); gl.uniform1f(u.size,this.world.size);
+      gl.uniform1f(u.water,this.world.waterLevel); gl.uniform2fv(u.heightRange,this.heightRange);
+      gl.uniform2f(u.viewport,this.width,this.height); gl.uniform2fv(u.cellSize,this.cellSize);
+      gl.uniform3fv(u.eye,eye); gl.uniform3fv(u.forward,forward); gl.uniform3fv(u.right,right); gl.uniform3fv(u.up,up);
+      gl.uniform3fv(u.sun,sun); gl.uniform3fv(u.headPosition,headPosition); gl.uniform3fv(u.headDirection,headDirection);
+      gl.uniform1f(u.time,time); gl.uniform2f(u.weather,rain,fog);
+      gl.uniform1f(u.motion,options.reducedMotion ? .15 : 1); gl.uniform1f(u.far,600);
+      gl.drawArrays(gl.TRIANGLES,0,3);
+      gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+      gl.viewport(0,0,this.canvas.width,this.canvas.height); gl.useProgram(this.displayProgram);
+      for (let i=0;i<3;i++) unit(gl,i,this.cellTextures[i]);
+      unit(gl,3,this.maskTexture);
+      const d=this.displayUniforms;
+      gl.uniform2f(d.viewport,this.width,this.height); gl.uniform2fv(d.cellSize,this.cellSize);
+      gl.uniform2f(d.physical,this.canvas.width,this.canvas.height); gl.uniform2i(d.grid,this.columns,this.rows);
+      gl.uniform1i(d.debug,Boolean(options.debug)); gl.drawArrays(gl.TRIANGLES,0,3);
+      if (!this._validated) {
+        const error=gl.getError();
+        if (error!==gl.NO_ERROR) throw new Error('WebGL could not draw the glyph scene (GPU error '+error+').');
+        this._validated=true;
+      }
+      this.frames++;
+      this.frameTimes.push(performance.now()-begin);
+      if (this.frameTimes.length>180) this.frameTimes.shift();
+    }
+
+    diagnostics() {
+      const sorted=this.frameTimes.slice().sort((a,b)=>a-b);
+      return {
+        pipeline:'numerical scene -> RGBA8UI glyph/foreground/background -> 5x7 mask display',
+        quality:this.quality, columns:this.columns,rows:this.rows,cells:this.columns*this.rows,
+        cellSize:this.cellSize.slice(),viewport:[this.width,this.height],dpr:this.dpr,
+        objects:this.objectCount,worldObjects:this.staticObjects.length,maxObjects:MAX_OBJECTS,
+        terrainBudget:192,reflectionBudget:{queries:1,distance:185,objects:160,terrainCells:80},
+        shadowObjects:this.shadowCount,frames:this.frames,lost:this.lost,
+        cpuSubmitMedianMs:sorted.length ? sorted[Math.floor(sorted.length*.5)] : 0,
+        cpuSubmitP95Ms:sorted.length ? sorted[Math.min(sorted.length-1,Math.floor(sorted.length*.95))] : 0
+      };
+    }
+
+    // Explicit diagnostics only; the normal frame path never reads GPU pixels.
+    inspectCells() {
+      if (this.lost || this.destroyed) throw new Error('Character records unavailable while renderer context is lost or destroyed.');
+      const gl=this.gl;
+      const data=new Uint8Array(this.columns*this.rows*4);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER,this.framebuffer);
+      gl.readBuffer(gl.COLOR_ATTACHMENT0);
+      gl.readPixels(0,0,this.columns,this.rows,gl.RGBA_INTEGER,gl.UNSIGNED_BYTE,data);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER,null);
+      const ids=[],materials=[],samples=[];
+      for (let i=0;i<data.length;i+=4) {
+        ids.push(data[i]); materials.push(data[i+1]);
+        if (samples.length<64 && (i===0 || data[i]!==data[i-4]))
+          samples.push({index:i/4,glyph:data[i],character:String.fromCharCode(data[i]),material:data[i+1],depth:data[i+2]});
+      }
+      return {columns:this.columns,rows:this.rows,ids,materials,distinctGlyphs:[...new Set(ids)],samples};
+    }
+
+    destroy() {
+      if (this.destroyed) return;
+      this.destroyed=true;
+      this.canvas.removeEventListener('webglcontextlost',this._lost);
+      this.canvas.removeEventListener('webglcontextrestored',this._restored);
+      if (!this.lost) {
+        const gl=this.gl;
+        if (this.sceneProgram) gl.deleteProgram(this.sceneProgram);
+        if (this.displayProgram) gl.deleteProgram(this.displayProgram);
+        if (this.vao) gl.deleteVertexArray(this.vao);
+        if (this.framebuffer) gl.deleteFramebuffer(this.framebuffer);
+        for (const value of [this.terrainTexture,this.objectTexture,this.maskTexture,...(this.cellTextures || [])])
+          if (value) gl.deleteTexture(value);
+      }
+      this.frameTimes.length=0;
+      if (this._selection) this._selection.length=0;
+    }
+  }
+
+  global.NSGlyphRenderer=NSGlyphRenderer;
+})(typeof window!=='undefined' ? window : globalThis);
+
+
+// Input, host lifecycle and HTML interface. Simulation remains independent of DOM.
+class NSGame {
+  constructor({canvas,host={}}={}) {
+    if (!canvas) throw new Error('A canvas is required.');
+    this.canvas=canvas; this.host=host; this.listeners=[]; this.input={}; this.frames=[];
+    this.destroyed=false; this.started=false; this.running=false; this.debug=false;
+    this.world=new NSWorld('NEXT-STOP'); this.sim=new NSSimulation(this.world);this.exploration=new NSExploration(this.world);
+    this.renderer=new NSGlyphRenderer(canvas,this.world);
+    this.accumulator=0; this.previous=0; this.lastUI=0; this.toastUntil=0;
+    this.width=window.innerWidth; this.height=window.innerHeight;
+    this.el={};
+    for(const id of ['menu','start-view','pause-view','help-view','settings-view','journal-view','journal-count','journal-list','field-hint','journey-ticket','journey-label','objective','hint','speed','throttle','brake','status','toast','diagnostics','menu-status','quality','weather','seed','reduced-motion','high-contrast','debug','pause-button']) this.el[id]=document.getElementById(id);
+    this.bindControls(); this.resize(this.width,this.height); this.syncSettings();this.syncJournal();
+    document.getElementById('start-button').focus();
+    this.renderer.onContextLost=()=>{this.wasRunning=this.running;this.pause();this.notify('Graphics interrupted. Waiting for restoration.');};
+    this.renderer.onContextRestored=()=>{this.notify('Graphics restored. Your journey is safe.');if(this.wasRunning)this.resume();};
+    this.renderer.onError=error=>{this.pause();this.showFatal(error);this.host.onError?.(error);};
+    this.tick=this.tick.bind(this); this.raf=requestAnimationFrame(this.tick);
+  }
+  listen(target,type,handler,options) { target.addEventListener(type,handler,options);this.listeners.push(()=>target.removeEventListener(type,handler,options)); }
+  click(id,handler) { const node=document.getElementById(id);if(node)this.listen(node,'click',handler); }
+  bindControls() {
+    this.click('start-button',()=>this.start());
+    this.click('pause-button',()=>this.running?this.openMenu('pause'):this.closeMenu());
+    this.click('help-button',()=>this.openMenu('help'));this.click('start-help',()=>this.openMenu('help'));
+    this.click('journal-button',()=>this.openMenu('journal'));
+    this.listen(this.el['journal-list'],'click',event=>{const button=event.target.closest('button[data-landmark]');if(!button)return;this.exploration.select(button.dataset.landmark);this.syncJournal();const target=this.exploration.target(this.sim.player).record;this.notify(`Journal destination: ${target.name} at ${target.station}.`);this.el['journal-view'].querySelector('.close-menu').focus();});
+    this.click('settings-button',()=>this.openMenu('settings'));this.click('pause-settings',()=>this.openMenu('settings'));
+    for(const button of document.querySelectorAll('.resume-button,.close-menu'))this.listen(button,'click',()=>this.closeMenu());
+    this.listen(this.el.quality,'change',()=>{this.sim.settings.quality=this.el.quality.value;this.resize(this.width,this.height);});
+    this.listen(this.el.weather,'change',()=>{this.sim.settings.weatherMode=this.el.weather.value;if(this.el.weather.value!=='auto')this.sim.weatherTarget=this.el.weather.value;});
+    this.listen(this.el['reduced-motion'],'change',()=>{this.sim.settings.reducedMotion=this.el['reduced-motion'].checked;this.syncSettings();});
+    this.listen(this.el['high-contrast'],'change',()=>{this.sim.settings.highContrast=this.el['high-contrast'].checked;this.syncSettings();});
+    this.listen(this.el.debug,'change',()=>{this.debug=this.el.debug.checked;this.el.diagnostics.hidden=!this.debug;});
+    this.click('regenerate',()=>{try{this.regenerate(this.el.seed.value);this.notify('New valley ready. Start beside your train.');}catch(error){this.report(error);}});
+    this.click('recover',()=>{this.notify(this.sim.recover()||'Returned to a safe station.');});
+    this.click('export',()=>this.exportSave());this.click('import',async()=>{if(!this.host.readSave){document.getElementById('save-file').click();return;}try{this.restore(await this.host.readSave());this.notify('Host save restored.');}catch(error){this.report(error);}});
+    this.listen(document.getElementById('save-file'),'change',async event=>{const file=event.target.files[0];if(!file)return;try{if(file.size>1048576)throw new Error('Save is too large (maximum 1 MB).');this.restore(JSON.parse(await file.text()));this.notify('Save imported. Journey restored.');}catch(error){this.report(error);}finally{event.target.value='';}});
+    const held={KeyW:'forward',KeyS:'backward',KeyA:'left',KeyD:'right',Space:'brake',ArrowLeft:'lookLeft',ArrowRight:'lookRight',ArrowUp:'lookUp',ArrowDown:'lookDown'};
+    this.listen(window,'keydown',event=>{
+      if(event.code==='Tab'&&!this.el.menu.hidden){const items=[...this.el.menu.querySelectorAll('button,input,select')].filter(n=>!n.closest('[hidden]')&&!n.hidden&&!n.disabled);const first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}return;}
+      const editing=['INPUT','SELECT','TEXTAREA'].includes(event.target.tagName);
+      if(event.code==='Escape'){event.preventDefault();if(!event.repeat){if(this.el.menu.hidden)this.openMenu('pause');else this.closeMenu();}return;}
+      if(editing)return;
+      if(event.code==='KeyJ'&&!event.repeat){event.preventDefault();this.openMenu('journal');return;}
+      if(event.code==='KeyH'&&!event.repeat){event.preventDefault();this.openMenu('help');return;}
+      if(event.code==='F3'&&!event.repeat){event.preventDefault();this.debug=!this.debug;this.el.debug.checked=this.debug;this.el.diagnostics.hidden=!this.debug;return;}
+      if(!this.running)return;
+      if(held[event.code]){event.preventDefault();this.input[held[event.code]]=true;}
+      if(!event.repeat){const action={KeyE:'interact',KeyC:'camera',KeyF:'recenter',KeyR:'reverse'}[event.code];if(action){event.preventDefault();this.notify(this.sim.action(action));}}
+    });
+    this.listen(window,'keyup',event=>{if(held[event.code])this.input[held[event.code]]=false;});
+    this.listen(window,'blur',()=>{this.input={};if(this.running)this.openMenu('pause');});
+    this.listen(document,'visibilitychange',()=>{if(document.hidden){this.input={};this.pause();}});
+    this.listen(window,'resize',()=>this.resize(window.innerWidth,window.innerHeight));
+    this.listen(this.canvas,'click',()=>{if(!this.running)return;this.canvas.focus({preventScroll:true});if(!document.pointerLockElement&&this.canvas.requestPointerLock){try{const result=this.canvas.requestPointerLock();if(result?.catch)result.catch(()=>this.notify('Mouse capture unavailable. Drag or use arrow keys to look.'));}catch{this.notify('Drag or use arrow keys to look.');}}});
+    this.listen(document,'pointerlockerror',()=>this.notify('Drag or use arrow keys to look.'));
+    this.listen(this.canvas,'pointerdown',event=>{if(event.button===0&&this.running){this.dragging=true;this.lastPointer=[event.clientX,event.clientY];}});
+    this.listen(window,'pointerup',()=>{this.dragging=false;this.lastPointer=null;});
+    this.listen(window,'pointermove',event=>{if(!this.running)return;let dx=0,dy=0;if(document.pointerLockElement===this.canvas){dx=event.movementX;dy=event.movementY;}else if(this.dragging&&this.lastPointer){dx=event.clientX-this.lastPointer[0];dy=event.clientY-this.lastPointer[1];this.lastPointer=[event.clientX,event.clientY];}this.input.lookX=(this.input.lookX||0)+dx;this.input.lookY=(this.input.lookY||0)+dy;});
+  }
+  start(){if(this.destroyed)return;this.started=true;this.resume();this.notify('Walk to the locomotive and press E to board.');}
+  pause(){this.running=false;this.input={};this.dragging=false;this.lastPointer=null;this.accumulator=0;if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
+  resume(){if(this.destroyed)return;this.started=true;this.running=true;this.accumulator=0;this.previous=performance.now();this.el.menu.hidden=true;this.el['pause-button'].textContent='Pause';this.canvas.focus({preventScroll:true});}
+  openMenu(view){this.pause();this.el.menu.hidden=false;for(const name of ['start','pause','help','settings','journal'])this.el[name+'-view'].hidden=name!==view;const heading=this.el[view+'-view'].querySelector('h1,h2');heading.id=view+'-heading';this.el.menu.querySelector('.card').setAttribute('aria-labelledby',heading.id);this.syncSettings();this.syncJournal();const focus=this.el[view+'-view'].querySelector('button,input,select');focus?.focus();}
+  closeMenu(){if(this.started)this.resume();else this.openMenu('start');}
+  resize(width,height){this.width=Math.max(1,width);this.height=Math.max(1,height);this.renderer.resize(this.width,this.height,this.sim.settings.quality||'standard');}
+  setInput(state){this.input={...this.input,...state};}
+  tick(now){
+    if(this.destroyed)return;const elapsed=this.previous?Math.max(0,(now-this.previous)/1000):0;this.previous=now;
+    if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){this.sim.step(1/60,this.input);this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
+    this.sim.renderAlpha=this.running?this.accumulator*60:1;
+    try{if(!this.renderer.lost){this.renderer.render(this.sim,this.sim.camera(Math.min(elapsed,.05)),{quality:this.sim.settings.quality,debug:this.debug,reducedMotion:this.sim.settings.reducedMotion});}}catch(error){this.pause();this.showFatal(error);return;}
+    if(this.running&&elapsed>0&&elapsed<.25){this.frames.push(elapsed*1000);if(this.frames.length>600)this.frames.shift();}
+    if(now-this.lastUI>150){this.updateUI(now);this.lastUI=now;}this.raf=requestAnimationFrame(this.tick);
+  }
+  updateUI(now){
+    const train=this.sim.train;this.el.objective.textContent=this.sim.objective();this.el.hint.textContent=this.sim.hint();
+    this.el['journey-label'].textContent=NSJourney.label(this.sim);
+    const target=this.exploration.target(this.sim.player);
+    const explorationStation=this.sim.delivery.finished&&target?this.world.stations.findIndex(s=>s.name===target.record.station):null;
+    this.approach=NSJourney.approach(this.sim,explorationStation);
+    this.el['journey-ticket'].dataset.approach=this.approach?.phase||'';
+    if(this.approach)this.el.hint.textContent=this.approach.hint;
+    const discovery=this.running?this.exploration.discover(this.sim.player):null;
+    if(discovery)this.notify(`Field note: ${discovery.name} · ${this.exploration.count}/${this.exploration.total} places discovered. J opens your journal.`);
+    this.syncJournal();
+    const next=this.exploration.target(this.sim.player);
+    this.el['field-hint'].hidden=this.sim.player.mode!=='foot';
+    this.el['field-hint'].textContent=next&&next.distance<80?`${next.record.name} · ${Math.ceil(next.distance)} m ${NSExploration.bearing(this.sim.player,next.record.anchor)} · J: journal`:`Field journal ${this.exploration.count}/${this.exploration.total} · J: read notes`;
+    if(this.sim.delivery.finished&&next)this.el.objective.textContent=`Deliveries complete. Explore ${next.record.name} at ${next.record.station} · ${this.exploration.count}/${this.exploration.total} places found.`;
+    this.el.speed.textContent=(Math.abs(train.speed)*3.6).toFixed(1);this.el.throttle.textContent=Math.round(train.throttle*100);this.el.brake.textContent=Math.round((this.input.brake?1:train.brake||0)*100);
+    const weather=this.sim.weather;const w=(weather.rain||0)>.45?'RAIN':(weather.fog||0)>.45?'FOG':'CLEAR';const clock=(8+this.sim.time/30)%24;this.el.status.textContent=`${String(Math.floor(clock)).padStart(2,'0')}:${String(Math.floor(clock%1*60)).padStart(2,'0')} · ${w} · ${this.world.seed}`;
+    if(now>this.toastUntil)this.el.toast.classList.remove('visible');
+    if(this.debug){const d=this.renderer.diagnostics(),sorted=this.frames.slice().sort((a,b)=>a-b),mid=sorted[Math.floor(sorted.length/2)]||0,p95=sorted[Math.floor(sorted.length*.95)]||0;this.el.diagnostics.textContent=`DIRECT GLYPH CELLS\n${JSON.stringify(d,null,2)}\nFrame median ${mid.toFixed(1)} ms / p95 ${p95.toFixed(1)} ms\nSeed checksum ${this.world.checksum()}\nF3 toggles diagnostics`;}
+  }
+  syncSettings(){this.el.quality.value=this.sim.settings.quality||'standard';this.el.weather.value=this.sim.settings.weatherMode||'auto';this.el.seed.value=this.world.seed;this.el['reduced-motion'].checked=!!this.sim.settings.reducedMotion;this.el['high-contrast'].checked=!!this.sim.settings.highContrast;document.body.classList.toggle('reduced-motion',!!this.sim.settings.reducedMotion);document.body.classList.toggle('high-contrast',!!this.sim.settings.highContrast);}
+  syncJournal(){
+    const signature=this.world.seed+'|'+this.exploration.serialize().visited.join(',')+'|'+this.exploration.selected;
+    if(signature===this.journalSignature)return;this.journalSignature=signature;
+    this.el['journal-count'].textContent=`${this.exploration.count} of ${this.exploration.total} places discovered`;
+    this.el['journal-list'].replaceChildren();
+    for(const record of this.exploration.records){
+      const visited=this.exploration.visited.has(record.id),item=document.createElement('li'),name=document.createElement('strong'),note=document.createElement('p');
+      item.className=visited?'discovered':'';name.textContent=`${visited?'✓':'○'} ${record.name}`;
+      note.textContent=visited?record.description:`Walk along ${record.station}'s platform to find this place. The cab cannot collect field notes.`;
+      item.append(name,note);
+      if(!visited){const button=document.createElement('button');button.className='small';button.dataset.landmark=record.id;button.textContent=this.exploration.selected===record.id?'Destination selected':'Set destination';button.disabled=this.exploration.selected===record.id;button.setAttribute('aria-label',`Set destination: ${record.name}`);item.append(button);}
+      this.el['journal-list'].append(item);
+    }
+  }
+  notify(message){if(!message)return;this.el.toast.textContent=message;this.el.toast.classList.add('visible');this.toastUntil=performance.now()+4500;if(!this.el.menu.hidden)this.el['menu-status'].textContent=message;}
+  report(error){console.error(error);this.notify(error.message||String(error));this.host.onError?.(error);}
+  serialize(){return{...this.sim.serialize(),exploration:this.exploration.serialize()};}
+  restore(value){
+    const data=typeof value==='string'?JSON.parse(value):value;
+    if(!data||!data.world||typeof data.world.seed!=='string'||data.world.seed.length>64)throw new Error('Save contains an invalid world seed.');
+    const candidateWorld=new NSWorld(data.world.seed),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld);candidate.restore(data);candidateExploration.restore(data.exploration);
+    this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();this.resize(this.width,this.height);
+  }
+  regenerate(seed){const value=String(seed).trim();if(!value||value.length>64)throw new Error('Use a world seed between 1 and 64 characters.');const candidateWorld=new NSWorld(value),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld);candidate.settings={...this.sim.settings};this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();}
+  diagnostics(){const sorted=this.frames.slice().sort((a,b)=>a-b);return{frames:sorted.length,medianMs:sorted[Math.floor(sorted.length/2)]||0,p95Ms:sorted[Math.floor(sorted.length*.95)]||0,renderer:this.renderer.diagnostics(),seed:this.world.seed,checksum:this.world.checksum(),running:this.running};}
+  async exportSave(){try{const data=this.serialize(),text=JSON.stringify(data,null,2);if(this.host.writeSave)await this.host.writeSave(text);else{const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='next-stop-save.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}try{localStorage.setItem('next-stop-save',text);}catch{this.notify('Save exported. Browser storage unavailable; keep your JSON file.');return;}this.notify('Save exported. Keep it for your next journey.');}catch(error){this.report(error);}}
+  showFatal(error){document.getElementById('fatal').hidden=false;document.getElementById('fatal-message').textContent=error.message||'The renderer could not start.';document.getElementById('fatal-detail').textContent=error.stack||'';console.error(error);}
+  destroy(){if(this.destroyed)return;this.pause();this.destroyed=true;cancelAnimationFrame(this.raf);for(const remove of this.listeners)remove();this.listeners=[];this.renderer.destroy();}
+}
+window.NextStop={create:options=>new NSGame(options)};
+try{window.nextStopGame=window.NextStop.create({canvas:document.getElementById('world')});}catch(error){document.getElementById('fatal').hidden=false;document.getElementById('fatal-message').textContent=error.message;document.getElementById('fatal-detail').textContent=error.stack||'';console.error(error);}
+
+})();
+</script>
+</body>
+</html>
