@@ -117,7 +117,7 @@ class NSGame {
   restore(value){
     const data=typeof value==='string'?JSON.parse(value):value;
     if(!data||!data.world||typeof data.world.seed!=='string'||data.world.seed.length>64)throw new Error('Save contains an invalid world seed.');
-    const candidateWorld=new NSWorld(data.world.seed),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld);candidate.restore(data);candidateExploration.restore(data.exploration);
+    const candidateWorld=new NSWorld(data.world.seed,data.world.version),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld);candidate.restore(data);candidateExploration.restore(data.exploration);
     this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();this.resize(this.width,this.height);
   }
   regenerate(seed){const value=String(seed).trim();if(!value||value.length>64)throw new Error('Use a world seed between 1 and 64 characters.');const candidateWorld=new NSWorld(value),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld);candidate.settings={...this.sim.settings};this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();}

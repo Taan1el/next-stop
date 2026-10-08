@@ -41,9 +41,10 @@ R reverse while stopped, C camera; mouse capture or drag/arrow-key look; Esc pau
    Terrain: row-major vertex heights; bilinear interpolation over [-500,500].
    Route coordinates are metres of arc length; +Y up, yaw 0 faces +Z. */
 class NSWorld {
-  constructor(seed = 'Next Stop') {
+  constructor(seed = 'Next Stop', version = 2) {
+    if (![1,2].includes(version)) throw new Error('Unsupported valley generation version.');
     this.seed = String(seed).trim().slice(0, 80) || 'Next Stop';
-    this.version = 1;
+    this.version = version;
     this.size = 1000;
     this.resolution = 129;
     this.waterLevel = 0;
@@ -51,6 +52,8 @@ class NSWorld {
     this.objects = [];
     this.route = [];
     this.stations = [];
+    this.lamps = [];
+    this.chimneys = [];
     this._seedHash = NSWorld.hash(this.seed);
     this._rngState = this._seedHash || 1;
     this._phase = this.random() * Math.PI * 2;
@@ -150,6 +153,14 @@ class NSWorld {
       const noise = (this._noise(wx, wz, 185) - .5) * 7 + (this._noise(wx, wz, 65) - .5) * 3;
       const edge = Math.max(0, (Math.max(Math.abs(wx), Math.abs(wz)) / half - .65) / .35);
       let h = 4.5 + noise + edge * edge * (57 + this._noise(wx, wz, 110) * 24);
+      if (this.version===2) {
+        const radius=Math.hypot(wx/430,wz/355),angle=Math.atan2(wz,wx);
+        const foothill=Math.max(0,Math.min(1,(radius-.70)/.65));
+        const ridge=Math.max(0,Math.min(1,(radius-.86)/.53));
+        const crest=.58+.42*(.5+.5*Math.cos(angle*5+this._phase));
+        h=6+noise*1.6+Math.sin(wx*.016+this._phase)*Math.cos(wz*.013)*4;
+        h+=foothill*foothill*22+Math.pow(ridge,1.15)*(95+this._noise(wx,wz,72)*92)*crest;
+      }
       const lake = ((wx - 55) / 188) ** 2 + ((wz + 157) / 121) ** 2;
       if (lake < 1.24) {
         const basin = -3.5 + Math.min(lake, 1) * 2 + this._noise(wx, wz, 36) * .25;
@@ -219,6 +230,15 @@ class NSWorld {
       if (i === 2) {
         this._object(bx + rx * 7, floor + 1.8, bz + rz * 7, 4, 1.8, 4, p.yaw, 2, 0, { solid: true });
       }
+      if(this.version===2){
+        const lx=p.x+rx*6.7+Math.sin(p.yaw)*17,lz=p.z+rz*6.7+Math.cos(p.yaw)*17;
+        this._object(lx,p.y+1.9,lz,.10,1.8,.10,p.yaw,7,0,{solid:true});
+        this._object(lx,p.y+3.65,lz,.25,.30,.25,p.yaw,17);
+        this.lamps.push({x:lx,y:p.y+3.65,z:lz});
+        this._object(bx+rx*1.8,floor+6.9,bz,.55,1.2,.55,p.yaw,2);
+        this.chimneys.push({x:bx+rx*1.8,y:floor+8.2,z:bz});
+        this._object(bx-rx*3.56,floor+1.9,bz,.08,.55,.7,p.yaw,18);
+      }
     }
   }
   _buildScenery() {
@@ -235,16 +255,29 @@ class NSWorld {
       }
     }
     let trees = 0, tries = 0;
-    while (trees < 32 && tries++ < 250) {
-      const x = (this.random() - .5) * 780, z = (this.random() - .5) * 780;
+    const target=this.version===1?32:220;
+    while (trees < target && tries++ < (this.version===1?250:2200)) {
+      const x = (this.random() - .5) * (this.version===1?780:920), z = (this.random() - .5) * (this.version===1?780:920);
       const y = this.heightAt(x, z);
-      if (y < 1 || this._nearestRoute(x, z).distance < 13) continue;
+      const railDistance=this._nearestRoute(x,z).distance;
+      if (y < 1 || railDistance < 13) continue;
+      if(this.version===2&&(y>125||this._noise(x+130,z-70,105)<.36))continue;
       if (this.objects.some(o => o.solid && Math.hypot(o.x - x, o.z - z) < 12)) continue;
-      const height = 7 + this.random() * 5;
+      const height = this.version===1?7+this.random()*5:8+this.random()*9;
       this._object(x, y + height * .3, z, .45, height * .3, .45, 0, 11, 0, { solid: true });
       this._object(x, y + height * .65, z, height * .27, height * .35, height * .27, 0, 12, 1);
       this._object(x, y + height * .91, z, height * .17, height * .22, height * .17, 0, 12, 1);
       trees++;
+    }
+    if(this.version===2){
+      // Small rural fences define field edges without covering the railway.
+      for(const station of this.stations){const p=this.routeAt(station.s),rx=Math.cos(p.yaw),rz=-Math.sin(p.yaw);
+        for(let i=0;i<7;i++){const side=24,along=-72+i*5,x=p.x+rx*side+Math.sin(p.yaw)*along,z=p.z+rz*side+Math.cos(p.yaw)*along,y=this.heightAt(x,z);
+          if(y<1||this.blocked(x,y,z,2))continue;
+          this._object(x,y+.7,z,.10,.7,.10,p.yaw,11,0,{solid:true});
+          this._object(x+Math.sin(p.yaw)*2.5,y+.95,z+Math.cos(p.yaw)*2.5,.08,.09,2.5,p.yaw,11);
+        }
+      }
     }
   }
   _inside(object, x, z, margin = 0) {
@@ -596,7 +629,7 @@ class NSSimulation {
     const train = { s: number(t.s, 0, this.world.routeLength - 1e-8, 'route distance'), speed: number(t.speed, -this.maxSpeed, this.maxSpeed, 'speed'),
       throttle: number(t.throttle, 0, 1, 'throttle'), brake: number(t.brake, 0, 1, 'brake'), direction: choice(t.direction, [-1, 1], 'direction') };
     const p = object(data.player, 'player'), half = this.world.size / 2;
-    const player = { x: number(p.x, -half + 4, half - 4, 'player x'), y: number(p.y, -10, 150, 'player y'), z: number(p.z, -half + 4, half - 4, 'player z'),
+    const player = { x: number(p.x, -half + 4, half - 4, 'player x'), y: number(p.y, -10, Math.max(150,this.world.maxHeight+12), 'player y'), z: number(p.z, -half + 4, half - 4, 'player z'),
       yaw: NSSimulation.angle(number(p.yaw, -1e6, 1e6, 'yaw')), pitch: number(p.pitch, -1.15, 1.15, 'pitch'), mode: choice(p.mode, ['foot', 'train'], 'player mode') };
     if (player.mode === 'foot') {
       const surface = this.world.surfaceAt(player.x, player.z);
@@ -1634,7 +1667,7 @@ class NSGame {
   restore(value){
     const data=typeof value==='string'?JSON.parse(value):value;
     if(!data||!data.world||typeof data.world.seed!=='string'||data.world.seed.length>64)throw new Error('Save contains an invalid world seed.');
-    const candidateWorld=new NSWorld(data.world.seed),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld);candidate.restore(data);candidateExploration.restore(data.exploration);
+    const candidateWorld=new NSWorld(data.world.seed,data.world.version),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld);candidate.restore(data);candidateExploration.restore(data.exploration);
     this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();this.resize(this.width,this.height);
   }
   regenerate(seed){const value=String(seed).trim();if(!value||value.length>64)throw new Error('Use a world seed between 1 and 64 characters.');const candidateWorld=new NSWorld(value),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld);candidate.settings={...this.sim.settings};this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();}
