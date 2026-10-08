@@ -1,55 +1,60 @@
 # Next Stop verification and improvement report
 
-The playable game is **next-stop.html, 106,337 bytes**. It contains HTML, CSS, JavaScript, shaders, numeric glyph definitions and the procedural world generator. Open it directly in a WebGL2 browser. No server, internet connection, installation, image assets, engine or runtime companion files are required.
+The playable game is **next-stop.html, 130,946 bytes**. It contains HTML, CSS, JavaScript, shaders, numeric glyph masks and the procedural world generator. Open it directly in a WebGL2 browser. No server, connection, installation, images, engine or runtime companion files are needed.
 
-SHA-256: 8bfff4e19e89c354fbb9728f314c3592228bcbee78d064e44b150b89c370ccd7.
+SHA-256: 1f60bee0124fb590cd224960d6107af20d908c8c9932c0b70fdd455fcfc8dbae.
 
-## Improvements from playthroughs
+## Rural railway improvements
 
-- **Arrival guidance:** actual grade and current power determine stopping prediction using the same train forces as the simulation. BRAKE NOW, platform-ready, missed-stop, reverse and add-power cues guide ordinary driving. Crossing a platform centre no longer shows an almost-full-loop distance while delivery is already valid.
-- **Camera:** final smoothed chase positions clear station buildings. F centres the train camera; C switches cab/chase. These actions preserve train physics and delivery progress.
-- **Field journal:** leave the cab to discover three station landmarks and read their saved notes with J. Notes cannot be collected aboard. Two discoveries in the full run required walking; Bellweather was close enough to be discovered on disembarking.
-- **Exploration destinations:** choose an undiscovered journal place. Cargo stops retain priority until deliveries finish; afterward train guidance leads to the selected station, and foot hints lead to its landmark. Discovery clears the selection.
-- **Portable progress:** JSON and host saves retain discoveries and destinations. Original version-1 saves load with an empty journal. Invalid journal data is rejected before replacing live state.
-- **Renderer capacity:** static selection reserves the actual dynamic train record count and refreshes when it changes. Dynamic records remain first, with the 256-record upload cap enforced.
+- **Less clutter:** station-paper menus, serif/typewriter notices and a compact soot/brass speed dial. The centre of the world stays clear. Journal, help and settings live in paused menus. Foot mode hides train instruments.
+- **Landscape depth:** seeded mountain ridges/foothills, 220 trees, trackside woods, field fences, wheat/grass colours, pitched roofs and an open locomotive cab. The route remains the same safe branch line; generation versions preserve original saves.
+- **Visible movement:** foliage shifts in wind, grass detail moves, boiler fire changes glyphs/colour, smoke rises and drifts, clouds move smoothly, and gaslamps cast warm pulsing light. These are numerical primitives and direct glyph cells. Static tree trunks retain authoritative collision.
+- **Steam operation:** B adds coal; fire and pressure affect engine pull. V whistles. Bridge/crossing instructions require easing power/braking, with speed and whistle performance affecting the driver rating. Coal/water refill at stops. An automatic fireman supports relaxed travel.
+- **Services:** goods, passenger or free running. Goods choices supply mixed farm freight, heavier timber or prompt mail, affecting manifests, pull or earnings. Passenger stops require four seconds stopped before E serves the platform. Free running removes delivery obligations while retaining ordinary train and walking interactions.
+- **Reasons to leave the cab:** six foot discoveries, saved field notes and selectable destinations. The journal includes a collapsible driver ledger of completed stops, earnings and supplies.
+- **Portable state:** saves carry steam, service/cargo, crossing performance, fares, stop times, discoveries and chosen destinations. Old world versions reproduce their terrain/checksums. Candidate data validates before live references change. Whistle volume/mute are local interface preferences.
 
-A railway-explorer agent reviewed source and captured scenes, suggesting arrival feedback, reasons to leave the cab and camera recovery. Independent physics and renderer agents checked the resulting changes. The explorer critique was a review, not a separately claimed browser playthrough.
+Existing grade/power-aware arrival cues, platform-centre handling, reverse recovery, F camera centring, safe smoothed chase positions and dynamic primitive reservation remain.
 
-## Real browser runs
+## Actual browser runs
 
-Successful runs used ordinary keyboard controls in offline browsers. State reads supported assertions; the train was not teleported and time was not accelerated.
+Successful driving runs use ordinary keyboard controls in offline browsers. State reads support assertions; the train/player is not teleported and simulation time is not accelerated. The walking tester reads authoritative surfaces to plan around obstacles, then uses normal turn/walk keys.
 
-| Run | Duration | Result |
-|---|---:|---|
-| 01 baseline | 307.041 s | Three deliveries and safe exit; reproduced misleading platform distance |
-| 02 driving polish | 307.304 s | Followed three brake cues, finished deliveries, checked platform-centre crossing |
-| 05 field journal | 362.372 s | Three deliveries, deliberate overshoot/reverse recovery, tower camera orbit, three foot discoveries |
-| 06 legacy-save night exploration | 116.401 s | Imported a real completed old save, selected Bellweather, used F and both cameras, drove/stopped, collected/exported its note |
+| Run | Loaded artifact | Duration | Result |
+|---|---:|---:|---|
+| 09 rural renewal | 127,058 bytes, world 2 | 447.282 s | Three deliveries, all six notes, fire/whistle/crossing operation, deliberate overshoot/reverse and camera orbit |
+| 14 passenger/free running | 129,976 bytes, world 3 | 110.475 s | Cab departure, actual passenger arrival, blocked early service, four-second boarding wait, earned fare; free-running boarding/exit |
+| 17 rural UI/audio | **130,946 bytes**, world 3 | Focused run | Timber selection, pause freeze, keyboard ledger/Tab wrap, narrow layout, audio controls, file/host saves, legacy import, context/lifecycle |
+| 19 final rural circuit | **130,946 bytes**, world 3 | **449.399 s** | Three deliveries, **six of six** foot discoveries, firing/crossings, overshoot/reverse recovery and collision-free camera orbit |
 
-These runs recorded no application exceptions, console warnings, WebGL errors or external application requests. Edge was **154.0.4258.62**; Chrome was **154.0.8037.97**. The night leg and final host checks loaded the current 106,337-byte artifact.
+Runs 17 and 19 loaded the exact SHA-256 above. Passenger run 14 preceded only the volume/mute controls; those received real keyboard verification in 17. Edge was 154.0.4258.62 and Chrome 154.0.8037.97. Successful runs recorded no unexpected application exceptions, console warnings, WebGL errors or external requests. The deliberate invalid-save diagnostic in the UI run was expected and checked explicitly.
 
-The longest complete circuit loaded **105,953 bytes**, just before adding F and its help text. The 384-byte addition received numerical camera checks and actual keyboard verification in the current Chrome build. Another full circuit was not needed for this camera-only action.
+Earlier historical coverage remains: baseline/driving circuits 01 and 02 (307.041 / 307.304 seconds); field-journal circuit 05 (362.372 seconds); legacy-save night/exploration leg 06 (116.401 seconds). Those used earlier builds and do not prove every new feature.
 
-Failed attempts remain in the evidence. Attempt 03 omitted W after R, which correctly resets power. Attempt 04 lost control-poll timing while a long asynchronous playthrough ran between Node REPL calls; a dedicated Node process fixed the harness. Attempt 07 tried clicking Settings behind an open journal dialog; corrected navigation passed as 08. These attempts are not counted as successful runs.
+Failed evidence remains. Attempts 10 and 11 drove successfully but their straight-line walking helper pressed forward into a correctly solid station building. Extending the timeout did not solve it; obstacle planning fixed the harness, and 19 repeated the complete flow. Attempt 18 completed two stops/four notes but required a one-metre endpoint on a two-metre planning grid; the corrected endpoint tolerance passed numerical replay before the full repeat. Attempt 13 timed out during local navigation while several browsers were running; the serial repeat passed as 14. Attempts 15 and 16 read audio gain before scheduled changes reached its timeline; waiting for actual gain changes passed as 17. Earlier attempts 03/04/07 involved omitted reverse power, background control timing and clicking behind an open dialog. None is counted as a passed run.
 
-## Focused verification
+## Focused and visual verification
 
-**40/40 regression checks passed:** world/physics 15, journey guidance 8, exploration 7, renderer resource ownership 5 and renderer budget 5. The packaging audit parses the inline script and checks the asset/dependency/network restrictions. The builder rejects HTML over **2,000,000 bytes**. Source assembly matches the artifact byte for byte.
+**52/52 checks passed:** world/physics 15, journey guidance 8, exploration 7, railway/version/service 12, renderer ownership/failures 5 and renderer budget 5. The packaging audit parses the inline runtime and checks dependency/media/network restrictions. The builder caps the game at **2,000,000 bytes**. Source assembly matches the delivered HTML byte for byte.
 
-Actual journal UI checks verified paused-state freezing, Tab wrapping, keyboard selection and restored focus, and a fitting **390 by 844** layout without horizontal overflow. JSON file export/import restored exact state. Invalid destination input produced a readable error and preserved state and live object identities. Old saves were imported through the actual file chooser.
+UI checks verified a frozen serialized state while paused, keyboard access to the ledger, focus wrapping and destination selection. At **390 by 844**, the 350 by 804 menu fits with internal scrolling and no horizontal overflow. Native range/checkbox keys changed whistle volume/mute and the actual audio gain.
 
-The current build passed injected host export/import with a discovered note, destroy/recreate listener and animation cleanup, and actual WebGL context loss/restoration while the journal was open. Progress and the paused dialog survived; drawing resumed without GL or console errors. Independent numerical checks walked all 24 landmark anchors across eight seeds and exercised atomic app-level rejection of invalid selections.
+Actual JSON download/file import and host export/import restored exact progress. Invalid boiler pressure produced a readable rejection and preserved state/live object identities. A real original save was imported through the file chooser, recreating generation 1 checksum **4bd6b452** and an automatic fireman. Numerical checks also preserve generation 2 checksum **190dfd5a**; current generation 3 is **0d37a594** for NEXT-STOP.
 
-The original implementation passed all **17 initial acceptance checks**. Retained evidence covers direct glyph rendering, terrain/route agreement, reflections responding to train movement, daylight/weather and lit windows, walking/boarding, reverse, save validation, pointer-capture rejection and fallback controls, focus loss, seed changes, quality/resize, missing WebGL2 and deliberate shader failure. Changed behavior was rechecked above; not every original visual experiment was repeated this session.
+Destroy/recreate released listeners/animation and retained saved service through restart. Real WebGL context loss/restoration while the journal was open preserved progress and its paused state, and drawing resumed without GL or console errors.
+
+Fixed-camera rendering inspections over **1.2 seconds** measured **380 changed fire cells** among 492 visible fire cells, and **22 changed foliage cells** among 56 visible foliage cells. These count glyph/material differences; they are separate visual inspections, not additional claimed playthroughs. Screenshots show the new hills/woods, roofs, open cab, firebox, paper UI and mobile journal. Motion is generated from numerical scene/time values rather than swapped image frames.
+
+The original 17 acceptance checks were completed earlier. Retained evidence covers direct glyph emission, terrain/route agreement, water reflections responding to motion, daylight/weather and lit windows, pointer-capture fallback, quality/resize, missing WebGL2 and deliberate shader failure. Changed behavior was rechecked above; every historical visual experiment was not repeated this session.
 
 ## Performance and limits
 
-The latest full circuit used **1280 by 720**, standard quality and **160 by 60 cells** (9,600). Its final rolling 600-frame sample measured **16.7 ms median / 16.8 ms p95**, about 60 FPS. Renderer CPU submission measured **0.3 ms median / 0.6 ms p95**; this is not GPU execution time. The current Chrome night leg measured **16.7 / 16.9 ms** in its final 600-frame sample. These describe this machine and sampling window, not universal performance.
+The final circuit used **1280 by 720**, standard quality and **160 by 60 glyph cells** (9,600). Its final rolling 600-frame window measured **16.7 ms median / 16.9 ms p95**. Renderer CPU submission measured **0.3 / 0.7 ms**; these are not GPU execution times. Run 09 measured 16.7 / 16.9 ms, near 60 FPS. Measurements describe this machine and sampling window, not universal performance.
 
-The valley is finite. Scene distance, primitive counts, terrain traversal, shadows and a single water reflection query are bounded. There are no mobile touch controls or OS wrapper. window.NextStop.create({canvas, host}) exposes lifecycle, input and serialization for future embedding; the target OS/runtime is still unspecified.
+Rendering remains bounded: 256 uploaded primitives, 192 terrain traversal cells, 48 shadow objects and one reflected query with reduced limits. The world is finite. There are no mobile touch controls or OS wrapper. window.NextStop.create({canvas, host}) exposes lifecycle, input and serialization for future embedding; the target OS/runtime remains unspecified.
 
-This request was **this session only**. No recurring automation was created.
+A local Git repository contains small, reviewable commits. All author and committer identities are **Taan1el <taaniel.vananurm@gmail.com>**, with no additional contributor trailers. No remote is configured or publication performed. No recurring automation was created; this improvement request was **this session only**.
 
-Evidence is under .omx/evidence/cycles/01-baseline/, 02-driving-polish/, 05-field-journal/, 06-legacy-night-exploration/, 08-final-host/ and journal-ui-checks.json. Failed attempts 03, 04 and 07 remain alongside them. Initial acceptance evidence remains under .omx/evidence/; focused scripts are in work/qa/.
+Local evidence is under .omx/evidence/cycles/09-rural-renewal/, 14-passenger/, 17-rural-ui-audio/ and 19-rural-final/. Failed attempts remain alongside them. Animation, scene captures and exact assembly/hash evidence are under .omx/evidence/rural-renewal/. Focused scripts are in work/qa/.
 
-NEXT_STOP_PREVIEW.png is a documentation screenshot from the successful daylight braking check, not an application asset. Only **next-stop.html** is needed to play; saves are optional user data.
+NEXT_STOP_PREVIEW.png is a screenshot from the current final circuit, not a game asset. Only **next-stop.html** is required to play; exported saves are optional user data.
