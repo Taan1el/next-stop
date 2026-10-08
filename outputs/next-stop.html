@@ -596,6 +596,14 @@ class NSSimulation {
       for (const side of [-1.205, 1.205]) add(p, 0, 2.42, .035, .64, 3.8, 9, 0, side);
       for (const side of [-1.06, 1.06]) for (const along of [-3.2, 3.2]) add(p, along, .43, .18, .4, .4, 7, 1, side);
     }
+    if(this.world.version===2){
+      add(loco,-4.43,1.18,.22,.22,.10,20);
+      add(loco,-1.7,1.42,.42,.38,.12,18);
+      const puff=(x,y,z,age,scale)=>objects.push({x:x+age*.75,y:y+age*.8,z:z-age*.22,hx:scale+age*.19,hy:scale*.7+age*.25,hz:scale+age*.18,yaw:0,material:19,type:1});
+      for(let i=0;i<4;i++){const age=((this.time+i*1.2)%4.8),p=this.world.routeAt(this.train.s-this.train.speed*age);puff(p.x+Math.sin(p.yaw)*3.7,p.y+3.4,p.z+Math.cos(p.yaw)*3.7,age,.28);}
+      for(const chimney of this.world.chimneys)if(Math.hypot(chimney.x-this.player.x,chimney.z-this.player.z)<110)
+        for(let i=0;i<3;i++)puff(chimney.x,chimney.y,chimney.z,(this.time*.7+i*1.5)%4.5,.35);
+    }
     return objects;
   }
   serialize() {
@@ -825,6 +833,7 @@ class NSExploration {
   uniform vec2 u_weather;
   uniform float u_motion;
   uniform float u_far;
+  uniform vec3 u_lamps[3];
 
   struct Hit { float t; vec3 p; vec3 n; int material; vec3 local; };
 
@@ -832,6 +841,16 @@ class NSExploration {
     vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
     q += dot(q, q.yzx + 33.33);
     return fract((q.x + q.y) * q.z);
+  }
+  float fieldNoise(vec2 p) {
+    vec2 cell=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+    return mix(mix(hash21(cell),hash21(cell+vec2(1,0)),f.x),
+               mix(hash21(cell+vec2(0,1)),hash21(cell+vec2(1,1)),f.x),f.y);
+  }
+  float clouds(vec3 rd) {
+    vec2 p=rd.xz/max(.10,rd.y)*.72+vec2(u_time*.005*u_motion,u_time*.0015*u_motion);
+    float shape=fieldNoise(p)*.52+fieldNoise(p*2.13+7.1)*.28+fieldNoise(p*4.31-3.7)*.14+fieldNoise(p*8.1)*.06;
+    return smoothstep(.47-u_weather.x*.07,.69,shape)*smoothstep(.025,.13,rd.y);
   }
   float heightAt(vec2 p) {
     vec2 q = clamp((p + u_size * 0.5) / u_size * float(u_resolution - 1),
@@ -915,7 +934,7 @@ class NSExploration {
           hit.p=ro+rd*hit.t;
           vec2 f=clamp(origin+velocity*clamp(root,0.0,extent),0.0,1.0);
           hit.n=normalize(vec3(-(hx+crossH*f.y)/spacing,1.0,-(hz+crossH*f.x)/spacing));
-          hit.material=(hit.n.y<0.88 || hit.p.y<u_water+1.3) ? 2 : 1;
+          hit.material=(hit.n.y<0.88 || hit.p.y<u_water+1.3 || hit.p.y>85.0) ? 2 : 1;
           hit.local=hit.p;
           return true;
         }
@@ -932,12 +951,20 @@ class NSExploration {
 
   bool objectHit(vec3 ro, vec3 rd, int index, float limit, out Hit hit) {
     vec4 centre = texelFetch(u_objects,ivec2(0,index),0);
+    vec4 shape=texelFetch(u_objects,ivec2(1,index),0);
+    vec4 data=texelFetch(u_objects,ivec2(2,index),0);
+    // Sparse vapour cells allow the ordinary world query through between wisps.
+    if(int(data.z+.5)==19 && hash21(floor(gl_FragCoord.xy)+vec2(float(index)*3.1,floor(u_time*2.0)))<.78)return false;
+    if(int(data.z+.5)==12){
+      float wind=u_time*.9+centre.x*.043+centre.z*.061;
+      centre.x+=sin(wind)*.48*u_motion;
+      centre.z+=sin(wind*.73+2.1)*.30*u_motion;
+      centre.w+=.6;
+    }
     vec3 offset=centre.xyz-ro;
     float along=dot(offset,rd);
     if (along+centre.w<0.025 || along-centre.w>limit ||
         dot(offset,offset)-along*along>centre.w*centre.w) return false;
-    vec4 shape=texelFetch(u_objects,ivec2(1,index),0);
-    vec4 data=texelFetch(u_objects,ivec2(2,index),0);
     vec3 p=ro-centre.xyz;
     vec3 localRo=vec3(data.x*p.x-data.y*p.z,p.y,data.y*p.x+data.x*p.z);
     vec3 localRd=vec3(data.x*rd.x-data.y*rd.z,rd.y,data.y*rd.x+data.x*rd.z);
@@ -1005,17 +1032,22 @@ class NSExploration {
     vec3 colour=mix(horizon,zenith,pow(clamp(rd.y+0.12,0.0,1.0),0.55));
     float dusk=1.0-smoothstep(0.05,0.42,abs(u_sun.y));
     colour+=vec3(.20,.074,.028)*dusk*pow(1.0-max(rd.y,0.0),5.0);
-    float cloud=sin(rd.x*13.0+rd.z*6.0+u_time*.005)*sin(rd.z*18.0-rd.y*14.0+u_time*.009);
+    float cloud=clouds(rd);
     colour=mix(colour,mix(vec3(.13,.16,.20),vec3(.58,.64,.65),day),
-                smoothstep(.28,.68,cloud)*(.36+u_weather.x*.38));
+                cloud*(.72+u_weather.x*.18));
     colour=mix(colour,mix(vec3(.07,.085,.11),vec3(.35,.43,.45),day),u_weather.x*.48);
     float sunDisc=pow(max(0.0,dot(rd,u_sun)),900.0);
     colour+=vec3(1.0,.70,.24)*sunDisc*day;
     return colour;
   }
   vec3 palette(int material,vec3 p) {
-    if (material==1) return mix(vec3(.19,.34,.13),vec3(.35,.40,.18),.5+.5*sin(p.x*.035+p.z*.047));
-    if (material==2) return vec3(.46,.46,.41);
+    if (material==1) {
+      float field=fieldNoise(p.xz*.016);
+      vec3 grass=mix(vec3(.18,.30,.12),vec3(.32,.39,.18),field);
+      vec3 grain=mix(vec3(.41,.36,.17),vec3(.57,.46,.22),.5+.5*sin(p.x*.48+p.z*.12));
+      return mix(grass,grain,smoothstep(.60,.66,field)*smoothstep(0.5,4.0,p.y));
+    }
+    if (material==2) return mix(vec3(.39,.40,.37),vec3(.77,.80,.76),smoothstep(123.0,166.0,p.y));
     if (material==3) return vec3(.065,.24,.28);
     if (material==4) return vec3(.64,.48,.31);
     if (material==5) return vec3(.50,.23,.18);
@@ -1027,6 +1059,10 @@ class NSExploration {
     if (material==11) return vec3(.35,.24,.12);
     if (material==12) return mix(vec3(.075,.25,.12),vec3(.21,.36,.15),.5+.5*sin(p.y*.8+p.x*.3));
     if (material==13) return vec3(.36,.39,.40);
+    if (material==17) return vec3(1.0,.72,.26);
+    if (material==18) return vec3(1.0,.32,.035);
+    if (material==19) return vec3(.32,.34,.31);
+    if (material==20) return vec3(1.0,.075,.025);
     return vec3(.55);
   }
 
@@ -1059,13 +1095,22 @@ class NSExploration {
     lamp*=lamp*max(.08,dot(hit.n,-lampToSurface/max(.001,lampDistance)))*mix(1.9,.32,day);
     colour+=base*vec3(1.0,.83,.49)*lamp;
     if (hit.material==9) colour=base*mix(1.12,.62,day);
+    for(int i=0;i<3;i++){
+      vec3 toLamp=u_lamps[i]-hit.p;float d=length(toLamp);
+      float glow=max(0.0,1.0-d/16.0);glow*=glow*mix(1.5,.12,day);
+      glow*=.95+.05*sin(u_time*2.7+float(i)*2.1);
+      colour+=base*vec3(1.0,.66,.25)*glow*max(.16,dot(hit.n,toLamp/max(.01,d)));
+    }
+    if(hit.material==17)colour=base*(1.15+.06*sin(u_time*3.1));
+    if(hit.material==20)colour=base*1.1;
+    if(hit.material==18){float flame=.65+.35*sin(hit.local.y*11.0-u_time*8.0+hit.local.x*7.0);colour=mix(vec3(.73,.12,.01),vec3(1.0,.72,.12),flame);}
     return colour;
   }
 
   uint glyphFor(Hit h,float light) {
     float pattern=hash21(floor(h.p.xz*1.6)+floor(h.p.y)*7.0);
     bool side=abs(h.n.y)<.5;
-    if (h.material==1) return pattern>.78 ? 34u : pattern>.40 ? 44u : 46u;
+    if (h.material==1) return pattern>.78 ? (sin(h.p.x*.13+h.p.z*.19+u_time*1.1*u_motion)>.1 ? 34u : 39u) : pattern>.40 ? 44u : 46u;
     if (h.material==2) return h.n.y<.6 ? (h.n.x*h.n.z>0.0 ? 47u : 92u) : pattern>.55 ? 37u : 58u;
     if (h.material==3) return pattern>.67 ? 126u : pattern>.31 ? 61u : 45u;
     if (h.material==4) return side ? (fract(h.local.y*.60)>.7 ? 45u : 124u) : 58u;
@@ -1078,6 +1123,10 @@ class NSExploration {
     if (h.material==11) return side ? 124u : 43u;
     if (h.material==12) return pattern>.73 ? 64u : pattern>.35 ? 42u : 43u;
     if (h.material==13) return side ? 72u : 61u;
+    if (h.material==17) return 42u;
+    if (h.material==18){float fire=hash21(floor(h.local.xy*5.0)+vec2(floor(u_time*9.0),floor(u_time*4.0)));return fire>.65 ? 94u : fire>.30 ? 42u : 58u;}
+    if (h.material==19) return pattern>.7 ? 126u : pattern>.3 ? 58u : 46u;
+    if (h.material==20) return 42u;
     return 63u;
   }
   uvec4 colourRecord(vec3 c) { return uvec4(round(clamp(c,0.0,1.0)*255.0),255u); }
@@ -1095,8 +1144,8 @@ class NSExploration {
     float distance=u_far;
     if (!found) {
       float stars=hash21(floor(vec2(atan(rd.x,rd.z),asin(clamp(rd.y,-1.0,1.0)))*320.0));
-      float cloud=sin(rd.x*13.0+rd.z*6.0+u_time*.005)*sin(rd.z*18.0-rd.y*14.0+u_time*.009);
-      glyph=cloud>.4 ? 126u : 46u;
+      float cloud=clouds(rd);
+      glyph=cloud>.45 ? 126u : cloud>.18 ? 45u : 32u;
       background=skyColour*.70;
       foreground=skyColour*.98;
       if (u_sun.y<-.08 && stars>.994 && rd.y>.02) { glyph=42u; foreground=vec3(.77,.81,.85); }
@@ -1125,7 +1174,8 @@ class NSExploration {
       background=colour*.31;
       if (material==7) { foreground+=vec3(.11,.12,.12); background*=.45; }
       if (material==9) background=colour*.24;
-      float fogDensity=.00075+u_weather.y*.017+u_weather.x*.0018;
+      if (material==19){foreground=mix(skyColour,vec3(.57,.58,.53),.35);background=skyColour*.70;}
+      float fogDensity=.00055+u_weather.y*u_weather.y*.012+u_weather.x*.0009;
       float fog=1.0-exp(-distance*fogDensity);
       foreground=mix(foreground,skyColour*.90,fog);
       background=mix(background,skyColour*.67,fog);
@@ -1316,7 +1366,7 @@ class NSExploration {
       this.sceneUniforms = uniforms(gl,this.sceneProgram,[
         'terrain','objects','resolution','objectCount','shadowCount','size','water',
         'heightRange','viewport','cellSize','eye','forward','right','up','sun',
-        'headPosition','headDirection','time','weather','motion','far'
+        'headPosition','headDirection','time','weather','motion','far','lamps'
       ]);
       this.displayUniforms = uniforms(gl,this.displayProgram,[
         'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
@@ -1350,6 +1400,8 @@ class NSExploration {
       let min = Infinity, max = -Infinity;
       for (const height of world.heights) { min=Math.min(min,height); max=Math.max(max,height); }
       this.heightRange = [min,max];
+      this.lampPositions=new Float32Array(9).fill(100000);
+      for(let i=0;i<Math.min(3,world.lamps?.length||0);i++){const p=world.lamps[i];this.lampPositions.set([p.x,p.y,p.z],i*3);}
       this.staticObjects = (world.objects || []).map(object => ({
         object, radius: Math.hypot(object.hx,object.hy,object.hz)
       }));
@@ -1474,6 +1526,7 @@ class NSExploration {
       gl.uniform3fv(u.sun,sun); gl.uniform3fv(u.headPosition,headPosition); gl.uniform3fv(u.headDirection,headDirection);
       gl.uniform1f(u.time,time); gl.uniform2f(u.weather,rain,fog);
       gl.uniform1f(u.motion,options.reducedMotion ? .15 : 1); gl.uniform1f(u.far,600);
+      gl.uniform3fv(u.lamps,this.lampPositions);
       gl.drawArrays(gl.TRIANGLES,0,3);
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);
       gl.viewport(0,0,this.canvas.width,this.canvas.height); gl.useProgram(this.displayProgram);

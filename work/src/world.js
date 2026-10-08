@@ -557,6 +557,14 @@ class NSSimulation {
       for (const side of [-1.205, 1.205]) add(p, 0, 2.42, .035, .64, 3.8, 9, 0, side);
       for (const side of [-1.06, 1.06]) for (const along of [-3.2, 3.2]) add(p, along, .43, .18, .4, .4, 7, 1, side);
     }
+    if(this.world.version===2){
+      add(loco,-4.43,1.18,.22,.22,.10,20);
+      add(loco,-1.7,1.42,.42,.38,.12,18);
+      const puff=(x,y,z,age,scale)=>objects.push({x:x+age*.75,y:y+age*.8,z:z-age*.22,hx:scale+age*.19,hy:scale*.7+age*.25,hz:scale+age*.18,yaw:0,material:19,type:1});
+      for(let i=0;i<4;i++){const age=((this.time+i*1.2)%4.8),p=this.world.routeAt(this.train.s-this.train.speed*age);puff(p.x+Math.sin(p.yaw)*3.7,p.y+3.4,p.z+Math.cos(p.yaw)*3.7,age,.28);}
+      for(const chimney of this.world.chimneys)if(Math.hypot(chimney.x-this.player.x,chimney.z-this.player.z)<110)
+        for(let i=0;i<3;i++)puff(chimney.x,chimney.y,chimney.z,(this.time*.7+i*1.5)%4.5,.35);
+    }
     return objects;
   }
   serialize() {
