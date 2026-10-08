@@ -28,7 +28,7 @@ R reverse while stopped, C camera; mouse capture or drag/arrow-key look; Esc pau
 <section id="hud" aria-label="Journey status"><div class="ticket" id="journey-ticket"><div class="eyebrow" id="journey-label">Your first departure</div><div id="objective">Find your train.</div><div id="hint">WASD walk · E board · H help</div><div id="field-hint" hidden></div><div id="work-hint" hidden></div></div><div id="instruments"><div class="gauge"><label>SPEED</label><strong id="speed">0.0</strong> <small>km/h</small></div><div class="gauge"><label>POWER</label><strong id="throttle">0</strong><small>%</small></div><div class="gauge"><label>BRAKE</label><strong id="brake">0</strong><small>%</small></div><div class="gauge"><label>STEAM</label><strong id="pressure">9.2</strong><small> bar</small><label>FIRE <span id="fire">72</span>%</label></div></div></section>
 <div id="toast" role="status" aria-live="polite"></div><pre id="diagnostics" hidden></pre>
 <section id="menu" aria-label="Journey menu"><div class="card" role="dialog" aria-modal="true" aria-labelledby="menu-heading">
-<div id="start-view" class="view"><div class="eyebrow">Pinebank &amp; Valley Railway</div><h1 id="menu-heading">Next Stop</h1><p>The morning goods train is waiting at Pinebank.<br>Take the branch line through farms, woods and mountain weather.</p><div class="route-strip"><span>PINEBANK</span><i></i><span>BELLWEATHER</span><i></i><span>STONEHAVEN</span></div><fieldset class="service-choice"><legend>CHOOSE YOUR MORNING TURN</legend><label><input type="radio" name="service" value="freight" checked>Goods train <small>milk, post and coal</small></label><label><input type="radio" name="service" value="passenger">Passenger local <small>workers, market and home</small></label><label><input type="radio" name="service" value="explore">Free running <small>no delivery obligations</small></label></fieldset><div class="row"><button id="start-button" class="primary">Start journey</button><button id="start-help">Controls</button></div><hr class="divider"><p class="note">Bring the freight home, or linger at a station.<br>The valley is yours to explore.</p></div>
+<div id="start-view" class="view"><div class="eyebrow">Pinebank &amp; Valley Railway</div><h1 id="menu-heading">Next Stop</h1><p>The morning goods train is waiting at Pinebank.<br>Take the branch line through farms, woods and mountain weather.</p><div class="route-strip"><span>PINEBANK</span><i></i><span>BELLWEATHER</span><i></i><span>STONEHAVEN</span></div><fieldset class="service-choice"><legend>CHOOSE YOUR MORNING TURN</legend><label><input type="radio" name="service" value="freight" checked>Goods train <small>milk, post and coal</small></label><label><input type="radio" name="service" value="passenger">Passenger local <small>workers, market and home</small></label><label><input type="radio" name="service" value="explore">Free running <small>no delivery obligations</small></label></fieldset><label class="field"><span>Freight manifest</span><select id="cargo"><option value="mixed">Mixed goods · milk, post and coal</option><option value="timber">Timber turn · heavier wagons</option><option value="mail">Mail train · prompt arrival bonus</option></select></label><div class="row"><button id="start-button" class="primary">Start journey</button><button id="start-help">Controls</button></div><hr class="divider"><p class="note">Bring the freight home, or linger at a station.<br>The valley is yours to explore.</p></div>
 <div id="pause-view" class="view" hidden><div class="eyebrow">Time stands still</div><h2>Journey paused</h2><p>Your train and delivery are right where you left them.</p><div class="row"><button class="primary resume-button">Resume journey</button><button id="journal-button">Journal</button><button id="help-button">Controls</button><button id="settings-button">Settings</button><button id="pause-settings" hidden>Settings</button></div></div>
 <div id="help-view" class="view" hidden><div class="eyebrow">Pocket guide</div><h2>How to travel</h2><dl class="controls"><dt><kbd>W A S D</kbd></dt><dd>Walk. In the cab, W/S raises or lowers power.</dd><dt><kbd>E</kbd></dt><dd>Board nearby train. At the destination, deliver while stopped. Otherwise leave while stopped.</dd><dt><kbd>Space</kbd></dt><dd>Hold to brake. Begin braking before the platform.</dd><dt><kbd>C</kbd> / <kbd>R</kbd></dt><dd>Switch cab/chase view. Reverse direction while stopped.</dd><dt>Mouse / arrows</dt><dd>Click world to capture mouse. Drag to look if capture is unavailable. Arrow keys also look.</dd><dt><kbd>Esc</kbd> / <kbd>H</kbd></dt><dd>Pause / guide. Escape releases mouse.</dd><dt><kbd>F</kbd></dt><dd>Centre the train camera on the railway.</dd><dt><kbd>B</kbd> / <kbd>V</kbd></dt><dd>Add coal to the fire / sound the whistle. Ease power for bridges and crossings. Pressure supplies the engine’s pull.</dd><dt><kbd>J</kbd></dt><dd>Open the field journal. Discover places on foot along station platforms.</dd></dl><hr class="divider"><p class="note">Destination and interaction hints appear at the bottom. Settings provides weather, portable saves, and recovery.</p><button class="primary close-menu">Back to journey</button></div>
 <div id="settings-view" class="view" hidden><div class="eyebrow">Station office</div><h2>Journey settings</h2><label class="field"><span>Glyph size</span><select id="quality"><option value="coarse">Large · faster</option><option value="standard" selected>Classic · balanced</option><option value="fine">Small · more detail</option></select></label><label class="field"><span>Weather</span><select id="weather"><option value="auto">Changing skies</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="fog">Fog</option></select></label><label class="field check"><input type="checkbox" id="reduced-motion">Reduced camera motion</label><label class="field check"><input type="checkbox" id="fire-assist">Automatic fireman · relaxed driving</label><label class="field check"><input type="checkbox" id="high-contrast">High-contrast interface</label><label class="field check"><input type="checkbox" id="debug">Show glyph IDs and diagnostics</label><label class="field"><span>World seed · new valley resets journey</span><input id="seed" maxlength="64" value="NEXT-STOP" autocomplete="off"></label><div class="row"><button id="regenerate">New valley</button><button id="recover">Return to safe station</button></div><hr class="divider"><div class="row"><button id="export">Export save</button><button id="import">Import save</button><input type="file" id="save-file" accept="application/json,.json" hidden></div><p class="note">JSON saves travel with you, even when browser storage is unavailable.</p><p id="menu-status" class="menu-status" role="status"></p><button class="primary close-menu">Back to journey</button></div>
@@ -815,7 +815,7 @@ class NSExploration {
 // Branch-line service, gentle firing and a portable driver's ledger. No DOM/GL.
 class NSRailway {
   constructor(world){
-    this.world=world;this.service='freight';this.assisted=false;
+    this.world=world;this.service='freight';this.cargo='mixed';this.assisted=false;
     this.engine={fire:.72,pressure:9.2,coal:100,water:100};
     this.overspeed=0;this.earnings=0;this.stops=[];this.whistled=new Set();this.missed=new Set();
     this.whistleUntil=-1;this.lastStoke=-10;this.dwell=null;
@@ -823,7 +823,7 @@ class NSRailway {
       {id:'farm-crossing',name:'Farm crossing',s:world.routeLength*.76,radius:24,limit:5}];
   }
   configure(sim){if(this.service==='explore')Object.assign(sim.delivery,{started:true,finished:true,index:0,completed:3});this.apply(sim);}
-  apply(sim){sim.tractionScale=this.assisted?1:Math.max(.36,Math.min(1,this.engine.pressure/8.8));sim.steamFire=this.engine.fire;}
+  apply(sim){const load=this.service==='freight'&&this.cargo==='timber'?.92:1;sim.tractionScale=(this.assisted?1:Math.max(.36,Math.min(1,this.engine.pressure/8.8)))*load;sim.steamFire=this.engine.fire;}
   instruction(sim){
     if(sim.player.mode!=='train')return null;
     const length=this.world.routeLength,direction=Math.abs(sim.train.speed)>.025?Math.sign(sim.train.speed):sim.train.direction;
@@ -879,20 +879,25 @@ class NSRailway {
     const index=Math.min(2,sim.delivery.completed);
     if(this.service==='explore')return 'Free running · stop wherever you like';
     if(sim.delivery.finished)return `Service finished · ${this.grade()} · ${this.earnings} shillings`;
+    if(this.service==='freight'&&this.cargo==='timber')return ['Pine logs for Bellweather','Boards for Stonehaven','Empty timber wagons home'][index];
+    if(this.service==='freight'&&this.cargo==='mail')return ['Morning post for Bellweather','Express bags for Stonehaven','Evening letters for Pinebank'][index];
     return this.service==='passenger'?['Morning workers · 14 aboard','Market local · 18 aboard','Homeward local · 11 aboard'][index]:['Milk churns for Bellweather','Post bags for Stonehaven','Coal sacks for Pinebank'][index];
   }
   grade(){const score=Math.max(0,100-this.overspeed*.9-this.missed.size*7);return score>=90?'Careful driver':score>=70?'Steady service':'Room to improve';}
   recordStop(sim,index){
-    const station=this.world.stations[index];this.earnings+=Math.max(8,Math.round((this.service==='passenger'?24:18)-Math.min(10,this.overspeed*.1)));
+    const station=this.world.stations[index],base=this.service==='passenger'?24:this.cargo==='timber'?20:this.cargo==='mail'?22:18;
+    const promptPost=this.service==='freight'&&this.cargo==='mail'&&sim.time<(this.stops.length+1)*120?4:0;
+    this.earnings+=Math.max(8,Math.round(base+promptPost-Math.min(10,this.overspeed*.1)));
     this.stops.push({station:station.name,time:sim.time});this.engine.coal=100;this.engine.water=100;
     return `${this.service==='passenger'?'Passengers served':'Freight handed over'} at ${station.name}. Supplies topped up. ${this.earnings} shillings earned.`;
   }
-  serialize(){return{version:1,service:this.service,assisted:this.assisted,engine:{...this.engine},overspeed:this.overspeed,earnings:this.earnings,stops:this.stops.map(s=>({...s})),whistled:[...this.whistled],missed:[...this.missed],whistleUntil:this.whistleUntil,lastStoke:this.lastStoke,dwell:this.dwell?{...this.dwell}:null};}
+  serialize(){return{version:1,service:this.service,cargo:this.cargo,assisted:this.assisted,engine:{...this.engine},overspeed:this.overspeed,earnings:this.earnings,stops:this.stops.map(s=>({...s})),whistled:[...this.whistled],missed:[...this.missed],whistleUntil:this.whistleUntil,lastStoke:this.lastStoke,dwell:this.dwell?{...this.dwell}:null};}
   restore(data,sim){
     if(data===undefined){this.assisted=true;this.apply(sim);return;}
     const fail=()=>{throw new Error('Invalid save: railway service or boiler data is unsupported.');};
     const num=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
     if(!data||Array.isArray(data)||data.version!==1||!['freight','passenger','explore'].includes(data.service)||typeof data.assisted!=='boolean')fail();
+    const cargo=data.cargo??'mixed';if(!['mixed','timber','mail'].includes(cargo))fail();
     const e=data.engine;if(!e||!num(e.fire,.10,1)||!num(e.pressure,3.2,11.8)||!num(e.coal,0,100)||!num(e.water,0,100)||!num(data.overspeed,0,1e9)||!num(data.earnings,0,1000))fail();
     if(!Array.isArray(data.stops)||data.stops.length>3||data.stops.some(s=>!s||!this.world.stations.some(st=>st.name===s.station)||!num(s.time,0,sim.time)))fail();
     const list=a=>Array.isArray(a)&&a.length<=2&&new Set(a).size===a.length&&a.every(id=>this.sections.some(s=>s.id===id));
@@ -900,7 +905,7 @@ class NSRailway {
     if(data.dwell!==null&&(!data.dwell||!Number.isInteger(data.dwell.index)||data.dwell.index<0||data.dwell.index>2||!num(data.dwell.since,0,sim.time)))fail();
     if(data.service==='explore'&&!sim.delivery.finished)fail();
     if(data.service!=='explore'&&data.stops.length>sim.delivery.completed)fail();
-    Object.assign(this,{service:data.service,assisted:data.assisted,engine:{fire:e.fire,pressure:e.pressure,coal:e.coal,water:e.water},overspeed:data.overspeed,earnings:data.earnings,stops:data.stops.map(s=>({station:s.station,time:s.time})),whistled:new Set(data.whistled),missed:new Set(data.missed),whistleUntil:data.whistleUntil,lastStoke:data.lastStoke,dwell:data.dwell?{index:data.dwell.index,since:data.dwell.since}:null});
+    Object.assign(this,{service:data.service,cargo,assisted:data.assisted,engine:{fire:e.fire,pressure:e.pressure,coal:e.coal,water:e.water},overspeed:data.overspeed,earnings:data.earnings,stops:data.stops.map(s=>({station:s.station,time:s.time})),whistled:new Set(data.whistled),missed:new Set(data.missed),whistleUntil:data.whistleUntil,lastStoke:data.lastStoke,dwell:data.dwell?{index:data.dwell.index,since:data.dwell.since}:null});
     this.apply(sim);
   }
 }
@@ -1795,7 +1800,7 @@ class NSGame {
     this.listen(window,'pointerup',()=>{this.dragging=false;this.lastPointer=null;});
     this.listen(window,'pointermove',event=>{if(!this.running)return;let dx=0,dy=0;if(document.pointerLockElement===this.canvas){dx=event.movementX;dy=event.movementY;}else if(this.dragging&&this.lastPointer){dx=event.clientX-this.lastPointer[0];dy=event.clientY-this.lastPointer[1];this.lastPointer=[event.clientX,event.clientY];}this.input.lookX=(this.input.lookX||0)+dx;this.input.lookY=(this.input.lookY||0)+dy;});
   }
-  start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.notify('E · board the locomotive. H opens the driver’s guide.');}
+  start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.cargo=document.getElementById('cargo').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.notify('E · board the locomotive. H opens the driver’s guide.');}
   act(action){
     if(action==='stoke'||action==='whistle'){const message=this.railway.action(action,this.sim);this.notify(message);if(action==='whistle'&&this.sim.player.mode==='train')this.soundWhistle();return;}
     const before=this.sim.delivery.completed,index=this.sim.delivery.index,mode=this.sim.player.mode;

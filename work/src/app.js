@@ -61,7 +61,7 @@ class NSGame {
     this.listen(window,'pointerup',()=>{this.dragging=false;this.lastPointer=null;});
     this.listen(window,'pointermove',event=>{if(!this.running)return;let dx=0,dy=0;if(document.pointerLockElement===this.canvas){dx=event.movementX;dy=event.movementY;}else if(this.dragging&&this.lastPointer){dx=event.clientX-this.lastPointer[0];dy=event.clientY-this.lastPointer[1];this.lastPointer=[event.clientX,event.clientY];}this.input.lookX=(this.input.lookX||0)+dx;this.input.lookY=(this.input.lookY||0)+dy;});
   }
-  start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.notify('E · board the locomotive. H opens the driver’s guide.');}
+  start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.cargo=document.getElementById('cargo').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.notify('E · board the locomotive. H opens the driver’s guide.');}
   act(action){
     if(action==='stoke'||action==='whistle'){const message=this.railway.action(action,this.sim);this.notify(message);if(action==='whistle'&&this.sim.player.mode==='train')this.soundWhistle();return;}
     const before=this.sim.delivery.completed,index=this.sim.delivery.index,mode=this.sim.player.mode;

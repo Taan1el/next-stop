@@ -1,7 +1,7 @@
 // Branch-line service, gentle firing and a portable driver's ledger. No DOM/GL.
 class NSRailway {
   constructor(world){
-    this.world=world;this.service='freight';this.assisted=false;
+    this.world=world;this.service='freight';this.cargo='mixed';this.assisted=false;
     this.engine={fire:.72,pressure:9.2,coal:100,water:100};
     this.overspeed=0;this.earnings=0;this.stops=[];this.whistled=new Set();this.missed=new Set();
     this.whistleUntil=-1;this.lastStoke=-10;this.dwell=null;
@@ -9,7 +9,7 @@ class NSRailway {
       {id:'farm-crossing',name:'Farm crossing',s:world.routeLength*.76,radius:24,limit:5}];
   }
   configure(sim){if(this.service==='explore')Object.assign(sim.delivery,{started:true,finished:true,index:0,completed:3});this.apply(sim);}
-  apply(sim){sim.tractionScale=this.assisted?1:Math.max(.36,Math.min(1,this.engine.pressure/8.8));sim.steamFire=this.engine.fire;}
+  apply(sim){const load=this.service==='freight'&&this.cargo==='timber'?.92:1;sim.tractionScale=(this.assisted?1:Math.max(.36,Math.min(1,this.engine.pressure/8.8)))*load;sim.steamFire=this.engine.fire;}
   instruction(sim){
     if(sim.player.mode!=='train')return null;
     const length=this.world.routeLength,direction=Math.abs(sim.train.speed)>.025?Math.sign(sim.train.speed):sim.train.direction;
@@ -65,20 +65,25 @@ class NSRailway {
     const index=Math.min(2,sim.delivery.completed);
     if(this.service==='explore')return 'Free running · stop wherever you like';
     if(sim.delivery.finished)return `Service finished · ${this.grade()} · ${this.earnings} shillings`;
+    if(this.service==='freight'&&this.cargo==='timber')return ['Pine logs for Bellweather','Boards for Stonehaven','Empty timber wagons home'][index];
+    if(this.service==='freight'&&this.cargo==='mail')return ['Morning post for Bellweather','Express bags for Stonehaven','Evening letters for Pinebank'][index];
     return this.service==='passenger'?['Morning workers · 14 aboard','Market local · 18 aboard','Homeward local · 11 aboard'][index]:['Milk churns for Bellweather','Post bags for Stonehaven','Coal sacks for Pinebank'][index];
   }
   grade(){const score=Math.max(0,100-this.overspeed*.9-this.missed.size*7);return score>=90?'Careful driver':score>=70?'Steady service':'Room to improve';}
   recordStop(sim,index){
-    const station=this.world.stations[index];this.earnings+=Math.max(8,Math.round((this.service==='passenger'?24:18)-Math.min(10,this.overspeed*.1)));
+    const station=this.world.stations[index],base=this.service==='passenger'?24:this.cargo==='timber'?20:this.cargo==='mail'?22:18;
+    const promptPost=this.service==='freight'&&this.cargo==='mail'&&sim.time<(this.stops.length+1)*120?4:0;
+    this.earnings+=Math.max(8,Math.round(base+promptPost-Math.min(10,this.overspeed*.1)));
     this.stops.push({station:station.name,time:sim.time});this.engine.coal=100;this.engine.water=100;
     return `${this.service==='passenger'?'Passengers served':'Freight handed over'} at ${station.name}. Supplies topped up. ${this.earnings} shillings earned.`;
   }
-  serialize(){return{version:1,service:this.service,assisted:this.assisted,engine:{...this.engine},overspeed:this.overspeed,earnings:this.earnings,stops:this.stops.map(s=>({...s})),whistled:[...this.whistled],missed:[...this.missed],whistleUntil:this.whistleUntil,lastStoke:this.lastStoke,dwell:this.dwell?{...this.dwell}:null};}
+  serialize(){return{version:1,service:this.service,cargo:this.cargo,assisted:this.assisted,engine:{...this.engine},overspeed:this.overspeed,earnings:this.earnings,stops:this.stops.map(s=>({...s})),whistled:[...this.whistled],missed:[...this.missed],whistleUntil:this.whistleUntil,lastStoke:this.lastStoke,dwell:this.dwell?{...this.dwell}:null};}
   restore(data,sim){
     if(data===undefined){this.assisted=true;this.apply(sim);return;}
     const fail=()=>{throw new Error('Invalid save: railway service or boiler data is unsupported.');};
     const num=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
     if(!data||Array.isArray(data)||data.version!==1||!['freight','passenger','explore'].includes(data.service)||typeof data.assisted!=='boolean')fail();
+    const cargo=data.cargo??'mixed';if(!['mixed','timber','mail'].includes(cargo))fail();
     const e=data.engine;if(!e||!num(e.fire,.10,1)||!num(e.pressure,3.2,11.8)||!num(e.coal,0,100)||!num(e.water,0,100)||!num(data.overspeed,0,1e9)||!num(data.earnings,0,1000))fail();
     if(!Array.isArray(data.stops)||data.stops.length>3||data.stops.some(s=>!s||!this.world.stations.some(st=>st.name===s.station)||!num(s.time,0,sim.time)))fail();
     const list=a=>Array.isArray(a)&&a.length<=2&&new Set(a).size===a.length&&a.every(id=>this.sections.some(s=>s.id===id));
@@ -86,7 +91,7 @@ class NSRailway {
     if(data.dwell!==null&&(!data.dwell||!Number.isInteger(data.dwell.index)||data.dwell.index<0||data.dwell.index>2||!num(data.dwell.since,0,sim.time)))fail();
     if(data.service==='explore'&&!sim.delivery.finished)fail();
     if(data.service!=='explore'&&data.stops.length>sim.delivery.completed)fail();
-    Object.assign(this,{service:data.service,assisted:data.assisted,engine:{fire:e.fire,pressure:e.pressure,coal:e.coal,water:e.water},overspeed:data.overspeed,earnings:data.earnings,stops:data.stops.map(s=>({station:s.station,time:s.time})),whistled:new Set(data.whistled),missed:new Set(data.missed),whistleUntil:data.whistleUntil,lastStoke:data.lastStoke,dwell:data.dwell?{index:data.dwell.index,since:data.dwell.since}:null});
+    Object.assign(this,{service:data.service,cargo,assisted:data.assisted,engine:{fire:e.fire,pressure:e.pressure,coal:e.coal,water:e.water},overspeed:data.overspeed,earnings:data.earnings,stops:data.stops.map(s=>({station:s.station,time:s.time})),whistled:new Set(data.whistled),missed:new Set(data.missed),whistleUntil:data.whistleUntil,lastStoke:data.lastStoke,dwell:data.dwell?{index:data.dwell.index,since:data.dwell.since}:null});
     this.apply(sim);
   }
 }

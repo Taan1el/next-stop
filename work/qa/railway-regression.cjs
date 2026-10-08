@@ -47,6 +47,10 @@ test('Freight manifests, earned fares and station resupply follow actual stops',
 test('Free running leaves station interactions available without delivery obligations',()=>{
   const {sim,rail}=fresh();rail.service='explore';rail.configure(sim);assert(sim.delivery.finished);assert.equal(rail.stops.length,0);assert.match(rail.job(sim),/Free/);sim.train.speed=0;sim.action('interact');assert.equal(sim.player.mode,'foot');
 });
+test('Cargo choices change manifests, heavy pull and prompt-mail earnings',()=>{
+  const {sim,rail}=fresh();rail.cargo='timber';rail.apply(sim);assert(sim.tractionScale<1);assert.match(rail.job(sim),/logs/);
+  rail.cargo='mail';rail.apply(sim);assert.equal(sim.tractionScale,1);assert.match(rail.job(sim),/post/);rail.recordStop(sim,1);assert.equal(rail.earnings,26);
+});
 test('Railway save round trip preserves operational state and legacy saves use assistance',()=>{
   const {sim,rail}=fresh();rail.action('stoke',sim);rail.action('whistle',sim);const saved=plain(rail.serialize()),restored=new NSRailway(world);restored.restore(saved,sim);assert.deepEqual(plain(restored.serialize()),saved);
   const legacy=new NSRailway(world);legacy.restore(undefined,sim);assert(legacy.assisted);assert.equal(sim.tractionScale,1);
