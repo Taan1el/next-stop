@@ -84,7 +84,7 @@ module.exports=async function runCycle(page,{directory,name,htmlPath,pastCentre=
     if(!result.final.delivery.finished||result.final.mode!=='foot'||result.final.gl||issues.length||requests.some(u=>!u.startsWith('file:')))throw Error('Final playthrough gate failed');
     if(visitJournal&&result.final.exploration.visited.length!==(allDiscoveries?result.final.totalPlaces:3))throw Error('Journal incomplete');
     result.status='passed';result.wallSeconds=(Date.now()-result.start)/1000;result.issues=issues;result.requests=requests;
-  }catch(error){result.status='failed';result.error=error.stack;}
+  }catch(error){result.status='failed';result.error=error.stack;result.failureState=await page.evaluate(()=>nextStopGame.serialize()).catch(()=>null);}
   fs.writeFileSync(path.join(directory,'circuit.json'),JSON.stringify(result,null,2));return result;
 };
 async function walkTo(page,target,radius){
@@ -101,7 +101,7 @@ async function walkTo(page,target,radius){
     for(let count=0;open.length&&count<12000;count++){
       open.sort((a,b)=>b.cost+Math.hypot(b.x-target.x,b.z-target.z)-a.cost-Math.hypot(a.x-target.x,a.z-target.z));
       const cur=open.pop();if(cur.closed)continue;cur.closed=true;
-      if(Math.hypot(cur.x-target.x,cur.z-target.z)<Math.max(1,radius-1)){found=cur;break;}
+      if(Math.hypot(cur.x-target.x,cur.z-target.z)<Math.max(.8,radius-.2)){found=cur;break;}
       for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){
         const ix=cur.ix+dx,iz=cur.iz+dz;if(Math.abs(ix)>range||Math.abs(iz)>range)continue;
         const next=node(ix,iz),id=key(ix,iz),cost=cur.cost+Math.hypot(dx,dz)*step,old=best.get(id);
