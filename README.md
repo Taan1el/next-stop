@@ -1,23 +1,41 @@
 # Next Stop
 
-A rural railway made of coloured glyphs. Walk the valley, drive the local train and work its station stops through changing weather.
+An old rural railway made of coloured glyphs. Drive a steam train through woods, fields, mountain ridges and three country stations, or leave the cab to explore.
 
 ## Play
 
-Open **outputs/next-stop.html** in a browser with WebGL2. It runs offline. The game needs only that file; no engine, images, imported models or runtime libraries.
+Open **outputs/next-stop.html** in a browser with WebGL2. The game runs offline from that single file. No images, imported models, engine or runtime libraries are required.
+
+Choose goods, passenger or free-running service. Goods work offers mixed farm freight, heavier timber or prompt mail. Passenger stops include a short boarding wait. Free running has no delivery obligation. Settings offers an automatic fireman for relaxed driving.
+
+| Controls | Action |
+|---|---|
+| WASD | Walk; aboard, W/S raises/lowers power |
+| E | Board, serve a stopped destination, or leave |
+| Space | Hold the brake |
+| B / V | Add coal / sound the whistle |
+| C / F | Cab/chase view / centre camera |
+| R | Reverse while stopped; apply W again afterward |
+| Mouse or arrows | Look around |
+| J | Saved field notes and six walking destinations |
+| Esc / H | Pause / controls |
+
+Watch steam pressure and fire, ease power for bridges and crossings, and whistle before crossing. Completed stops replenish coal/water and record service earnings. Wind moves foliage, fire flickers, smoke rises, clouds drift and lamps warm their surroundings. Volume/mute controls are in Settings.
 
 ## Develop
 
-Readable JavaScript and the HTML shell live in **work/src/**. Assemble with:
+Readable source lives in **work/src/**. Assemble with:
 
     node work/build.cjs
 
-The generated HTML is limited to 2,000,000 bytes. Regression scripts are under **work/qa/**; actual browser evidence is kept locally under **.omx/**. See **outputs/CLAUDE_HANDOFF.md** and **outputs/NEXT_STOP_VERIFICATION.md** for current architecture and test coverage.
+The builder caps the HTML at 2,000,000 bytes. Focused scripts live under **work/qa/**. Real-time browser playtests use normal player inputs; local evidence and plans live under ignored **.omx/**. See **outputs/CLAUDE_HANDOFF.md** and **outputs/NEXT_STOP_VERIFICATION.md** for architecture, current coverage and limitations.
 
-Development playtests use Playwright installed on the developer's machine. It is not bundled in the game. Adjust the test scripts' local runtime paths when moving machines.
+Development tests use local Playwright and Edge/Chrome installations. Adjust those test paths when moving machines; these tools are never bundled in the game.
+
+World versions 1 and 2 preserve their numerical generation for existing saves. New valleys use version 3. Validate saves before swapping live state. Edit source and rebuild instead of patching only generated HTML.
 
 ## History
 
-Keep changes small and reviewable, separating behavior, rendering, UI, verification and documentation. Repository author and committer: **Taan1el <taaniel.vananurm@gmail.com>**.
+Keep changes small and reviewable. Every repository author and committer must be **Taan1el <taaniel.vananurm@gmail.com>**, with no additional contributor trailers. Identity is configured locally in this repository. No remote is configured.
 
-The custom renderer queries numerical terrain and solids directly at character-grid resolution, emits glyph IDs and colours, then expands embedded numeric glyph masks. It never renders a conventional image and applies a text filter.
+The renderer queries numerical terrain and solids directly at character-grid resolution, emits glyph IDs and colours, then displays embedded numeric glyph masks. It never renders a conventional image and applies a text filter.

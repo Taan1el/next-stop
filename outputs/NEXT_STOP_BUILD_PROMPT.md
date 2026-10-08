@@ -262,3 +262,19 @@ The initial playable specification is complete. Continue from the existing imple
 - The user's selected scope is **this session only**. Do not create recurring automation without new authorization.
 
 The current build and completed improvement evidence are documented in NEXT_STOP_VERIFICATION.md. Future work should recheck affected behavior rather than treating this prompt as test evidence.
+
+
+## 14. Rural railway renewal amendment
+
+The player selected all three directions: light steam management, passenger/cargo work and relaxed exploration. Continue from this implementation, retaining a gentle branch-line pace and the original single-file/direct-glyph requirements.
+
+- Match an old rural railway: station-paper menus, restrained serif/typewriter text, soot and brass instruments. Keep the centre of the world visible and move detailed controls/settings into paused menus.
+- Give scenery depth through generated mountain ridges, woods, fields, fences and pitched country roofs. Retain safe rail grade, terrain/collision agreement and deterministic world versions so original saves still recreate their own landscape.
+- Make glyph-rendered scenery visibly alive: analytical wind displacement of foliage, moving grass detail, flickering fire, drifting smoke/clouds and warm lamp light. Avoid imported animation, image textures, models or a post-render text filter.
+- Keep steam operation understandable: coal firing, pressure-dependent pull, a whistle, bridge/crossing instructions, station resupply and a saved driver ledger. Offer an automatic fireman for relaxed travel. Synthesized whistle audio needs volume and mute controls and starts only after player action.
+- Offer goods, passenger and free-running service. Goods choices should affect manifests, pull or earnings; passenger service should require a stopped boarding wait; free running should remove job obligations while preserving ordinary train interactions.
+- Provide six foot discoveries with saved notes and selectable destinations. Visiting a place is actual on-foot play, not progress granted from a passing train.
+- Verify normal controls, station work, deliberate overshoot/reverse recovery, camera clearance, walking routes, animated cells, offline rendering, paused menus, narrow layout, file/host saves and context restoration. Keep failed evidence, report causes honestly, and distinguish reviews/render inspections from complete playthroughs.
+- Use a local Git repository with small meaningful commits. All author and committer identities must be Taan1el <taaniel.vananurm@gmail.com>; do not add other contributor trailers or infer remote publication.
+
+The 2,000,000-byte ceiling and this-session-only playtest scope remain in force. See the verification report for the exact delivered artifact and measured results.
