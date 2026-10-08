@@ -7,7 +7,7 @@ const plain=v=>JSON.parse(JSON.stringify(v));
 function test(name,run){run();count++;console.log('PASS '+name);}
 function fresh(){const sim=new NSSimulation(world),rail=new NSRailway(world);sim.action('interact');return{sim,rail};}
 test('Original generation remains checksum-compatible while new scenery is deterministic',()=>{
-  const old=new NSWorld('NEXT-STOP',1);assert.equal(old.checksum(),'4bd6b452');assert.equal(new NSWorld('NEXT-STOP').checksum(),world.checksum());
+  const old=new NSWorld('NEXT-STOP',1);assert.equal(old.checksum(),'4bd6b452');assert.equal(new NSWorld('NEXT-STOP',2).checksum(),'190dfd5a');assert.equal(new NSWorld('NEXT-STOP').checksum(),world.checksum());
   assert.notEqual(old.checksum(),world.checksum());assert(world.maxHeight>180);assert(world.objects.filter(o=>o.material===12).length>=400);assert.equal(world.lamps.length,3);
   assert.throws(()=>new NSWorld('NEXT-STOP',99));
 });

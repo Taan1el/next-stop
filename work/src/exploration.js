@@ -21,7 +21,7 @@ class NSExploration {
       const [id,name,description]=notes[index];
       return {id,name,description,station:station.name,anchor,radius:8};
     });
-    if(world.version===2){
+    if(world.version>=2){
       const extra=[['pinebank-meadow','Pinebank meadow','The meadow fence follows the old branch line. Milk churns begin their morning journey here.'],
         ['bellweather-ridge','Bellweather ridge path','Woodland moves in the valley wind; pale ridges stand beyond the roofs and the crossing.'],
         ['stonehaven-fields','Stonehaven field gate','Post and passengers pass the field gate. Beyond the platform, the countryside carries on.']];

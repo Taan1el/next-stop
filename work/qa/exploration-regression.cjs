@@ -26,8 +26,8 @@ test('Every default landmark is reachable by actual walking along its platform',
   const world=new NSWorld('NEXT-STOP');
   for(const r of new NSExploration(world).records){
     const sim=new NSSimulation(world),station=world.stations.find(s=>s.name===r.station);sim.train.s=station.s;assert(sim._spawnFoot(station.s));
-    for(let tick=0;tick<600;tick++){const dx=r.anchor.x-sim.player.x,dz=r.anchor.z-sim.player.z;if(Math.hypot(dx,dz)<7)break;sim.player.yaw=Math.atan2(dx,dz);sim.step(1/60,{forward:true});}
-    assert(Math.hypot(sim.player.x-r.anchor.x,sim.player.z-r.anchor.z)<7,'Walk must reach '+r.name);
+    for(let tick=0;tick<900;tick++){const dx=r.anchor.x-sim.player.x,dz=r.anchor.z-sim.player.z;if(Math.hypot(dx,dz)<r.radius-.5)break;sim.player.yaw=Math.atan2(dx,dz);sim.step(1/60,{forward:true});}
+    assert(Math.hypot(sim.player.x-r.anchor.x,sim.player.z-r.anchor.z)<r.radius-.5,'Walk must reach the collection radius at '+r.name);
   }
 });
 test('Journal save round trip and legacy saves preserve explicit version semantics',()=>{

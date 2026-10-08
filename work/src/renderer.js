@@ -180,7 +180,7 @@
     vec3 localRo=vec3(data.x*p.x-data.y*p.z,p.y,data.y*p.x+data.x*p.z);
     vec3 localRd=vec3(data.x*rd.x-data.y*rd.z,rd.y,data.y*rd.x+data.x*rd.z);
     float t; vec3 normal;
-    if (shape.w>0.5) {
+    if (shape.w>0.5 && shape.w<1.5) {
       vec3 a=localRo/shape.xyz, b=localRd/shape.xyz;
       float A=dot(b,b), B=dot(a,b), C=dot(a,a)-1.0;
       float disc=B*B-A*C;
@@ -192,6 +192,15 @@
       normal=normalize((localRo+localRd*t)/(shape.xyz*shape.xyz));
     } else {
       vec2 interval=boxInterval(localRo,localRd,-shape.xyz,shape.xyz);
+      // A gable is a bounded convex prism; clip the two roof planes directly.
+      if(shape.w>1.5){
+        for(int side=-1;side<=1;side+=2){
+          vec3 plane=vec3(float(side)*shape.y/shape.x,1.0,0.0);
+          float numerator=shape.y-dot(plane,localRo),denominator=dot(plane,localRd);
+          if(abs(denominator)<.000001){if(numerator<0.0)return false;}
+          else{float crossing=numerator/denominator;if(denominator<0.0)interval.x=max(interval.x,crossing);else interval.y=min(interval.y,crossing);}
+        }
+      }
       if (interval.x>interval.y || interval.y<0.025) return false;
       t=interval.x>=0.025 ? interval.x : interval.y;
       if (t>limit) return false;
@@ -205,6 +214,7 @@
       } else if (ratio.z>ratio.y) {
         normal=vec3(0.0,0.0,sign(localP.z));
       }
+      if(shape.w>1.5){vec3 roofNormal=vec3(sign(localP.x)*shape.y/shape.x,1.0,0.0);if(abs(dot(roofNormal,localP)-shape.y)<.002)normal=normalize(roofNormal);}
     }
     hit.t=t; hit.p=ro+rd*t;
     hit.n=normalize(vec3(data.x*normal.x+data.y*normal.z,normal.y,
@@ -274,6 +284,7 @@
     if (material==18) return vec3(1.0,.32,.035);
     if (material==19) return vec3(.32,.34,.31);
     if (material==20) return vec3(1.0,.075,.025);
+    if (material==23) return vec3(.19,.22,.16);
     return vec3(.55);
   }
 
@@ -338,6 +349,7 @@
     if (h.material==18){float fire=hash21(floor(h.local.xy*5.0)+vec2(floor(u_time*9.0),floor(u_time*4.0)));return fire>.65 ? 94u : fire>.30 ? 42u : 58u;}
     if (h.material==19) return pattern>.7 ? 126u : pattern>.3 ? 58u : 46u;
     if (h.material==20) return 42u;
+    if (h.material==23) return side ? (pattern>.6 ? 35u : 72u) : 61u;
     return 63u;
   }
   uvec4 colourRecord(vec3 c) { return uvec4(round(clamp(c,0.0,1.0)*255.0),255u); }
