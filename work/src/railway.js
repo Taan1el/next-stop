@@ -85,9 +85,10 @@ class NSRailway {
     if(!data||Array.isArray(data)||data.version!==1||!['freight','passenger','explore'].includes(data.service)||typeof data.assisted!=='boolean')fail();
     const cargo=data.cargo??'mixed';if(!['mixed','timber','mail'].includes(cargo))fail();
     const e=data.engine;if(!e||!num(e.fire,.10,1)||!num(e.pressure,3.2,11.8)||!num(e.coal,0,100)||!num(e.water,0,100)||!num(data.overspeed,0,1e9)||!num(data.earnings,0,1000))fail();
-    if(!Array.isArray(data.stops)||data.stops.length>3||data.stops.some(s=>!s||!this.world.stations.some(st=>st.name===s.station)||!num(s.time,0,sim.time)))fail();
+    if(!Array.isArray(data.stops)||data.stops.length>3||data.stops.some((s,i)=>!s||s.station!==this.world.stations[(i+1)%3].name||!num(s.time,0,sim.time)||(i>0&&s.time<data.stops[i-1].time)))fail();
     const list=a=>Array.isArray(a)&&a.length<=2&&new Set(a).size===a.length&&a.every(id=>this.sections.some(s=>s.id===id));
     if(!list(data.whistled)||!list(data.missed)||!num(data.whistleUntil,-1,sim.time+1.4)||!num(data.lastStoke,-10,sim.time))fail();
+    if(data.whistled.some(id=>data.missed.includes(id)))fail();
     if(data.dwell!==null&&(!data.dwell||!Number.isInteger(data.dwell.index)||data.dwell.index<0||data.dwell.index>2||!num(data.dwell.since,0,sim.time)))fail();
     if(data.service==='explore'&&!sim.delivery.finished)fail();
     if(data.service!=='explore'&&data.stops.length>sim.delivery.completed)fail();
