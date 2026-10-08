@@ -75,21 +75,23 @@ class NSGame {
     if(now-this.lastUI>150){this.updateUI(now);this.lastUI=now;}this.raf=requestAnimationFrame(this.tick);
   }
   updateUI(now){
-    const train=this.sim.train;this.el.objective.textContent=this.sim.objective();this.el.hint.textContent=this.sim.hint();
-    this.el['journey-label'].textContent=NSJourney.label(this.sim);
+    const train=this.sim.train;document.body.dataset.mode=this.sim.player.mode;
+    this.el.objective.textContent=this.sim.delivery.finished?'The valley is yours':this.sim.delivery.started?this.world.stations[this.sim.delivery.index].name:'Pinebank departure';this.el.hint.textContent=this.sim.hint();
+    this.el['journey-label'].textContent=this.sim.player.mode==='train'?`${this.sim.delivery.finished?'Free running':`Goods train · ${this.sim.delivery.completed}/3 stops`} · ${this.sim.train.direction===1?'forward':'reverse'}`:NSJourney.label(this.sim);
     const target=this.exploration.target(this.sim.player);
     const explorationStation=this.sim.delivery.finished&&target?this.world.stations.findIndex(s=>s.name===target.record.station):null;
     this.approach=NSJourney.approach(this.sim,explorationStation);
     this.el['journey-ticket'].dataset.approach=this.approach?.phase||'';
-    if(this.approach)this.el.hint.textContent=this.approach.hint;
+    if(this.approach){const a=this.approach;this.el.hint.textContent=a.phase==='cruise'?`${Math.ceil(a.distance)} m to platform`:a.phase==='approach'?`Platform ${Math.ceil(a.distance)} m · ease power`:a.phase==='ready'?(a.kind==='delivery'?'E · hand over freight':'E · leave train'):a.phase==='departure'?'W · open the regulator':a.hint;}
     const discovery=this.running?this.exploration.discover(this.sim.player):null;
     if(discovery)this.notify(`Field note: ${discovery.name} · ${this.exploration.count}/${this.exploration.total} places discovered. J opens your journal.`);
     this.syncJournal();
     const next=this.exploration.target(this.sim.player);
     this.el['field-hint'].hidden=this.sim.player.mode!=='foot';
     this.el['field-hint'].textContent=next&&next.distance<80?`${next.record.name} · ${Math.ceil(next.distance)} m ${NSExploration.bearing(this.sim.player,next.record.anchor)} · J: journal`:`Field journal ${this.exploration.count}/${this.exploration.total} · J: read notes`;
-    if(this.sim.delivery.finished&&next)this.el.objective.textContent=`Deliveries complete. Explore ${next.record.name} at ${next.record.station} · ${this.exploration.count}/${this.exploration.total} places found.`;
+    if(this.sim.delivery.finished&&next)this.el.objective.textContent=next.record.name;
     this.el.speed.textContent=(Math.abs(train.speed)*3.6).toFixed(1);this.el.throttle.textContent=Math.round(train.throttle*100);this.el.brake.textContent=Math.round((this.input.brake?1:train.brake||0)*100);
+    document.getElementById('instruments').style.setProperty('--needle',`${-115+Math.min(40,Math.abs(train.speed)*3.6)/40*230}deg`);
     const weather=this.sim.weather;const w=(weather.rain||0)>.45?'RAIN':(weather.fog||0)>.45?'FOG':'CLEAR';const clock=(8+this.sim.time/30)%24;this.el.status.textContent=`${String(Math.floor(clock)).padStart(2,'0')}:${String(Math.floor(clock%1*60)).padStart(2,'0')} · ${w} · ${this.world.seed}`;
     if(now>this.toastUntil)this.el.toast.classList.remove('visible');
     if(this.debug){const d=this.renderer.diagnostics(),sorted=this.frames.slice().sort((a,b)=>a-b),mid=sorted[Math.floor(sorted.length/2)]||0,p95=sorted[Math.floor(sorted.length*.95)]||0;this.el.diagnostics.textContent=`DIRECT GLYPH CELLS\n${JSON.stringify(d,null,2)}\nFrame median ${mid.toFixed(1)} ms / p95 ${p95.toFixed(1)} ms\nSeed checksum ${this.world.checksum()}\nF3 toggles diagnostics`;}
