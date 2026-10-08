@@ -88,14 +88,40 @@ module.exports=async function runCycle(page,{directory,name,htmlPath,pastCentre=
   fs.writeFileSync(path.join(directory,'circuit.json'),JSON.stringify(result,null,2));return result;
 };
 async function walkTo(page,target,radius){
-  const start=await page.evaluate(()=>({...nextStopGame.sim.player}));const deadline=Date.now()+35000;
+  const start=await page.evaluate(()=>({...nextStopGame.sim.player}));const deadline=Date.now()+70000;
+  // Inspect authoritative surfaces to plan a route around station buildings.
+  // Only real turn/walk keys move the player; no state is changed by planning.
+  const waypoints=await page.evaluate(({target,radius})=>{
+    const g=nextStopGame,start=g.sim.player,step=2,range=75,size=2*range+1;
+    const node=(ix,iz)=>({ix,iz,x:start.x+ix*step,z:start.z+iz*step});
+    const key=(ix,iz)=>(ix+range)*size+iz+range;
+    const safe=(x,z,y)=>{const s=g.world.surfaceAt(x,z);return s.walkable&&s.height-y<=.55&&y-s.height<=1.8&&!g.world.blocked(x,s.height,z,.48)&&!g.sim._blockedByTrain(x,s.height,z);};
+    const segment=(a,b)=>{let y=g.world.surfaceAt(a.x,a.z).height;const n=Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/.15);for(let i=1;i<=n;i++){const x=a.x+(b.x-a.x)*i/n,z=a.z+(b.z-a.z)*i/n;if(!safe(x,z,y))return false;y=g.world.surfaceAt(x,z).height;}return true;};
+    const first={...node(0,0),cost:0,parent:null},open=[first],best=new Map([[key(0,0),first]]);let found=null;
+    for(let count=0;open.length&&count<12000;count++){
+      open.sort((a,b)=>b.cost+Math.hypot(b.x-target.x,b.z-target.z)-a.cost-Math.hypot(a.x-target.x,a.z-target.z));
+      const cur=open.pop();if(cur.closed)continue;cur.closed=true;
+      if(Math.hypot(cur.x-target.x,cur.z-target.z)<Math.max(1,radius-1)){found=cur;break;}
+      for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){
+        const ix=cur.ix+dx,iz=cur.iz+dz;if(Math.abs(ix)>range||Math.abs(iz)>range)continue;
+        const next=node(ix,iz),id=key(ix,iz),cost=cur.cost+Math.hypot(dx,dz)*step,old=best.get(id);
+        if(old&&old.cost<=cost||!segment(cur,next))continue;
+        const candidate={...next,cost,parent:cur};best.set(id,candidate);open.push(candidate);
+      }
+    }
+    if(!found)throw Error('No walkable route to landmark');
+    const path=[];for(let p=found;p;p=p.parent)path.unshift({x:p.x,z:p.z});
+    const smooth=[];let a=0;while(a<path.length-1){let b=path.length-1;while(b>a+1&&!segment(path[a],path[b]))b--;smooth.push(path[b]);a=b;}return smooth;
+  },{target,radius});
+  let waypoint=0;
   while(Date.now()<deadline){
     const p=await page.evaluate(()=>({...nextStopGame.sim.player}));if(p.mode!=='foot')throw Error('Walking requires foot mode');
     const dx=target.x-p.x,dz=target.z-p.z;if(Math.hypot(dx,dz)<=radius)return{from:start,to:p};
     module.exports.lastWalk={from:start,target,last:p,remaining:Math.hypot(dx,dz),running:await page.evaluate(()=>nextStopGame.running)};
-    const angle=Math.atan2(dx,dz),delta=Math.atan2(Math.sin(angle-p.yaw),Math.cos(angle-p.yaw));
-    if(Math.abs(delta)>.08){const key=delta>0?'ArrowRight':'ArrowLeft';await page.keyboard.down(key);await page.waitForTimeout(Math.min(350,Math.max(20,Math.abs(delta)/1.45*1000)));await page.keyboard.up(key);}
-    else{await page.keyboard.down('KeyW');await page.waitForTimeout(150);await page.keyboard.up('KeyW');}
+    while(waypoint<waypoints.length-1&&Math.hypot(waypoints[waypoint].x-p.x,waypoints[waypoint].z-p.z)<.8)waypoint++;
+    const next=waypoints[waypoint]||target,angle=Math.atan2(next.x-p.x,next.z-p.z),delta=Math.atan2(Math.sin(angle-p.yaw),Math.cos(angle-p.yaw));
+    if(Math.abs(delta)>.025){const key=delta>0?'ArrowRight':'ArrowLeft';await page.keyboard.down(key);await page.waitForTimeout(Math.min(350,Math.max(12,Math.abs(delta)/1.45*1000)));await page.keyboard.up(key);}
+    else{await page.keyboard.down('KeyW');await page.waitForTimeout(100);await page.keyboard.up('KeyW');}
   }
   throw Error('Could not reach landmark with walking controls: '+JSON.stringify(module.exports.lastWalk));
 }
