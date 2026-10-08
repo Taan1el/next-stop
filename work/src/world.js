@@ -218,7 +218,12 @@ class NSWorld {
     let trees = 0, tries = 0;
     const target=this.version===1?32:220;
     while (trees < target && tries++ < (this.version===1?250:2200)) {
-      const x = (this.random() - .5) * (this.version===1?780:920), z = (this.random() - .5) * (this.version===1?780:920);
+      let x = (this.random() - .5) * (this.version===1?780:920), z = (this.random() - .5) * (this.version===1?780:920);
+      if(this.version===2&&trees<154){
+        const p=this.routeAt(((tries%7)/7+.045)*this.routeLength),side=35+Math.abs(x)*.07,along=z/8;
+        x=p.x-Math.cos(p.yaw)*side+Math.sin(p.yaw)*along;
+        z=p.z+Math.sin(p.yaw)*side+Math.cos(p.yaw)*along;
+      }
       const y = this.heightAt(x, z);
       const railDistance=this._nearestRoute(x,z).distance;
       if (y < 1 || railDistance < 13) continue;

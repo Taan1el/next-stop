@@ -8,7 +8,7 @@ const normalize=v=>JSON.parse(JSON.stringify(v));
 test('Anchors are deterministic and safe across several procedural seeds',()=>{
   for(const seed of ['NEXT-STOP','QA-NEXT-STOP','VALLEY-2','RAINY-HOME']){
     const world=new NSWorld(seed),journal=new NSExploration(world),same=new NSExploration(new NSWorld(seed));
-    assert.deepEqual(normalize(journal.records),normalize(same.records));assert.equal(journal.total,3);
+    assert.deepEqual(normalize(journal.records),normalize(same.records));assert.equal(journal.total,6);
     for(const r of journal.records){const surface=world.surfaceAt(r.anchor.x,r.anchor.z);assert(surface.walkable);assert(!world.blocked(r.anchor.x,surface.height,r.anchor.z));}
   }
 });
@@ -20,7 +20,7 @@ test('Passing on the train does not discover walking landmarks',()=>{
 test('Walking discovers each landmark once and exhausts the next-target list',()=>{
   const journal=new NSExploration(new NSWorld('NEXT-STOP'));
   for(const r of journal.records){const player={...r.anchor,mode:'foot'};assert.equal(journal.discover(player).id,r.id);assert.equal(journal.discover(player),null);}
-  assert.equal(journal.count,3);assert.equal(journal.nextTarget(journal.records[0].anchor),null);
+  assert.equal(journal.count,journal.total);assert.equal(journal.nextTarget(journal.records[0].anchor),null);
 });
 test('Every default landmark is reachable by actual walking along its platform',()=>{
   const world=new NSWorld('NEXT-STOP');

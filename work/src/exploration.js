@@ -21,6 +21,18 @@ class NSExploration {
       const [id,name,description]=notes[index];
       return {id,name,description,station:station.name,anchor,radius:8};
     });
+    if(world.version===2){
+      const extra=[['pinebank-meadow','Pinebank meadow','The meadow fence follows the old branch line. Milk churns begin their morning journey here.'],
+        ['bellweather-ridge','Bellweather ridge path','Woodland moves in the valley wind; pale ridges stand beyond the roofs and the crossing.'],
+        ['stonehaven-fields','Stonehaven field gate','Post and passengers pass the field gate. Beyond the platform, the countryside carries on.']];
+      world.stations.forEach((station,index)=>{
+        let anchor=null;
+        for(const [side,along] of [[8,-42],[7,-36],[4.4,-23]]){const x=station.x+Math.cos(station.yaw)*side+Math.sin(station.yaw)*along,z=station.z-Math.sin(station.yaw)*side+Math.cos(station.yaw)*along,surface=world.surfaceAt(x,z);
+          if(surface.walkable&&!world.blocked(x,surface.height,z)){anchor={x,y:surface.height,z};break;}
+        }
+        if(anchor){const [id,name,description]=extra[index];this.records.push({id,name,description,station:station.name,anchor,radius:6});}
+      });
+    }
   }
   get total(){return this.records.length;}
   get count(){return this.visited.size;}
