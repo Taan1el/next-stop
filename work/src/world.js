@@ -347,7 +347,7 @@ class NSSimulation {
     this.player = { x: 0, y: 0, z: 0, yaw: 0, pitch: -.05, mode: 'foot' };
     this.cameraMode = 'chase';
     this.delivery = { index: 0, completed: 0, started: false, finished: false };
-    this.settings = { quality: 'standard', reducedMotion: false, weatherMode: 'auto', highContrast: false };
+    this.settings = { quality: 'standard', reducedMotion: false, weatherMode: 'auto', highContrast: false, nightBrightness:1, lantern:true };
     this.maxSpeed = 6.5;
     this._camera = null;
     this._lastRouteYaw = world.routeAt(0).yaw;
@@ -356,7 +356,7 @@ class NSSimulation {
     this._previousS = 0;
     this._previousPlayer = { ...this.player };
   }
-  static angle(value) { return Math.atan2(Math.sin(value), Math.cos(value)); }
+  static angle(value) { return value>=-Math.PI&&value<=Math.PI?value:Math.atan2(Math.sin(value),Math.cos(value)); }
   _spawnFoot(distance) {
     const p = this.world.routeAt(distance), rx = Math.cos(p.yaw), rz = -Math.sin(p.yaw);
     let chosen = null;
@@ -767,6 +767,8 @@ class NSSimulation {
     const s = object(data.settings, 'settings');
     const settings = { quality: choice(s.quality, ['coarse', 'standard', 'fine'], 'quality'), reducedMotion: bool(s.reducedMotion, 'reduced motion'),
       weatherMode: choice(s.weatherMode, ['auto', 'clear', 'rain', 'fog'], 'weather mode'), highContrast: s.highContrast === undefined ? false : bool(s.highContrast, 'high contrast') };
+    if(s.nightBrightness!==undefined)settings.nightBrightness=number(s.nightBrightness,.7,1.4,'night brightness');
+    if(s.lantern!==undefined)settings.lantern=bool(s.lantern,'hand lantern');
     Object.assign(this, { time, weather: restoredWeather, weatherTarget, train, player, cameraMode, delivery, settings });
     this._lastRouteYaw = this.world.routeAt(train.s).yaw; this._camera = null;
     this._previousS = train.s; this._previousPlayer = { ...player }; this.renderAlpha = 1;
