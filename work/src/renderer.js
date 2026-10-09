@@ -45,6 +45,10 @@
   uniform float u_motion;
   uniform float u_far;
   uniform vec3 u_lamps[3];
+  uniform vec4 u_lantern;
+  uniform float u_nightBrightness;
+  uniform int u_paint;
+  uniform vec3 u_lampCare;
   uniform highp usampler2D u_labels;
   uniform vec4 u_stars[64];
 
@@ -313,7 +317,7 @@
     if (material==18) return vec3(1.0,.32,.035);
     if (material==19) return vec3(.32,.34,.31);
     if (material==20) return vec3(1.0,.075,.025);
-    if (material==23) return vec3(.19,.22,.16);
+    if (material==23){if(u_paint==1)return vec3(.10,.34,.23);if(u_paint==2)return vec3(.59,.35,.13);return vec3(.19,.22,.16);}
     if (material==24) return vec3(.46,.29,.20);
     if (material==25) return vec3(.51,.55,.43);
     if (material==26) return vec3(.16,.30,.34);
@@ -385,13 +389,16 @@
   vec3 illuminate(Hit hit,bool allowShadow) {
     vec3 base=palette(hit.material,hit.p);if(hit.material>=23)base=detailColour(hit,base);
     float day=smoothstep(-.15,.25,u_sun.y);
-    float ambient=mix(.20,.49,day)*(1.0-u_weather.x*.23);
+    float night=1.0-day;
+    float ambient=mix(.37,.49,day)*(1.0-u_weather.x*.12);
     float diffuse=max(0.0,dot(hit.n,u_sun))*max(0.0,u_sun.y)*.92*(1.0-u_weather.x*.45);
     if (allowShadow) diffuse*=shadow(hit);
     float heightShade=1.0;
     if(hit.material>=23&&hit.material!=26&&hit.material!=35)heightShade=mix(.78,1.12,clamp(hit.local.y/max(.02,hit.extent.y)*.5+.5,0.0,1.0));
     vec3 ambientTint=mix(vec3(.80,.72,.53),vec3(.61,.78,1.0),clamp(hit.n.y*.5+.5,0.0,1.0));
     vec3 colour=base*heightShade*(ambientTint*ambient+vec3(1.0,.84,.59)*diffuse);
+    vec3 moon=normalize(vec3(-u_sun.x,max(.25,-u_sun.y),-u_sun.z));
+    colour+=base*heightShade*vec3(.51,.67,.94)*max(0.0,dot(hit.n,moon))*.26*night;
     if(day>.1&&hit.material!=3)colour+=base*vec3(.20,.14,.07)*max(0.0,-hit.n.y)*day*.20;
     vec3 lampToSurface=hit.p-u_headPosition;
     float lampDistance=length(lampToSurface);
@@ -399,11 +406,15 @@
     float lamp=beam*max(0.0,1.0-lampDistance/95.0);
     lamp*=lamp*max(.08,dot(hit.n,-lampToSurface/max(.001,lampDistance)))*mix(1.9,.32,day);
     colour+=base*vec3(1.0,.83,.49)*lamp;
+    vec3 toLantern=u_lantern.xyz-hit.p;float lanternDistance=length(toLantern);
+    float lanternGlow=pow(max(0.0,1.0-lanternDistance/15.0),2.0)*u_lantern.w;
+    colour+=base*vec3(1.0,.76,.39)*lanternGlow*max(.26,dot(hit.n,toLantern/max(.01,lanternDistance)))*mix(2.5,.35,day);
     if (hit.material==9) colour=base*mix(1.12,.62,day);
     for(int i=0;i<3;i++){
       vec3 toLamp=u_lamps[i]-hit.p;float d=length(toLamp);
-      float glow=max(0.0,1.0-d/16.0);glow*=glow*mix(1.5,.12,day);
+      float glow=max(0.0,1.0-d/22.0);glow*=glow*mix(2.2,.12,day);
       glow*=.95+.05*sin(u_time*2.7+float(i)*2.1);
+      glow*=1.0+u_lampCare[i]*.30;
       colour+=base*vec3(1.0,.66,.25)*glow*max(.16,dot(hit.n,toLamp/max(.01,d)));
     }
     if(hit.material==17)colour=base*(1.15+.06*sin(u_time*3.1));
@@ -411,6 +422,10 @@
     if(hit.material==18){float flame=.65+.35*sin(hit.local.y*11.0-u_time*8.0+hit.local.x*7.0);colour=mix(vec3(.73,.12,.01),vec3(1.0,.72,.12),flame);}
     if(hit.material==26)colour=base*mix(.83,.72,day);
     if(hit.material==27||hit.material==38||hit.material==39){float glint=pow(max(0.0,dot(reflect(-u_sun,hit.n),normalize(u_eye-hit.p))),16.0);colour+=base*glint*.4*day;}
+    // Lift dark midtones before glyph encoding, preserving warm lamps and cool
+    // moonlight rather than applying a bright overlay to the displayed scene.
+    colour=mix(colour,sqrt(max(colour,vec3(0.0)))*.67,night*.38);
+    colour*=mix(u_nightBrightness,1.0,day);
     return colour;
   }
 
@@ -492,7 +507,7 @@
       float light=dot(colour,vec3(.2126,.7152,.0722));
       glyph=glyphFor(hit,light);
       foreground=colour*1.28+vec3(.022);
-      background=colour*.31;
+      background=colour*mix(.39,.31,smoothstep(-.15,.25,u_sun.y));
       if (material==7) { foreground+=vec3(.11,.12,.12); background*=.45; }
       if (material==9) background=colour*.24;
       if (material==19){foreground=mix(skyColour,vec3(.57,.58,.53),.35);background=skyColour*.70;}
@@ -689,7 +704,7 @@
       this.sceneUniforms = uniforms(gl,this.sceneProgram,[
         'terrain','objects','resolution','objectCount','shadowCount','size','water',
         'heightRange','viewport','cellSize','eye','forward','right','up','sun',
-        'headPosition','headDirection','time','weather','motion','far','lamps','labels','stars'
+        'headPosition','headDirection','time','weather','motion','far','lamps','labels','stars','lantern','nightBrightness','paint','lampCare'
       ]);
       this.displayUniforms = uniforms(gl,this.displayProgram,[
         'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
@@ -765,7 +780,7 @@
     }
 
     _uploadObjects(sim,eye) {
-      const dynamic=typeof sim.dynamicObjects==='function' ? sim.dynamicObjects() : [];
+      const dynamic=[...(typeof sim.dynamicObjects==='function' ? sim.dynamicObjects() : []),...(sim.village?.objects(sim)||[])];
       const staticCapacity=Math.max(0,MAX_OBJECTS-dynamic.length);
       const previous=this._selectionPosition;
       if (!previous || this._selectionCapacity!==staticCapacity ||
@@ -857,6 +872,11 @@
       gl.uniform2f(u.viewport,this.width,this.height); gl.uniform2fv(u.cellSize,this.cellSize);
       gl.uniform3fv(u.eye,eye); gl.uniform3fv(u.forward,forward); gl.uniform3fv(u.right,right); gl.uniform3fv(u.up,up);
       gl.uniform3fv(u.sun,sun); gl.uniform3fv(u.headPosition,headPosition); gl.uniform3fv(u.headDirection,headDirection);
+      const walker=sim.player,lanternOn=walker?.mode==='foot'&&sim.settings?.lantern!==false;
+      gl.uniform4fv(u.lantern,lanternOn?[walker.x+Math.cos(walker.yaw)*.35,walker.y+1.0,walker.z-Math.sin(walker.yaw)*.35,1]:[0,0,0,0]);
+      gl.uniform1f(u.nightBrightness,sim.settings?.nightBrightness??1);
+      gl.uniform1i(u.paint,sim.village?.paint==='green'?1:sim.village?.paint==='ochre'?2:0);
+      gl.uniform3fv(u.lampCare,[0,1,2].map(index=>sim.village?.completed.has('lamp-'+index)?1:0));
       gl.uniform4fv(u.stars,this.starRecords);
       gl.uniform1f(u.time,time); gl.uniform2f(u.weather,rain,fog);
       gl.uniform1f(u.motion,options.reducedMotion ? .15 : 1); gl.uniform1f(u.far,600);
