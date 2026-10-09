@@ -40,6 +40,6 @@ World versions 1, 2 and 3 preserve their numerical generation for existing saves
 
 ## History
 
-Keep changes small and reviewable. Every repository author and committer must be **Taan1el <taaniel.vananurm@gmail.com>**, with no additional contributor trailers. Identity is configured locally in this repository. No remote is configured.
+Keep changes small and reviewable. Every repository author and committer must be **Taan1el <taaniel.vananurm@gmail.com>**, with no additional contributor trailers. Identity is configured locally in this repository. The private GitHub repository is [Taan1el/next-stop](https://github.com/Taan1el/next-stop), configured as origin. Push only when authorized.
 
 The renderer queries numerical terrain and solids directly at character-grid resolution, emits glyph IDs and colours, then displays embedded numeric glyph masks. It never renders a conventional image and applies a text filter.

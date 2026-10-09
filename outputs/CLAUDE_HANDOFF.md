@@ -14,7 +14,7 @@ Use a short plan with concrete acceptance criteria, then playtest-and-improve cy
 
 Edit work/src/, rebuild outputs/next-stop.html and preserve train operation, walking, notes, world/save compatibility, renderer and host lifecycle. Update evidence under .omx/ and the report/handoff after meaningful changes. Complete authorized implementation and verification rather than stopping at a proposal.
 
-Keep small, meaningful Git commits. Both author and committer must be **Taan1el <taaniel.vananurm@gmail.com>**. The local repository already configures this identity and has no remote. Do not add additional contributor trailers or infer publication.
+Keep small, meaningful Git commits. Both author and committer must be **Taan1el <taaniel.vananurm@gmail.com>**. The repository configures this identity and origin points at private https://github.com/Taan1el/next-stop. The user authorized its initial push separately; obtain authorization for future pushes. Do not add additional contributor trailers or infer public publication.
 
 I eventually want the game in my OS. Keep the host interface usable. Establish the target OS and available JavaScript/WebGL or WebView runtime before implementing a wrapper or port.
 

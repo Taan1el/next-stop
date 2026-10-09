@@ -87,7 +87,7 @@ Rural-renewal circuit 19 used **1280 by 720**, standard quality and **160 by 60 
 
 Rendering remains bounded: 256 uploaded primitives, 192 terrain traversal cells, 48 shadow objects and one reflected query with reduced limits. The world is finite. There are no mobile touch controls or OS wrapper. window.NextStop.create({canvas, host}) exposes lifecycle, input and serialization for future embedding; the target OS/runtime remains unspecified.
 
-A local Git repository contains small, reviewable commits. All author and committer identities are **Taan1el <taaniel.vananurm@gmail.com>**, with no additional contributor trailers. No remote is configured or publication performed. No recurring automation was created; this improvement request was **this session only**.
+A Git repository contains small, reviewable commits. All author and committer identities are **Taan1el <taaniel.vananurm@gmail.com>**, with no additional contributor trailers. Following separate push authorization, origin points at the private repository [Taan1el/next-stop](https://github.com/Taan1el/next-stop). The game artifact is unchanged by the remote setup. No recurring automation was created; this improvement request was **this session only**.
 
 Local evidence is under .omx/evidence/cycles/09-rural-renewal/, 14-passenger/, 17-rural-ui-audio/ and 19-rural-final/. Failed attempts remain alongside them. Animation, scene captures and exact assembly/hash evidence are under .omx/evidence/rural-renewal/. Focused scripts are in work/qa/.
 
