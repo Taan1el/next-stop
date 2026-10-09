@@ -11,7 +11,7 @@ Numerical and action regressions use plain Node and isolated `vm` contexts. Run 
     node work/qa/renderer-budget.cjs
     node work/qa/audit.cjs
 
-The seven focused suites cover 57 behavior/resource checks. The separate packaging audit parses the assembled runtime and checks the offline single-file restrictions. These checks do not prove shader drawing or hardware performance.
+The seven focused suites cover 58 behavior/resource checks. The separate packaging audit parses the assembled runtime and checks the offline single-file restrictions. These checks do not prove shader drawing or hardware performance.
 
 Real browser scripts live under `work/playtest-*.cjs` and `work/run-cycle.cjs`. Launch them serially to keep measurements meaningful. They use local Playwright and Edge/Chrome paths, never player dependencies. Full circuits use normal keyboard inputs and real elapsed time. Fixed-time/camera shader inspections are labeled separately.
 

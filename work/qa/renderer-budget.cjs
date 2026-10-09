@@ -77,4 +77,19 @@ for (const count of [30, 40, 260, 0, 30]) {
   console.log(`PASS dynamic=${count}, selected static=${expectedStatic}, uploaded=${upload.height}`);
 }
 
-console.log(`${passed}/5 renderer budget/cache transitions passed.`);
+// Detail LOD must free records for scenery, then return when approaching again.
+const detail={...primitive(0),x:10,z:0,detail:true,lod:70,info:3};
+const silhouette={...primitive(1),x:10,z:0,material:25};
+renderer.staticObjects=[detail,silhouette].map(object=>({object,radius:Math.sqrt(3)}));
+renderer._selectionPosition=null;dynamic=[];
+renderer._uploadObjects(sim,eye);
+assert.equal(renderer.objectCount,2);
+assert(renderer._selection.some(candidate=>candidate.entry.object===detail));
+assert.equal(renderer.objectData[11],3,'Per-object detail metadata must survive the upload.');
+renderer._uploadObjects(sim,[110,5,0]);
+assert.equal(renderer.objectCount,1,'Distant decorative detail must leave the scene budget.');
+assert.equal(renderer._selection[0].entry.object,silhouette,'The building silhouette must remain.');
+renderer._uploadObjects(sim,eye);
+assert.equal(renderer.objectCount,2,'Returning close must restore detail after cache invalidation.');
+passed++;console.log('PASS close/far/close detail LOD preserves silhouettes and metadata');
+console.log(`${passed}/6 renderer budget/cache transitions passed.`);
