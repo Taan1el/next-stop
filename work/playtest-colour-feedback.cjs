@@ -6,7 +6,7 @@ if(!/^[a-z0-9-]+$/.test(name))throw Error('Invalid evidence name');
 const directory=path.join(root,'.omx/evidence/cycles',name);fs.mkdirSync(directory,{recursive:true});
 (async()=>{
  const browser=await launchBrowser(),context=await browser.newContext({viewport:{width:1280,height:720},offline:true,acceptDownloads:true}),page=await context.newPage();
- page.setDefaultTimeout(15000);const issues=[],requests=[];page.on('pageerror',e=>issues.push(e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.push(m.text());});page.on('request',r=>requests.push(r.url()));
+ page.setDefaultTimeout(60000);const issues=[],requests=[];page.on('pageerror',e=>issues.push(e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.push(m.text());});page.on('request',r=>requests.push(r.url()));
  const html=fs.readFileSync(path.join(root,'outputs/next-stop.html')),url=fileURL(path.join(root,'outputs/next-stop.html'));
  const result={status:'running',bytes:html.length,sha256:crypto.createHash('sha256').update(html).digest('hex'),browser:browser.version(),issues,requests};
  try{

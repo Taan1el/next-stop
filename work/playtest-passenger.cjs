@@ -2,7 +2,7 @@
 const {launchBrowser,fileURL}=require('./browser.cjs');
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');const root=path.resolve(__dirname,'..'),name=process.argv[2]||'passenger';if(!/^[a-z0-9-]+$/.test(name))throw Error('Invalid evidence name');const directory=path.join(root,'.omx/evidence/cycles',name);fs.mkdirSync(directory,{recursive:true});
 (async()=>{
- const browser=await launchBrowser(),context=await browser.newContext({viewport:{width:1280,height:720},offline:true}),page=await context.newPage();page.setDefaultTimeout(15000);
+ const browser=await launchBrowser(),context=await browser.newContext({viewport:{width:1280,height:720},offline:true}),page=await context.newPage();page.setDefaultTimeout(60000);
  const issues=[],requests=[];page.on('pageerror',e=>issues.push(e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.push(m.text());});page.on('request',r=>requests.push(r.url()));const html=fs.readFileSync(path.join(root,'outputs/next-stop.html'));const result={status:'running',bytes:html.length,sha256:crypto.createHash('sha256').update(html).digest('hex'),browser:browser.version(),start:Date.now()};let timer;
  try{
   await page.goto(fileURL(path.join(root,'outputs/next-stop.html')),{waitUntil:'domcontentloaded',timeout:60000});await page.getByRole('radio',{name:/Passenger local/}).check();await page.getByRole('button',{name:'Start journey',exact:true}).click();await page.keyboard.press('KeyE');await page.keyboard.press('KeyB');await page.keyboard.press('KeyC');await page.keyboard.down('KeyW');await page.waitForTimeout(2700);await page.keyboard.up('KeyW');

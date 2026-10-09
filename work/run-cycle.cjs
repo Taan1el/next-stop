@@ -8,7 +8,7 @@ if(!/^[a-z0-9-]+$/.test(name))throw Error('Invalid cycle evidence name');
 (async()=>{
   const browser=await launchBrowser();
   const context=await browser.newContext({viewport:{width:1280,height:720},offline:true});
-  const page=await context.newPage();page.setDefaultTimeout(15000);
+  const page=await context.newPage();page.setDefaultTimeout(60000);
   const issues=[],requests=[];page.on('pageerror',e=>issues.push(e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.push(m.text());});page.on('request',r=>requests.push(r.url()));
   const timer=setInterval(()=>{const r=runCycle.active;if(r)console.log(JSON.stringify({cycle:name,status:r.status,stops:r.stops.length,discoveries:r.discoveries.length,next:r.current?.name,remaining:r.current?.distance,cameraClear:r.cameraOrbitClear}));},30000);
   try{

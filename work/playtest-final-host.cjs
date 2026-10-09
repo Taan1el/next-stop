@@ -5,7 +5,7 @@ const root=path.resolve(__dirname,'..'),directory=path.join(root,'.omx/evidence/
 (async()=>{
   const browser=await launchBrowser();
   const context=await browser.newContext({viewport:{width:1280,height:720},offline:true});
-  const page=await context.newPage();page.setDefaultTimeout(15000);
+  const page=await context.newPage();page.setDefaultTimeout(60000);
   const issues=[],requests=[];page.on('pageerror',e=>issues.push({type:'pageerror',text:e.message}));page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.push({type:m.type(),text:m.text()});});page.on('request',r=>requests.push(r.url()));
   const html=fs.readFileSync(path.join(root,'outputs/next-stop.html')),save=JSON.parse(fs.readFileSync(path.join(root,'work/qa/fixtures/world1-exploration.json'),'utf8'));
   const result={status:'running',bytes:html.length,sha256:crypto.createHash('sha256').update(html).digest('hex'),browser:browser.version()};

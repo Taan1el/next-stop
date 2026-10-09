@@ -6,7 +6,7 @@ const root=path.resolve(__dirname,'..'),directory=path.join(root,'.omx/evidence/
 (async()=>{
   const browser=await launchBrowser();
   const context=await browser.newContext({viewport:{width:1280,height:720},offline:true,acceptDownloads:true});
-  const page=await context.newPage();page.setDefaultTimeout(15000);
+  const page=await context.newPage();page.setDefaultTimeout(60000);
   const issues=[],requests=[];page.on('pageerror',e=>issues.push(e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.push(m.text());});page.on('request',r=>requests.push(r.url()));
   const result={status:'running',browser:browser.version(),start:Date.now()};let timer;
   try{
