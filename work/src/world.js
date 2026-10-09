@@ -2,8 +2,8 @@
    Terrain: row-major vertex heights; bilinear interpolation over [-500,500].
    Route coordinates are metres of arc length; +Y up, yaw 0 faces +Z. */
 class NSWorld {
-  constructor(seed = 'Next Stop', version = 3) {
-    if (![1,2,3].includes(version)) throw new Error('Unsupported valley generation version.');
+  constructor(seed = 'Next Stop', version = 4) {
+    if (![1,2,3,4].includes(version)) throw new Error('Unsupported valley generation version.');
     this.seed = String(seed).trim().slice(0, 80) || 'Next Stop';
     this.version = version;
     this.size = 1000;
@@ -25,6 +25,7 @@ class NSWorld {
     this._buildRailway();
     this._buildStations();
     this._buildScenery();
+    if(this.version>=4)this._buildDetails();
     this.maxHeight = this.heights.reduce((a, b) => Math.max(a, b), -Infinity);
     this.minHeight = this.heights.reduce((a, b) => Math.min(a, b), Infinity);
     this._checksum = this._makeChecksum();
@@ -246,6 +247,59 @@ class NSWorld {
       }
     }
   }
+  _buildDetails(){
+    // Added after original generation, so old layouts and RNG order stay exact.
+    const buildings=this.objects.filter(o=>o.material===4);
+    const attach=(b,side,up,along,hx,hy,hz,material,type=0,flags={})=>this._object(
+      b.x+Math.cos(b.yaw)*side+Math.sin(b.yaw)*along,b.y+up,
+      b.z-Math.sin(b.yaw)*side+Math.cos(b.yaw)*along,hx,hy,hz,b.yaw,material,type,{detail:true,lod:70,...flags});
+    for(const o of this.objects){
+      if(o.material===5){o.material=31;if(o.type===2)o.type=7;}
+      if(o.material===9){o.material=26;o.detail=true;o.lod=90;}
+    }
+    // The former orange wall patch becomes a proper framed door.
+    this.objects=this.objects.filter(o=>o.material!==18);
+    for(const b of buildings){
+      b.material=b.station||b.hy>5?24:25;
+      const floor=-b.hy,front=-b.hx-.10;
+      if(b.hy>5){attach(b,front,b.hy*.65,0,.07,1.1,1.1,34,0,{lod:130});continue;}
+      attach(b,front,floor+1.15,0,.08,1.15,.65,33);
+      attach(b,front-.025,floor+2.34,0,.10,.10,.77,32);
+      for(const z of [-.74,.74])attach(b,front-.025,floor+1.15,z,.10,1.18,.08,32);
+      attach(b,front-.12,floor+1.08,-.40,.075,.075,.075,27,1);
+      attach(b,front+.10,floor+.14,0,.43,.14,.86,13,0,{solid:true});
+      const windows=b.station?[-4,4]:[-2.35,2.35];
+      for(const z of windows){
+        attach(b,front-.02,0,z,.075,.80,.92,26);
+        for(const edge of [-1,1])attach(b,front-.08,0,z+edge*.99,.11,.91,.085,32);
+        for(const edge of [-1,1])attach(b,front-.08,edge*.88,z,.11,.085,1.06,32);
+        attach(b,front-.17,-.98,z,.26,.12,1.15,13);
+      }
+      attach(b,front+.08,b.hy+.05,0,.16,.13,b.hz+.25,32,0,{lod:105});
+      if(!b.station){
+        attach(b,b.hx+.05,b.hy+.05,0,.14,.13,b.hz+.25,32,0,{lod:105});
+        const chimney=attach(b,b.hx*.45,b.hy+1.4,1.3,.35,.90,.35,24,0,{lod:110});
+        this.chimneys.push({x:chimney.x,y:chimney.y+chimney.hy+.05,z:chimney.z});
+      }
+    }
+    for(let i=0;i<this.stations.length;i++){
+      const station=this.stations[i],p=this.routeAt(station.s);
+      const at=(side,up,along,hx,hy,hz,material,type=0,flags={})=>attach(p,side,up,along,hx,hy,hz,material,type,flags);
+      at(5.8,4.1,0,1.9,.13,7.5,31,0,{lod:105});
+      at(3.9,3.97,0,.10,.21,7.7,32,0,{lod:105});
+      for(const along of [-6,6]){at(6.8,2.1,along,.075,2.0,.075,28,5,{solid:true});at(5.4,3.8,along,1.50,.10,.10,32);}
+      // Seat, back and legs read as one bench from a distance.
+      at(6.20,.52,-11,.48,.10,1.50,30);
+      at(6.65,.99,-11,.08,.43,1.5,30);
+      for(const along of [-12.1,-9.9])at(6.20,.22,along,.35,.23,.08,28,0,{solid:true});
+      at(6.45,.48,10,.43,.45,.43,30,5,{solid:true});
+      at(6.45,.15,12.2,.54,.15,.54,30,0,{solid:true});
+      at(6.45,.65,12.2,.42,.35,.42,30,0,{solid:true});
+      at(6.50,3.3,0,.20,.50,2.4,35,0,{info:i,lod:100});
+      at(6.7,4.01,17,.32,.08,.32,28,5);
+      at(6.7,3.4,17,.29,.06,.29,27,5);
+    }
+  }
   _inside(object, x, z, margin = 0) {
     const dx = x - object.x, dz = z - object.z, c = Math.cos(object.yaw), s = Math.sin(object.yaw);
     return Math.abs(dx * c - dz * s) < object.hx + margin && Math.abs(dx * s + dz * c) < object.hz + margin;
@@ -275,7 +329,7 @@ class NSWorld {
     let h = this._seedHash;
     const update = value => { h = Math.imul(h ^ Math.round(value * 1000), 16777619) >>> 0; };
     this.heights.forEach(update);
-    for (const o of this.objects) for (const key of ['x', 'y', 'z', 'hx', 'hy', 'hz', 'yaw', 'material', 'type']) update(o[key]);
+    for (const o of this.objects){for (const key of ['x', 'y', 'z', 'hx', 'hy', 'hz', 'yaw', 'material', 'type']) update(o[key]);if(this.version>=4)update(o.info||0);}
     for (const p of this.route) for (const key of ['x', 'y', 'z', 's']) update(p[key]);
     return h.toString(16).padStart(8, '0');
   }
@@ -289,6 +343,7 @@ class NSSimulation {
     this.weather = { rain: 0, fog: .08 };
     this.weatherTarget = 'clear';
     this.train = { s: 0, speed: 0, throttle: 0, brake: 1, direction: 1 };
+    if(world.version>=4)this.train.wheelTravel=0;
     this.player = { x: 0, y: 0, z: 0, yaw: 0, pitch: -.05, mode: 'foot' };
     this.cameraMode = 'chase';
     this.delivery = { index: 0, completed: 0, started: false, finished: false };
@@ -318,6 +373,7 @@ class NSSimulation {
     if (!Number.isFinite(dt) || dt <= 0) return;
     dt = Math.min(dt, 1 / 15);
     this._previousS = this.train.s;
+    this._previousWheelTravel=this.train.wheelTravel;
     this._previousPlayer = { ...this.player };
     this.time += dt;
     const mode = this.settings.weatherMode;
@@ -401,7 +457,9 @@ class NSSimulation {
     if (!speed && Math.sign(next) !== Math.sign(drive)) next = 0;
     next = Math.max(-this.maxSpeed, Math.min(this.maxSpeed, next));
     t.speed = next;
-    t.s = ((t.s + (speed + next) * .5 * dt) % this.world.routeLength + this.world.routeLength) % this.world.routeLength;
+    const travelled=(speed+next)*.5*dt;
+    if(Number.isFinite(t.wheelTravel))t.wheelTravel+=travelled;
+    t.s = ((t.s + travelled) % this.world.routeLength + this.world.routeLength) % this.world.routeLength;
   }
   stoppingDistance() {
     if (this.train.speed === 0) return 0;
@@ -547,6 +605,8 @@ class NSSimulation {
         z: p.z + Math.cos(p.yaw) * along - Math.sin(p.yaw) * side, hx, hy, hz, yaw: p.yaw, material, type, train: true });
     };
     const loco = this._presentationRoute();
+    if(this.world.version>=4)objects.push(...this._detailedTrainObjects(loco));
+    else{
     const engineMaterial=this.world.version>=3?23:8;
     add(loco, 0, .58, 1.13, .42, 4.5, 7);
     add(loco, 1.2, 1.7, 1.03, 1.03, 2.75, engineMaterial, 1);
@@ -570,13 +630,86 @@ class NSSimulation {
       for (const side of [-1.205, 1.205]) add(p, 0, 2.42, .035, .64, 3.8, 9, 0, side);
       for (const side of [-1.06, 1.06]) for (const along of [-3.2, 3.2]) add(p, along, .43, .18, .4, .4, 7, 1, side);
     }
+    }
     if(this.world.version>=2){
       add(loco,-4.43,1.18,.22,.22,.10,20);
       add(loco,-1.7,1.42,.42,.20+.18*(this.steamFire??.72),.12,18);
       const puff=(x,y,z,age,scale)=>objects.push({x:x+age*.75,y:y+age*.8,z:z-age*.22,hx:scale+age*.19,hy:scale*.7+age*.25,hz:scale+age*.18,yaw:0,material:19,type:1});
       for(let i=0;i<4;i++){const age=((this.time+i*1.2)%4.8),p=this.world.routeAt(this.train.s-this.train.speed*age);puff(p.x+Math.sin(p.yaw)*3.7,p.y+3.4,p.z+Math.cos(p.yaw)*3.7,age,.28);}
-      for(const chimney of this.world.chimneys)if(Math.hypot(chimney.x-this.player.x,chimney.z-this.player.z)<110)
+      const chimneys=this.world.version>=4?this.world.chimneys.filter(c=>Math.hypot(c.x-this.player.x,c.z-this.player.z)<110).sort((a,b)=>Math.hypot(a.x-this.player.x,a.z-this.player.z)-Math.hypot(b.x-this.player.x,b.z-this.player.z)).slice(0,3):this.world.chimneys;
+      for(const chimney of chimneys)if(Math.hypot(chimney.x-this.player.x,chimney.z-this.player.z)<110)
         for(let i=0;i<3;i++)puff(chimney.x,chimney.y,chimney.z,(this.time*.7+i*1.5)%4.5,.35);
+    }
+    return objects;
+  }
+  _detailedTrainObjects(loco){
+    const objects=[],add=(p,along,up,hx,hy,hz,material,type=0,side=0,info=0)=>{
+      const o={x:p.x+Math.sin(p.yaw)*along+Math.cos(p.yaw)*side,y:p.y+up,z:p.z+Math.cos(p.yaw)*along-Math.sin(p.yaw)*side,hx,hy,hz,yaw:p.yaw,material,type,info,train:true};objects.push(o);return o;
+    };
+    const alpha=Math.max(0,Math.min(1,this.renderAlpha??1));
+    const previous=this._previousWheelTravel??this.train.wheelTravel??0;
+    const travel=previous+((this.train.wheelTravel??0)-previous)*alpha,phase=travel/.72;
+    add(loco,0,.85,1.08,.18,4.5,28);
+    add(loco,1.20,2.05,.97,.97,2.72,23,3);
+    add(loco,3.96,2.05,.91,.91,.12,28,3);
+    add(loco,4.10,2.05,.22,.22,.055,27,3);
+    add(loco,3.70,3.30,.23,.46,.23,28,5);
+    add(loco,3.70,3.80,.34,.09,.34,28,5);
+    add(loco,.35,3.02,.32,.29,.32,27,1);
+    add(loco,1.65,3.05,.29,.32,.29,23,1);
+    for(const side of [-1.04,1.04])add(loco,1.2,2.28,.045,.045,2.5,27,3,side);
+    add(loco,4.00,2.47,.27,.27,.16,26,3);
+    for(const side of [-1.20,1.20]){
+      add(loco,-2.85,1.34,.075,.36,1.50,23,0,side);
+      for(const along of [-4.2,-1.45])add(loco,along,2.49,.075,1.10,.075,28,5,side);
+      add(loco,-2.85,.94,.34,.06,1.10,28,0,side*1.07);
+    }
+    add(loco,-4.28,2.1,1.13,.96,.06,23);
+    add(loco,-2.85,3.67,1.29,.15,1.68,28);
+    add(loco,-1.58,2.06,.87,.78,.12,28,3);
+    for(const side of [-.35,.35])add(loco,-1.77,2.55,.20,.20,.055,36,3,side,(this.steamPressure??9.2)/11.8);
+    add(loco,-1.83,1.63,.52,.48,.06,28);
+    add(loco,-1.91,2.00,.42,.07,.08,27);
+    add(loco,-2.05,2.20,.05,.30,.05,39,5,-.76);
+    add(loco,-2.05,2.53,.16,.07,.16,27,5,-.76);
+    add(loco,-2.3,1.17,.35,.08,.45,42,0,.73);
+    // Three coupled drivers. Quartered crank pins and rods follow wheel travel.
+    for(const side of [-1,1]){
+      const q=phase+(side<0?Math.PI/2:0),dy=Math.cos(q)*.22,dz=Math.sin(q)*.22;
+      for(const along of [-1.60,.30,2.20]){
+        add(loco,along,.72,.13,.72,.72,29,4,side*1.16,NSSimulation.angle(q));
+        add(loco,along+dz,.72+dy,.065,.10,.10,27,4,side*1.35);
+      }
+      add(loco,.30+dz,.72+dy,.065,.065,1.95,38,0,side*1.37);
+      add(loco,3.40,.69,.25,.22,.63,28,3,side*1.02);
+      add(loco,3.40+dz*.6,.70,.055,.055,.82,38,3,side*1.30);
+      const z0=2.20+dz,z1=3.43+dz*.6,y0=.72+dy,y1=.70;
+      add(loco,(z0+z1)/2,(y0+y1)/2,.055,.055,Math.hypot(z1-z0,y1-y0)/2,38,6,side*1.39,Math.atan2(y1-y0,z1-z0));
+      for(const along of [-3.80,3.70])add(loco,along,.37,.12,.37,.37,29,4,side*1.04,NSSimulation.angle(travel/.37));
+    }
+    const buffers=(p,end)=>{
+      add(p,end*4.57,.92,1.25,.18,.13,8);
+      for(const side of [-.83,.83])add(p,end*4.83,.94,.21,.21,.19,28,3,side);
+      add(p,end*5.15,.72,.12,.12,.34,28,3);
+    };
+    buffers(loco,1);buffers(loco,-1);
+    for(let carriage=1;carriage<=2;carriage++){
+      const p=this._presentationRoute(-carriage*11.3),passenger=this.serviceMode==='passenger'||this.serviceMode==='explore',timber=this.cargoKind==='timber'&&!passenger;
+      Object.assign(add(p,0,.85,1.13,.20,4.45,28),{part:'carriage-frame',carriage});
+      if(passenger){
+        add(p,0,2.10,1.18,1.02,4.25,8);
+        add(p,0,3.20,1.23,.30,4.40,28,3);
+        for(const side of [-1.20,1.20]){add(p,0,2.48,.055,.55,3.80,26,0,side);add(p,0,1.73,.06,.07,4.12,27,0,side);}
+      }else{
+        for(const side of [-1.14,1.14])add(p,0,timber?1.20:1.52,.08,timber?.23:.54,4.33,30,0,side);
+        for(const along of [-4.32,4.32])add(p,along,timber?1.20:1.52,1.15,timber?.23:.54,.08,30);
+        if(timber){for(const side of [-.65,0,.65])add(p,0,1.66,.29,.29,3.88,40,3,side);}
+        else if(this.cargoKind==='mail'){add(p,0,2.28,1.13,1.16,4.13,25);add(p,0,3.48,1.20,.22,4.25,28,3);}
+        else if(carriage===1){add(p,-1.1,1.60,.67,.53,.82,30);add(p,1.1,1.60,.67,.53,.82,30);add(p,0,1.70,.44,.60,.44,27,5,.55);}
+        else add(p,0,1.76,1.02,.56,3.84,37,1);
+      }
+      for(const side of [-1.08,1.08])for(const along of [-3.05,3.05])add(p,along,.45,.13,.45,.45,29,4,side,NSSimulation.angle(travel/.45));
+      buffers(p,1);buffers(p,-1);
     }
     return objects;
   }
@@ -610,6 +743,7 @@ class NSSimulation {
     const t = object(data.train, 'train');
     const train = { s: number(t.s, 0, this.world.routeLength - 1e-8, 'route distance'), speed: number(t.speed, -this.maxSpeed, this.maxSpeed, 'speed'),
       throttle: number(t.throttle, 0, 1, 'throttle'), brake: number(t.brake, 0, 1, 'brake'), direction: choice(t.direction, [-1, 1], 'direction') };
+    if(this.world.version>=4)train.wheelTravel=t.wheelTravel===undefined?0:number(t.wheelTravel,-1e10,1e10,'wheel travel');
     const p = object(data.player, 'player'), half = this.world.size / 2;
     const player = { x: number(p.x, -half + 4, half - 4, 'player x'), y: number(p.y, -10, Math.max(150,this.world.maxHeight+12), 'player y'), z: number(p.z, -half + 4, half - 4, 'player z'),
       yaw: NSSimulation.angle(number(p.yaw, -1e6, 1e6, 'yaw')), pitch: number(p.pitch, -1.15, 1.15, 'pitch'), mode: choice(p.mode, ['foot', 'train'], 'player mode') };
@@ -636,6 +770,7 @@ class NSSimulation {
     Object.assign(this, { time, weather: restoredWeather, weatherTarget, train, player, cameraMode, delivery, settings });
     this._lastRouteYaw = this.world.routeAt(train.s).yaw; this._camera = null;
     this._previousS = train.s; this._previousPlayer = { ...player }; this.renderAlpha = 1;
+    this._previousWheelTravel=train.wheelTravel;
     return 'Journey restored.';
   }
 }

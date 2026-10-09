@@ -165,12 +165,12 @@ test('Carriage centres and yaw use separate arc-length positions through curved 
   const sim=new NSSimulation(world);
   for(const distance of [0,world.routeLength/3,world.routeLength*.57,world.routeLength-4]) {
     sim.train.s=distance;
-    // Numerical body boxes are distinguished by the documented carriage body half-length/height.
-    const bodies=sim.dynamicObjects().filter(o=>o.material===8&&Math.abs(o.hz-4.55)<1e-10&&Math.abs(o.hy-1.23)<1e-10);
+    // The load may change, but each chassis must follow its own route position.
+    const bodies=sim.dynamicObjects().filter(o=>world.version>=4?o.part==='carriage-frame':o.material===8&&Math.abs(o.hz-4.55)<1e-10&&Math.abs(o.hy-1.23)<1e-10);
     assert.equal(bodies.length,2);
     for(let i=0;i<2;i++) {
       const expected=world.routeAt(distance-(i+1)*11.3),actual=bodies[i];
-      near(actual.x,expected.x);near(actual.z,expected.z);near(actual.y-2.1,expected.y);near(actual.yaw,expected.yaw);
+      near(actual.x,expected.x);near(actual.z,expected.z);near(actual.y-(world.version>=4?.85:2.1),expected.y);near(actual.yaw,expected.yaw);
     }
   }
 });
@@ -185,7 +185,7 @@ test('Presentation interpolation crosses route seam locally without changing sim
     sim.renderAlpha=alpha;
     const p=world.routeAt(previous+delta*alpha);
     const locomotive=sim.dynamicObjects()[0];
-    near(locomotive.x,p.x);near(locomotive.z,p.z);near(locomotive.y-.58,p.y);
+    near(locomotive.x,p.x);near(locomotive.z,p.z);near(locomotive.y-(world.version>=4?.85:.58),p.y);
     const camera=sim.camera(1/60);assert(camera.position.every(Number.isFinite));
     assert.deepEqual(normalize(sim.serialize()),before,'Presentation must not mutate saved simulation state.');
   }

@@ -45,8 +45,9 @@
   uniform float u_motion;
   uniform float u_far;
   uniform vec3 u_lamps[3];
+  uniform highp usampler2D u_labels;
 
-  struct Hit { float t; vec3 p; vec3 n; int material; vec3 local; };
+  struct Hit { float t; vec3 p; vec3 n; int material; vec3 local; vec3 extent; float info; };
 
   float hash21(vec2 p) {
     vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
@@ -179,6 +180,8 @@
     vec3 p=ro-centre.xyz;
     vec3 localRo=vec3(data.x*p.x-data.y*p.z,p.y,data.y*p.x+data.x*p.z);
     vec3 localRd=vec3(data.x*rd.x-data.y*rd.z,rd.y,data.y*rd.x+data.x*rd.z);
+    float pitch=shape.w>5.5&&shape.w<6.5?data.w:0.0;
+    if(pitch!=0.0){mat2 turn=mat2(cos(pitch),sin(pitch),-sin(pitch),cos(pitch));localRo.yz=turn*localRo.yz;localRd.yz=turn*localRd.yz;}
     float t; vec3 normal;
     if (shape.w>0.5 && shape.w<1.5) {
       vec3 a=localRo/shape.xyz, b=localRd/shape.xyz;
@@ -190,12 +193,32 @@
       if (t<0.025) t=(-B+q)/A;
       if (t<0.025 || t>limit) return false;
       normal=normalize((localRo+localRd*t)/(shape.xyz*shape.xyz));
+    } else if(shape.w>2.5&&shape.w<5.5){
+      // Finite elliptical cylinders: boiler Z, wheel X and chimney Y.
+      int axis=2;if(shape.w>3.5&&shape.w<4.5)axis=0;else if(shape.w>4.5)axis=1;
+      vec3 a=localRo/shape.xyz,b=localRd/shape.xyz;
+      vec2 radialA=a.xy,radialB=b.xy;
+      if(axis==0){radialA=a.yz;radialB=b.yz;}else if(axis==1){radialA=a.xz;radialB=b.xz;}
+      float A=dot(radialB,radialB),B=dot(radialA,radialB),C=dot(radialA,radialA)-1.0;
+      vec2 radial=vec2(-1e9,1e9);
+      if(A<.0000001){if(C>0.0)return false;}
+      else{float disc=B*B-A*C;if(disc<0.0)return false;float root=sqrt(disc);radial=vec2((-B-root)/A,(-B+root)/A);}
+      vec2 cap=vec2(-1e9,1e9);
+      if(abs(b[axis])<.0000001){if(abs(a[axis])>1.0)return false;}
+      else{float t0=(-1.0-a[axis])/b[axis],t1=(1.0-a[axis])/b[axis];cap=vec2(min(t0,t1),max(t0,t1));}
+      float nearT=max(radial.x,cap.x),farT=min(radial.y,cap.y);
+      if(nearT>farT||farT<.025)return false;t=nearT>=.025?nearT:farT;if(t>limit)return false;
+      vec3 point=localRo+localRd*t;
+      normal=vec3(0.0);
+      if(abs(point[axis]/shape[axis])>.9999)normal[axis]=sign(point[axis]);
+      else{normal=point/(shape.xyz*shape.xyz);normal[axis]=0.0;normal=normalize(normal);}
     } else {
       vec2 interval=boxInterval(localRo,localRd,-shape.xyz,shape.xyz);
       // A gable is a bounded convex prism; clip the two roof planes directly.
-      if(shape.w>1.5){
+      if((shape.w>1.5&&shape.w<2.5)||shape.w>6.5){
+        float slope=shape.y/shape.x;if(shape.w>6.5)slope*=2.0;
         for(int side=-1;side<=1;side+=2){
-          vec3 plane=vec3(float(side)*shape.y/shape.x,1.0,0.0);
+          vec3 plane=vec3(float(side)*slope,1.0,0.0);
           float numerator=shape.y-dot(plane,localRo),denominator=dot(plane,localRd);
           if(abs(denominator)<.000001){if(numerator<0.0)return false;}
           else{float crossing=numerator/denominator;if(denominator<0.0)interval.x=max(interval.x,crossing);else interval.y=min(interval.y,crossing);}
@@ -214,12 +237,14 @@
       } else if (ratio.z>ratio.y) {
         normal=vec3(0.0,0.0,sign(localP.z));
       }
-      if(shape.w>1.5){vec3 roofNormal=vec3(sign(localP.x)*shape.y/shape.x,1.0,0.0);if(abs(dot(roofNormal,localP)-shape.y)<.002)normal=normalize(roofNormal);}
+      if((shape.w>1.5&&shape.w<2.5)||shape.w>6.5){float slope=shape.y/shape.x;if(shape.w>6.5)slope*=2.0;vec3 roofNormal=vec3(sign(localP.x)*slope,1.0,0.0);if(abs(dot(roofNormal,localP)-shape.y)<.002)normal=normalize(roofNormal);}
     }
+    if(pitch!=0.0){mat2 untilt=mat2(cos(pitch),-sin(pitch),sin(pitch),cos(pitch));normal.yz=untilt*normal.yz;}
     hit.t=t; hit.p=ro+rd*t;
     hit.n=normalize(vec3(data.x*normal.x+data.y*normal.z,normal.y,
                         -data.y*normal.x+data.x*normal.z));
     hit.local=localRo+localRd*t;
+    hit.extent=shape.xyz;hit.info=data.w;
     hit.material=int(data.z+0.5);
     return true;
   }
@@ -285,7 +310,57 @@
     if (material==19) return vec3(.32,.34,.31);
     if (material==20) return vec3(1.0,.075,.025);
     if (material==23) return vec3(.19,.22,.16);
+    if (material==24) return vec3(.46,.29,.20);
+    if (material==25) return vec3(.51,.55,.43);
+    if (material==26) return vec3(.16,.30,.34);
+    if (material==27) return vec3(.74,.55,.22);
+    if (material==28||material==29) return vec3(.11,.14,.13);
+    if (material==30) return vec3(.39,.28,.16);
+    if (material==31) return vec3(.24,.30,.32);
+    if (material==32) return vec3(.76,.75,.61);
+    if (material==33) return vec3(.17,.27,.21);
+    if (material==34||material==35||material==36) return vec3(.76,.72,.57);
+    if (material==37) return vec3(.075,.085,.08);
+    if (material==38) return vec3(.61,.63,.56);
+    if (material==39) return vec3(.66,.34,.16);
+    if (material==40) return vec3(.52,.38,.23);
+    if (material==42) return vec3(.24,.28,.17);
     return vec3(.55);
+  }
+  bool labelInk(Hit h){
+    int id=int(h.info+.5),length=8;if(id==1)length=11;else if(id==2)length=10;
+    const int pine[8]=int[8](80,73,78,69,66,65,78,75);
+    const int bell[11]=int[11](66,69,76,76,87,69,65,84,72,69,82);
+    const int stone[10]=int[10](83,84,79,78,69,72,65,86,69,78);
+    float horizontal=h.local.z*sign(h.local.x)+float(length)*.195;
+    int x=int(floor(horizontal/.065)),row=int(floor((.2275-h.local.y)/.065));
+    if(x<0||x>=length*6||row<0||row>6)return false;
+    int letter=x/6,column=x%6;if(column==5)return false;
+    int glyph=pine[min(letter,7)];if(id==1)glyph=bell[min(letter,10)];else if(id==2)glyph=stone[min(letter,9)];
+    uint bits=texelFetch(u_labels,ivec2(glyph,row),0).r;return (bits>>uint(4-column)&1u)!=0u;
+  }
+  float handDistance(vec2 p,float angle,float reach){vec2 axis=vec2(sin(angle),cos(angle));return length(p-axis*clamp(dot(p,axis),0.0,reach));}
+  vec3 detailColour(Hit h,vec3 base){
+    vec3 p=h.local;
+    if(h.material==23){float band=step(.935,fract((p.z+2.72)*.66));base=mix(base,vec3(.33,.36,.29),band);float rivet=step(.91,fract(p.z*3.3))*step(.90,fract(atan(p.y,p.x)*3.0));return mix(base,vec3(.43,.44,.36),rivet);}
+    if(h.material==24){float row=floor(p.y*3.5);float mortar=step(.91,fract(p.y*3.5))+step(.94,fract((p.z+p.x)*1.4+mod(row,2.0)*.5));return mix(base*(.90+.16*hash21(floor(p.zy*vec2(1.4,3.5)))),vec3(.56,.53,.44),clamp(mortar,0.0,1.0));}
+    if(h.material==25||h.material==30){float joint=step(.93,fract(p.y*4.1));return mix(base*(.86+.20*hash21(vec2(floor(p.y*4.1),floor(p.z*.8)))),base*.48,joint);}
+    if(h.material==26){float divider=step(.91,fract((p.z+h.extent.z)*1.45))+step(.91,fract((p.y+h.extent.y)*1.70));float day=smoothstep(-.15,.25,u_sun.y);return mix(mix(vec3(.69,.44,.17),vec3(.12,.26,.30),day),vec3(.68,.65,.48),clamp(divider,0.0,1.0));}
+    if(h.material==29){vec2 uv=p.zy/h.extent.zy;float r=length(uv),angle=atan(uv.x,uv.y)-h.info;float spoke=step(.94,abs(cos(angle*5.0)));return mix(base,vec3(.57,.58,.49),max(spoke*step(.19,r),max(step(.88,r),1.0-step(.18,r))));}
+    if(h.material==31){float tile=step(.92,fract(p.z*2.8))+step(.91,fract(p.x*2.0));return mix(base*(.87+.16*hash21(floor(p.xz*vec2(2.0,2.8)))),base*.47,clamp(tile,0.0,1.0));}
+    if(h.material==33)return mix(base,base*.48,step(.93,fract(p.z*6.0)));
+    if(h.material==35)return labelInk(h)?vec3(.10,.15,.12):base;
+    if(h.material==34||h.material==36){
+      vec2 uv=p.zy/h.extent.zy;if(h.material==36)uv=p.xy/h.extent.xy;
+      float r=length(uv),angle=atan(uv.x,uv.y),dial=step(.85,r)+step(.91,abs(cos(angle*6.0)))*step(.66,r);
+      float needle=0.0;
+      if(h.material==34){float minutes=480.0+u_time*2.0;needle=max(1.0-smoothstep(.018,.042,handDistance(uv,minutes*6.283185/60.0,.70)),1.0-smoothstep(.028,.055,handDistance(uv,minutes*6.283185/720.0,.43)));}
+      else needle=1.0-smoothstep(.020,.060,handDistance(uv,-2.25+clamp(h.info,0.0,1.0)*4.5,.72));
+      return mix(base,vec3(.12,.16,.13),clamp(dial+needle,0.0,1.0));
+    }
+    if(h.material==37)return base*(.75+.5*hash21(floor(p.xz*5.0)));
+    if(h.material==40){float rings=step(.63,fract(length(p.xy)*15.0));return mix(base,base*.63,rings*step(.85,abs(p.z/h.extent.z)));}
+    return base;
   }
 
   float shadow(Hit hit) {
@@ -304,7 +379,7 @@
     return 1.0;
   }
   vec3 illuminate(Hit hit,bool allowShadow) {
-    vec3 base=palette(hit.material,hit.p);
+    vec3 base=palette(hit.material,hit.p);if(hit.material>=23)base=detailColour(hit,base);
     float day=smoothstep(-.15,.25,u_sun.y);
     float ambient=mix(.20,.49,day)*(1.0-u_weather.x*.23);
     float diffuse=max(0.0,dot(hit.n,u_sun))*max(0.0,u_sun.y)*.92*(1.0-u_weather.x*.45);
@@ -326,6 +401,8 @@
     if(hit.material==17)colour=base*(1.15+.06*sin(u_time*3.1));
     if(hit.material==20)colour=base*1.1;
     if(hit.material==18){float flame=.65+.35*sin(hit.local.y*11.0-u_time*8.0+hit.local.x*7.0);colour=mix(vec3(.73,.12,.01),vec3(1.0,.72,.12),flame);}
+    if(hit.material==26)colour=base*mix(.83,.72,day);
+    if(hit.material==27||hit.material==38||hit.material==39){float glint=pow(max(0.0,dot(reflect(-u_sun,hit.n),normalize(u_eye-hit.p))),16.0);colour+=base*glint*.4*day;}
     return colour;
   }
 
@@ -350,6 +427,20 @@
     if (h.material==19) return pattern>.7 ? 126u : pattern>.3 ? 58u : 46u;
     if (h.material==20) return 42u;
     if (h.material==23) return side ? (pattern>.6 ? 35u : 72u) : 61u;
+    if (h.material==24) return fract(h.local.y*3.5)>.87?45u:pattern>.7?58u:35u;
+    if (h.material==25||h.material==30) return fract(h.local.y*4.1)>.88?45u:124u;
+    if (h.material==26) return light>.40?43u:34u;
+    if (h.material==27||h.material==38||h.material==39) return side?124u:61u;
+    if (h.material==28) return pattern>.6?35u:61u;
+    if (h.material==29){float a=atan(h.local.z/h.extent.z,h.local.y/h.extent.y)-h.info;return abs(cos(a*5.0))>.85?43u:46u;}
+    if (h.material==31) return h.n.y>.6?61u:h.n.x>0.0?47u:92u;
+    if (h.material==32) return side?124u:45u;
+    if (h.material==33) return 124u;
+    if (h.material==34||h.material==36) return 46u;
+    if (h.material==35) return labelInk(h)?35u:32u;
+    if (h.material==37) return pattern>.5?35u:42u;
+    if (h.material==40) return abs(h.local.z/h.extent.z)>.85?64u:61u;
+    if (h.material==42) return 58u;
     return 63u;
   }
   uvec4 colourRecord(vec3 c) { return uvec4(round(clamp(c,0.0,1.0)*255.0),255u); }
@@ -589,7 +680,7 @@
       this.sceneUniforms = uniforms(gl,this.sceneProgram,[
         'terrain','objects','resolution','objectCount','shadowCount','size','water',
         'heightRange','viewport','cellSize','eye','forward','right','up','sun',
-        'headPosition','headDirection','time','weather','motion','far','lamps'
+        'headPosition','headDirection','time','weather','motion','far','lamps','labels'
       ]);
       this.displayUniforms = uniforms(gl,this.displayProgram,[
         'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
@@ -609,6 +700,7 @@
       gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
       gl.useProgram(this.sceneProgram);
       gl.uniform1i(this.sceneUniforms.terrain,0); gl.uniform1i(this.sceneUniforms.objects,1);
+      gl.uniform1i(this.sceneUniforms.labels,2);
       gl.useProgram(this.displayProgram);
       gl.uniform1i(this.displayUniforms.records,0); gl.uniform1i(this.displayUniforms.foreground,1);
       gl.uniform1i(this.displayUniforms.background,2); gl.uniform1i(this.displayUniforms.masks,3);
@@ -672,6 +764,7 @@
           const o=entry.object;
           const distance=Math.hypot(o.x-eye[0],o.z-eye[2]);
           if (distance-entry.radius>420) continue;
+          if(o.detail&&distance-entry.radius>(o.lod||70))continue;
           // Preserve station/building/tree silhouettes before filling the local
           // numerical track corridor. All candidates remain authoritative data.
           candidates.push({ entry,distance,score:distance+(o.material===7 ? 28 : 0) });
@@ -695,7 +788,7 @@
         this.objectData[i+4]=Math.max(.015,object.hx); this.objectData[i+5]=Math.max(.015,object.hy);
         this.objectData[i+6]=Math.max(.015,object.hz); this.objectData[i+7]=object.type || 0;
         this.objectData[i+8]=Math.cos(object.yaw || 0); this.objectData[i+9]=Math.sin(object.yaw || 0);
-        this.objectData[i+10]=object.material; this.objectData[i+11]=0;
+        this.objectData[i+10]=object.material; this.objectData[i+11]=object.info||0;
       };
       for (const object of dynamic) write(object);
       for (const candidate of this._selection) write(candidate.entry.object);
@@ -740,7 +833,7 @@
       gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
       gl.bindFramebuffer(gl.FRAMEBUFFER,this.framebuffer);
       gl.viewport(0,0,this.columns,this.rows); gl.useProgram(this.sceneProgram);
-      unit(gl,0,this.terrainTexture); unit(gl,1,this.objectTexture);
+      unit(gl,0,this.terrainTexture); unit(gl,1,this.objectTexture);unit(gl,2,this.maskTexture);
       gl.uniform1i(u.resolution,this.world.resolution); gl.uniform1i(u.objectCount,this.objectCount);
       gl.uniform1i(u.shadowCount,this.shadowCount); gl.uniform1f(u.size,this.world.size);
       gl.uniform1f(u.water,this.world.waterLevel); gl.uniform2fv(u.heightRange,this.heightRange);

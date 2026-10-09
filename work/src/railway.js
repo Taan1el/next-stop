@@ -9,7 +9,7 @@ class NSRailway {
       {id:'farm-crossing',name:'Farm crossing',s:world.routeLength*.76,radius:24,limit:5}];
   }
   configure(sim){if(this.service==='explore')Object.assign(sim.delivery,{started:true,finished:true,index:0,completed:3});this.apply(sim);}
-  apply(sim){const load=this.service==='freight'&&this.cargo==='timber'?.92:1;sim.tractionScale=(this.assisted?1:Math.max(.36,Math.min(1,this.engine.pressure/8.8)))*load;sim.steamFire=this.engine.fire;}
+  apply(sim){const load=this.service==='freight'&&this.cargo==='timber'?.92:1;sim.tractionScale=(this.assisted?1:Math.max(.36,Math.min(1,this.engine.pressure/8.8)))*load;sim.steamFire=this.engine.fire;sim.steamPressure=this.engine.pressure;sim.serviceMode=this.service;sim.cargoKind=this.cargo;}
   instruction(sim){
     if(sim.player.mode!=='train')return null;
     const length=this.world.routeLength,direction=Math.abs(sim.train.speed)>.025?Math.sign(sim.train.speed):sim.train.direction;
