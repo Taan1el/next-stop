@@ -13,6 +13,6 @@ Numerical and action regressions use plain Node and isolated `vm` contexts. Run 
 
 The seven focused suites cover 58 behavior/resource checks. The separate packaging audit parses the assembled runtime and checks the offline single-file restrictions. These checks do not prove shader drawing or hardware performance.
 
-Real browser scripts live under `work/playtest-*.cjs` and `work/run-cycle.cjs`. Launch them serially to keep measurements meaningful. They use local Playwright and Edge/Chrome paths, never player dependencies. Full circuits use normal keyboard inputs and real elapsed time. Fixed-time/camera shader inspections are labeled separately.
+Real browser scripts live under `work/playtest-*.cjs` and `work/run-cycle.cjs`. Run `npm ci`, `npx playwright install chromium` and `npm run test:browser`. The shared launcher also supports installed Chrome/Edge or an explicit executable path. Launch processes serially to keep measurements meaningful. Full circuits use normal keyboard inputs and real elapsed time; fixed-time/camera shader inspections are labeled separately.
 
-Evidence and failures remain under ignored `.omx/evidence/`. Current artifact scope and actual results live in `outputs/NEXT_STOP_VERIFICATION.md`; plans alone are not acceptance evidence.
+Three historical save states are committed under `fixtures/` and checked by `save-fixtures.cjs`. Browser scripts require no ignored evidence files as inputs. Generated results remain under ignored `.omx/evidence/`. See [testing](../../docs/TESTING.md) and [release validation](../../docs/RELEASE_VALIDATION.md) for coverage and limits.

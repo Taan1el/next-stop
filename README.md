@@ -1,45 +1,83 @@
 # Next Stop
 
-An old rural railway made of coloured glyphs. Drive a steam train through woods, fields, mountain ridges and three country stations, or leave the cab to explore.
+A small rural railway game made of coloured letters. Take a steam train through fields, woods and mountain weather, stop at country stations, or leave the cab to explore on foot.
 
-## Play
+![A steam train beside Bellweather station, with the lake and mountain ridges beyond](outputs/NEXT_STOP_PREVIEW.png)
 
-Open **outputs/next-stop.html** in a browser with WebGL2. The game runs offline from that single file. No images, imported models, engine or runtime libraries are required.
+**Desktop prototype · v0.1.0 · MIT license**
 
-Choose goods, passenger or free-running service. Goods work offers mixed farm freight, heavier timber or prompt mail. Passenger stops include a short boarding wait. Free running has no delivery obligation. Settings offers an automatic fireman for relaxed driving.
+## Download and play
 
-| Controls | Action |
+1. [Download next-stop.html](https://github.com/Taan1el/next-stop/raw/refs/heads/main/outputs/next-stop.html). If your browser displays the source, save it as `next-stop.html`.
+2. Open the downloaded file in a desktop browser with WebGL2 and hardware acceleration enabled.
+3. Choose a service and select **Start journey**. Press **E** beside the locomotive to board.
+
+The player needs only that HTML file. No installation, server, internet connection, images, imported models or game engine are required. The MIT notice is included inside the file.
+
+Keyboard and mouse are required. Windows Chromium-based browsers have been tested; other WebGL2 browsers are not yet verified. Mobile touch controls are not implemented.
+
+## Life on the branch line
+
+- **Goods train:** mixed farm freight, heavier timber wagons or prompt mail.
+- **Passenger local:** carry workers and market passengers; wait for boarding before serving each stop.
+- **Free running:** drive and explore without delivery obligations.
+- **Steam operation:** tend the fire, watch pressure, brake for the bridge and whistle at crossings. An optional automatic fireman makes driving more relaxed.
+- **Walking:** visit six trackside places and keep their notes in the journal.
+- **A moving world:** wind in the trees, drifting smoke and clouds, firelight, lamps, changing weather and water reflections.
+
+The locomotive has working wheel and rod animation, a rounded boiler and cab instruments. Stations have masonry, framed windows, canopies and glyph nameboards. Steam rhythm, rail joints and station bells are synthesized by the browser.
+
+## Controls
+
+| Key | Action |
 |---|---|
 | WASD | Walk; aboard, W/S raises/lowers power |
 | E | Board, serve a stopped destination, or leave |
 | Space | Hold the brake |
-| B / V | Add coal / sound the whistle |
-| C / F | Cab/chase view / centre camera |
-| R | Reverse while stopped; apply W again afterward |
+| B / V | Add coal / whistle |
+| C / F | Switch cab/chase camera / centre camera |
+| R | Reverse while stopped; apply W afterward |
 | Mouse or arrows | Look around |
-| J | Saved field notes and six walking destinations |
+| J | Journal and walking destinations |
 | Esc / H | Pause / controls |
 
-Watch steam pressure and fire, ease power for bridges and crossings, and whistle before crossing. Completed stops replenish coal/water and record service earnings with a station bell. Steam chuffs and rail joints follow movement. Volume/mute controls are in Settings.
+Settings includes sound volume/mute, glyph size, weather, reduced motion, high contrast, the automatic fireman and recovery to a safe station.
 
-The locomotive has a rounded boiler, spoked wheels, moving coupling rods, brass fittings and cab gauges. Stations have brickwork, framed windows, doors, canopies, furniture and readable glyph nameboards. Warm/cool lighting, material gradients and distance haze give the valley depth. Stars keep fixed celestial directions when the camera moves. Wind moves foliage, fire flickers, smoke rises, clouds drift and lamps warm their surroundings.
+## Saving a journey
 
-Progress checkpoints locally every ten seconds and when paused. Reopen the HTML and choose **Continue last journey**. Browser storage may be unavailable for local files; Settings still exports/imports portable JSON saves.
+Progress saves locally every ten seconds and when paused. Reopen the same file and choose **Continue last journey**. Local-file storage support varies by browser, so **Export save** in Settings is the portable backup. Import that JSON file to continue on another machine.
 
-## Develop
+## Build and test
 
-Readable source lives in **work/src/**. Assemble with:
+Development requires **Node.js 20 or newer**. The game has no runtime dependencies; Playwright is a development-only dependency.
 
-    node work/build.cjs
+```sh
+git clone https://github.com/Taan1el/next-stop.git
+cd next-stop
+npm ci
+npm run build
+npm test
+```
 
-The builder caps the HTML at 2,000,000 bytes. Focused scripts live under **work/qa/**. Real-time browser playtests use normal player inputs; local evidence and plans live under ignored **.omx/**. See **outputs/CLAUDE_HANDOFF.md** and **outputs/NEXT_STOP_VERIFICATION.md** for architecture, current coverage and limitations.
+Build output is [outputs/next-stop.html](outputs/next-stop.html). `npm test` runs numerical, save-fixture and renderer-resource checks plus the standalone packaging audit.
 
-Development tests use local Playwright and Edge/Chrome installations. Adjust those test paths when moving machines; these tools are never bundled in the game.
+For offline browser checks:
 
-World versions 1, 2 and 3 preserve their numerical generation for existing saves. New valleys use version 4. Validate saves before swapping live state. Edit source and rebuild instead of patching only generated HTML.
+```sh
+npx playwright install chromium
+npm run test:browser
+```
 
-## History
+Full real-time driving checks are separate: `npm run test:circuit` and `npm run test:passenger`. Browser runs use ordinary player controls and save local results under ignored `.omx/evidence/`.
 
-Keep changes small and reviewable. Every repository author and committer must be **Taan1el <taaniel.vananurm@gmail.com>**, with no additional contributor trailers. Identity is configured locally in this repository. The private GitHub repository is [Taan1el/next-stop](https://github.com/Taan1el/next-stop), configured as origin. Push only when authorized.
+See [testing](docs/TESTING.md) for browser selection, coverage and limitations; [architecture](docs/ARCHITECTURE.md) for the direct-glyph renderer; and [releases](docs/RELEASING.md) for creating the download package. Changes are listed in the [changelog](CHANGELOG.md).
 
-The renderer queries numerical terrain and solids directly at character-grid resolution, emits glyph IDs and colours, then displays embedded numeric glyph masks. It never renders a conventional image and applies a text filter.
+## How it is drawn
+
+The world is numerical terrain, material and object data. A custom WebGL2 scene pass resolves that data directly into glyph IDs and foreground/background colours. A display pass expands embedded numerical character masks. It does not render an ordinary image and apply a text filter.
+
+Readable source is in [work/src/](work/src/). Edit source and rebuild the HTML. World generations are versioned so older saves retain their original landscape.
+
+## License
+
+Copyright © 2026 Taan1el. Released under the [MIT license](LICENSE).
