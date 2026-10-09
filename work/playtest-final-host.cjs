@@ -31,7 +31,7 @@ const root=path.resolve(__dirname,'..'),directory=path.join(root,'.omx/evidence/
     await page.evaluate(()=>lossExtension.restoreContext());await page.waitForFunction(()=>!nextStopGame.renderer.lost);await page.waitForTimeout(350);
     result.restored=await page.evaluate(()=>({running:nextStopGame.running,save:JSON.stringify(nextStopGame.serialize()),gl:nextStopGame.renderer.gl.getError(),journalVisible:!nextStopGame.el['journal-view'].hidden}));assert(!result.restored.running&&result.restored.journalVisible&&result.restored.gl===0);assert.equal(result.restored.save,before);
     await page.screenshot({path:path.join(directory,'restored-journal.png'),scale:'css'});
-    await page.keyboard.press('Escape');await page.getByRole('button',{name:'Settings',exact:true}).first().click();
+    await page.keyboard.press('Escape');await page.keyboard.press('Escape');await page.getByRole('button',{name:'Settings',exact:true}).click();
     const expectedHost=await page.evaluate(()=>nextStopGame.serialize());await page.locator('#export').click();await page.waitForFunction(()=>hostWrites.length===1);
     result.hostExport=await page.evaluate(()=>{hostSource=hostWrites[0];return JSON.parse(hostWrites[0]);});assert.deepEqual(result.hostExport,expectedHost);
     await page.locator('#high-contrast').check();await page.locator('#import').click();await page.waitForFunction(()=>document.getElementById('menu-status').textContent==='Host save restored.');
