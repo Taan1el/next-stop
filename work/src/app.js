@@ -5,6 +5,7 @@ class NSGame {
     this.canvas=canvas; this.host=host; this.listeners=[]; this.input={}; this.frames=[];
     this.destroyed=false; this.started=false; this.running=false; this.debug=false;
     this.soundVolume=.55;this.soundMuted=false;
+    this.soundCounters={chuffs:0,joints:0,bells:0};this.lastSoundBeat=null;this.lastJoint=null;
     this.world=new NSWorld('NEXT-STOP'); this.sim=new NSSimulation(this.world);this.exploration=new NSExploration(this.world);
     this.railway=new NSRailway(this.world);
     this.renderer=new NSGlyphRenderer(canvas,this.world);
@@ -65,26 +66,52 @@ class NSGame {
     this.listen(window,'pointerup',()=>{this.dragging=false;this.lastPointer=null;});
     this.listen(window,'pointermove',event=>{if(!this.running)return;let dx=0,dy=0;if(document.pointerLockElement===this.canvas){dx=event.movementX;dy=event.movementY;}else if(this.dragging&&this.lastPointer){dx=event.clientX-this.lastPointer[0];dy=event.clientY-this.lastPointer[1];this.lastPointer=[event.clientX,event.clientY];}this.input.lookX=(this.input.lookX||0)+dx;this.input.lookY=(this.input.lookY||0)+dy;});
   }
-  start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.cargo=document.getElementById('cargo').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.notify('E · board the locomotive. H opens the driver’s guide.');}
+  start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.cargo=document.getElementById('cargo').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.ensureAudio();this.notify('E · board the locomotive. H opens the driver’s guide.');}
   act(action){
     if(action==='stoke'||action==='whistle'){const message=this.railway.action(action,this.sim);this.notify(message);if(action==='whistle'&&this.sim.player.mode==='train')this.soundWhistle();return;}
     const before=this.sim.delivery.completed,index=this.sim.delivery.index,mode=this.sim.player.mode;
     if(action==='interact'&&mode==='train'&&Math.abs(this.sim.train.speed)<=.22){const waiting=this.railway.waiting(this.sim);if(waiting){this.notify(waiting);return;}}
     let message=this.sim.action(action);
-    if(this.sim.delivery.completed>before)message=this.railway.recordStop(this.sim,index);
-    else if(action==='interact'&&mode==='foot'&&this.sim.player.mode==='train')message=this.railway.job(this.sim)+' · B: fire · V: whistle';
+    if(this.sim.delivery.completed>before){const earnings=this.railway.earnings;this.railway.recordStop(this.sim,index);message=`${this.world.stations[index].name} served · +${this.railway.earnings-earnings} shillings · ${this.railway.grade()}. Coal and water replenished.`;this.soundBell();this.el.toast.classList.add('service-reward');}
+    else this.el.toast.classList.remove('service-reward');
+    if(action==='interact'&&mode==='foot'&&this.sim.player.mode==='train')message=this.railway.job(this.sim)+' · B: fire · V: whistle';
     this.notify(message);
   }
   soundWhistle(){
-    if(this.soundMuted||this.soundVolume===0)return;
-    const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
-    if(!this.audio){this.audio=new Audio();this.audioMaster=this.audio.createGain();this.audioMaster.connect(this.audio.destination);this.syncAudio();}if(this.audio.state==='suspended')this.audio.resume();
-    const gain=this.audio.createGain(),now=this.audio.currentTime;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.045,now+.12);gain.gain.linearRampToValueAtTime(0,now+1.3);gain.connect(this.audioMaster);
+    if(!this.ensureAudio())return;
+    const gain=this.audio.createGain(),now=this.audio.currentTime;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.045,now+.12);gain.gain.linearRampToValueAtTime(0,now+1.3);gain.connect(this.audioTransport);
     for(let i=0;i<3;i++){const tone=this.audio.createOscillator();tone.type='sine';tone.frequency.setValueAtTime(264+i*132,now);tone.connect(gain);tone.start(now);tone.stop(now+1.35);tone.onended=()=>{tone.disconnect();if(i===2)gain.disconnect();};}
   }
+  ensureAudio(){
+    if(this.soundMuted||this.soundVolume===0||this.destroyed)return false;
+    const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return false;
+    try{if(!this.audio){this.audio=new Audio();this.audioMaster=this.audio.createGain();this.audioMaster.connect(this.audio.destination);this.audioTransport=this.audio.createGain();this.audioTransport.connect(this.audioMaster);this.syncAudio();
+      this.steamBuffer=this.audio.createBuffer(1,Math.ceil(this.audio.sampleRate*.22),this.audio.sampleRate);const samples=this.steamBuffer.getChannelData(0);let seed=17137,soft=0;for(let i=0;i<samples.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;soft=soft*.58+((seed/4294967296)*2-1)*.42;samples[i]=soft;}}
+      if(this.audio.state==='suspended')this.audio.resume().catch(()=>{});this.audioTransport.gain.value=this.running?1:0;return this.audio.state!=='closed';
+    }catch{return false;}
+  }
+  soundPulse(kind){
+    if(!this.audio||this.soundMuted||this.soundVolume===0||!this.running)return;
+    const source=this.audio.createBufferSource(),gain=this.audio.createGain(),now=this.audio.currentTime;
+    source.buffer=this.steamBuffer;source.playbackRate.value=kind==='joint'?2.1:1.0;
+    gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(kind==='joint'?.09:.045*(.6+this.sim.train.throttle*.4),now+.008);gain.gain.exponentialRampToValueAtTime(.0001,now+(kind==='joint'?.055:.18));
+    source.connect(gain);gain.connect(this.audioTransport);source.start(now);source.stop(now+.22);source.onended=()=>{source.disconnect();gain.disconnect();};
+    this.soundCounters[kind==='joint'?'joints':'chuffs']++;
+  }
+  soundBell(){
+    if(!this.ensureAudio())return;this.soundCounters.bells++;
+    for(let i=0;i<2;i++){const tone=this.audio.createOscillator(),gain=this.audio.createGain(),when=this.audio.currentTime+i*.16;tone.type='sine';tone.frequency.value=i?1320:880;gain.gain.setValueAtTime(.04,when);gain.gain.exponentialRampToValueAtTime(.0001,when+.65);tone.connect(gain);gain.connect(this.audioTransport);tone.start(when);tone.stop(when+.67);tone.onended=()=>{tone.disconnect();gain.disconnect();};}
+  }
+  updateTrainSound(){
+    if(!this.audio||!this.running||this.sim.player.mode!=='train'||Math.abs(this.sim.train.speed)<.15){this.lastSoundBeat=null;this.lastJoint=null;return;}
+    const distance=this.sim.train.wheelTravel??this.sim.train.s,beat=Math.floor(distance/(Math.PI*.72/2)),joint=Math.floor(distance/11.3);
+    if(this.lastSoundBeat!==null&&beat!==this.lastSoundBeat)this.soundPulse('chuff');
+    if(this.lastJoint!==null&&joint!==this.lastJoint)this.soundPulse('joint');
+    this.lastSoundBeat=beat;this.lastJoint=joint;
+  }
   syncAudio(){if(this.audioMaster)this.audioMaster.gain.setValueAtTime(this.soundMuted?0:this.soundVolume,this.audio.currentTime);}
-  pause(){this.running=false;this.input={};this.dragging=false;this.lastPointer=null;this.accumulator=0;if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
-  resume(){if(this.destroyed)return;this.started=true;this.running=true;this.accumulator=0;this.previous=performance.now();this.el.menu.hidden=true;this.el['pause-button'].textContent='Pause';this.canvas.focus({preventScroll:true});}
+  pause(){this.running=false;if(this.audioTransport)this.audioTransport.gain.value=0;this.input={};this.dragging=false;this.lastPointer=null;this.accumulator=0;if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
+  resume(){if(this.destroyed)return;this.started=true;this.running=true;if(this.audioTransport)this.audioTransport.gain.value=1;this.lastSoundBeat=null;this.lastJoint=null;this.accumulator=0;this.previous=performance.now();this.el.menu.hidden=true;this.el['pause-button'].textContent='Pause';this.canvas.focus({preventScroll:true});}
   menuItems(root=this.el.menu){return[...root.querySelectorAll('button,input,select,summary')].filter(n=>!n.closest('[hidden]')&&!n.hidden&&!n.disabled&&(n.type!=='radio'||n.checked));}
   openMenu(view){this.pause();this.el.menu.hidden=false;for(const name of ['start','pause','help','settings','journal'])this.el[name+'-view'].hidden=name!==view;const heading=this.el[view+'-view'].querySelector('h1,h2');heading.id=view+'-heading';this.el.menu.querySelector('.card').setAttribute('aria-labelledby',heading.id);this.syncSettings();this.syncJournal();this.menuItems(this.el[view+'-view'])[0]?.focus();}
   closeMenu(){if(this.started)this.resume();else this.openMenu('start');}
@@ -94,6 +121,7 @@ class NSGame {
     if(this.destroyed)return;const elapsed=this.previous?Math.max(0,(now-this.previous)/1000):0;this.previous=now;
     if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){this.railway.step(1/60,this.sim);this.sim.step(1/60,this.input);this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
     this.sim.renderAlpha=this.running?this.accumulator*60:1;
+    this.updateTrainSound();
     try{if(!this.renderer.lost){this.renderer.render(this.sim,this.sim.camera(Math.min(elapsed,.05)),{quality:this.sim.settings.quality,debug:this.debug,reducedMotion:this.sim.settings.reducedMotion});}}catch(error){this.pause();this.showFatal(error);return;}
     if(this.running&&elapsed>0&&elapsed<.25){this.frames.push(elapsed*1000);if(this.frames.length>600)this.frames.shift();}
     if(now-this.lastUI>150){this.updateUI(now);this.lastUI=now;}this.raf=requestAnimationFrame(this.tick);
