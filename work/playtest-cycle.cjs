@@ -80,9 +80,10 @@ module.exports=async function runCycle(page,{directory,name,htmlPath,pastCentre=
     await page.keyboard.up('Space');
     if(!visitJournal){await page.keyboard.press('KeyE');await page.waitForTimeout(250);}
     if(visitJournal){await page.keyboard.press('KeyJ');await page.waitForTimeout(200);await page.screenshot({path:path.join(directory,'completed-journal.png'),scale:'css'});}
-    result.final=await page.evaluate(()=>({mode:nextStopGame.sim.player.mode,delivery:{...nextStopGame.sim.delivery},exploration:nextStopGame.exploration?.serialize(),totalPlaces:nextStopGame.exploration.total,railway:nextStopGame.railway?.serialize(),save:nextStopGame.serialize(),stats:nextStopGame.diagnostics(),gl:nextStopGame.renderer.gl.getError()}));
+    result.final=await page.evaluate(()=>({mode:nextStopGame.sim.player.mode,delivery:{...nextStopGame.sim.delivery},exploration:nextStopGame.exploration?.serialize(),totalPlaces:nextStopGame.exploration.total,railway:nextStopGame.railway?.serialize(),sound:{...nextStopGame.soundCounters},save:nextStopGame.serialize(),stats:nextStopGame.diagnostics(),gl:nextStopGame.renderer.gl.getError()}));
     if(!result.final.delivery.finished||result.final.mode!=='foot'||result.final.gl||issues.length||requests.some(u=>!u.startsWith('file:')))throw Error('Final playthrough gate failed');
     if(visitJournal&&result.final.exploration.visited.length!==(allDiscoveries?result.final.totalPlaces:3))throw Error('Journal incomplete');
+    if(result.final.sound.bells!==3||result.final.sound.chuffs===0||result.final.sound.joints===0)throw Error('Train sound and station-bell feedback incomplete');
     result.status='passed';result.wallSeconds=(Date.now()-result.start)/1000;result.issues=issues;result.requests=requests;
   }catch(error){result.status='failed';result.error=error.stack;result.failureState=await page.evaluate(()=>nextStopGame.serialize()).catch(()=>null);}
   fs.writeFileSync(path.join(directory,'circuit.json'),JSON.stringify(result,null,2));return result;
