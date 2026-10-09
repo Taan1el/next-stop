@@ -4,7 +4,7 @@ A small rural railway game made of coloured letters. Take a steam train through 
 
 ![A steam train beside Bellweather station, with the lake and mountain ridges beyond](outputs/NEXT_STOP_PREVIEW.png)
 
-**Desktop prototype · v0.1.0 · MIT license**
+**Desktop prototype · v0.2.0 · MIT license**
 
 ## Download and play
 
@@ -23,6 +23,9 @@ Keyboard and mouse are required. Windows Chromium-based browsers have been teste
 - **Free running:** drive and explore without delivery obligations.
 - **Steam operation:** tend the fire, watch pressure, brake for the bridge and whistle at crossings. An optional automatic fireman makes driving more relaxed.
 - **Walking:** visit six trackside places and keep their notes in the journal.
+- **Station work:** carry parcels to local porters, refill lamps and sort addressed letters. Nine jobs earn shillings and a village reputation.
+- **A personal engine:** spend station-work earnings on green or ochre boiler paint; owned colours remain available to switch for free.
+- **After dark:** moonlight keeps paths and hills readable, station lamps light the platforms, and a hand lantern follows you on foot.
 - **A moving world:** wind in the trees, drifting smoke and clouds, firelight, lamps, changing weather and water reflections.
 
 The locomotive has working wheel and rod animation, a rounded boiler and cab instruments. Stations have masonry, framed windows, canopies and glyph nameboards. Steam rhythm, rail joints and station bells are synthesized by the browser.
@@ -38,14 +41,19 @@ The locomotive has working wheel and rod animation, a rounded boiler and cab ins
 | C / F | Switch cab/chase camera / centre camera |
 | R | Reverse while stopped; apply W afterward |
 | Mouse or arrows | Look around |
-| J | Journal and walking destinations |
+| T | Pick up/deliver parcels, start letters; hold to refill a lamp |
+| 1 / 2 / 3 | Sort an active letter to Pinebank / Bellweather / Stonehaven |
+| L | Toggle the hand lantern |
+| J | Journal, noticeboard, walking destinations and paint workshop |
 | Esc / H | Pause / controls |
 
-Settings includes sound volume/mute, glyph size, weather, reduced motion, high contrast, the automatic fireman and recovery to a safe station.
+Settings includes night brightness, sound volume/mute, glyph size, weather, reduced motion, high contrast, the automatic fireman and recovery to a safe station. Open **J**, expand the noticeboard and select a job to get walking directions. Letter rounds can be cancelled there before taking different work.
 
 ## Saving a journey
 
 Progress saves locally every ten seconds and when paused. Reopen the same file and choose **Continue last journey**. Local-file storage support varies by browser, so **Export save** in Settings is the portable backup. Import that JSON file to continue on another machine.
+
+Completed station work, carried parcels, unfinished letter rounds, reputation and owned paint travel with the save. A lamp refill must be completed in one continuous hold.
 
 ## Build and test
 

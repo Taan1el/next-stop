@@ -9,9 +9,10 @@ Numerical and action regressions use plain Node and isolated `vm` contexts. Run 
     node work/qa/refinement-regression.cjs
     node work/qa/renderer-resources.cjs
     node work/qa/renderer-budget.cjs
+    node work/qa/village-regression.cjs
     node work/qa/audit.cjs
 
-The seven focused suites cover 58 behavior/resource checks. The separate packaging audit parses the assembled runtime and checks the offline single-file restrictions. These checks do not prove shader drawing or hardware performance.
+The eight focused suites cover 67 behavior/resource checks. The separate packaging audit parses the assembled runtime and checks the offline single-file restrictions. These checks do not prove shader drawing or hardware performance.
 
 Real browser scripts live under `work/playtest-*.cjs` and `work/run-cycle.cjs`. Run `npm ci`, `npx playwright install chromium` and `npm run test:browser`. The shared launcher also supports installed Chrome/Edge or an explicit executable path. Launch processes serially to keep measurements meaningful. Full circuits use normal keyboard inputs and real elapsed time; fixed-time/camera shader inspections are labeled separately.
 

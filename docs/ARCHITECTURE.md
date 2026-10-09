@@ -10,6 +10,7 @@ Next Stop is vanilla JavaScript, inline CSS and raw WebGL2. The assembled HTML i
 | [journey.js](../work/src/journey.js) | Grade/power-aware station approach and braking guidance |
 | [exploration.js](../work/src/exploration.js) | Safe foot landmarks, notes and selected destinations |
 | [railway.js](../work/src/railway.js) | Steam, services, cargo, crossings, fares and station supplies |
+| [village.js](../work/src/village.js) | Station jobs, partial work, reward receipts, reputation, paint ownership and nearby numerical props |
 | [renderer.js](../work/src/renderer.js) | Numerical scene queries, glyph records and display pass |
 | [app.js](../work/src/app.js) | Input, fixed-step loop, menus, synthesized sound, storage and host lifecycle |
 | [shell.html](../work/src/shell.html) | Interface, styles and assembly placeholders |
@@ -23,6 +24,8 @@ Terrain is a seeded 129×129 height array. CPU and GPU share bilinear sampling. 
 
 Budgets are explicit: 256 uploaded records, 192 terrain traversal cells, 48 shadow objects and one reflected scene query with reduced limits. Dynamic shapes reserve their actual count before static selection. Close details use distance LOD; chimney smoke is bounded. Stars are fixed celestial directions projected from camera orientation, independent of camera position.
 
+Nearby village props share the dynamic reservation. Their work anchors are checked against existing walking collision; decorative porters and noticeboards add no new solid bounds. Night shading combines directional moonlight, warm station pools, an optional foot lantern and a bounded midtone lift. Refilled lamps strengthen their station pool. Boiler paint changes the numerical material palette while retaining its detail.
+
 ## Simulation and presentation
 
 Simulation uses fixed 60 Hz updates with bounded catch-up. Railway state updates before train forces and arrival guidance. Route samples use cumulative 3D arc length; carriages follow independent route offsets.
@@ -33,7 +36,7 @@ New worlds use generation 4. Earlier generations retain their numerical descript
 
 ## State and sound
 
-Candidate world, simulation, exploration and railway saves validate before replacing live references. Older saves without newer fields receive compatible defaults. Local checkpoints are optional; portable JSON export/import and an explicit host adapter remain available.
+Candidate world, simulation, exploration, railway and village saves validate before replacing live references. Older saves without newer fields receive compatible defaults. Village state is omitted until used, preserving untouched legacy exports. Partial letters and parcels are mutually exclusive; validated reward receipts determine the wallet after paint purchases. Local checkpoints are optional; portable JSON export/import and an explicit host adapter remain available.
 
 The Web Audio API synthesizes all railway sounds after a player gesture. Voices feed transport and master gains. Pause silences transport; volume/mute apply immediately. Destroy closes audio, cancels animation, removes listeners and releases GPU resources. Real context loss/restoration preserves game progress.
 

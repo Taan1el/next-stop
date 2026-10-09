@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+- Moonlit terrain, stronger station light pools and an optional hand lantern make night journeys readable. A saved brightness control adjusts night midtones.
+- Nine station jobs add parcel deliveries to local porters, continuous lamp refills and addressed-letter sorting. Completed work earns shillings and village reputation.
+- A journal noticeboard gives directions and cancellation; a paint workshop sells green and ochre boiler finishes with station-work earnings.
+- Partial parcel and letter work, reward receipts and owned paint persist in local and portable saves. Older saves retain their landscapes and receive compatible defaults.
+- Numerical station props and porters, restored lamp lighting and a synthesized completion cue provide feedback without external assets.
+- On-foot playtests, five night rendering fixtures and save validation cover the new activities alongside existing train checks.
+
 ## 0.1.0
 
 First desktop prototype.
