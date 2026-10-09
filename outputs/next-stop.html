@@ -2100,7 +2100,7 @@ class NSGame {
     if(this.lastJoint!==null&&joint!==this.lastJoint)this.soundPulse('joint');
     this.lastSoundBeat=beat;this.lastJoint=joint;
   }
-  syncAudio(){if(this.audioMaster)this.audioMaster.gain.setValueAtTime(this.soundMuted?0:this.soundVolume,this.audio.currentTime);}
+  syncAudio(){if(this.audioMaster){this.audioMaster.gain.cancelScheduledValues(0);this.audioMaster.gain.value=this.soundMuted?0:this.soundVolume;}}
   pause(){if(this.started&&!this.destroyed)this.checkpoint();this.running=false;if(this.audioTransport)this.audioTransport.gain.value=0;this.input={};this.dragging=false;this.lastPointer=null;this.accumulator=0;if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
   resume(){if(this.destroyed)return;this.started=true;this.running=true;if(this.audioTransport)this.audioTransport.gain.value=1;this.lastSoundBeat=null;this.lastJoint=null;this.accumulator=0;this.previous=performance.now();this.el.menu.hidden=true;this.el['pause-button'].textContent='Pause';this.canvas.focus({preventScroll:true});}
   menuItems(root=this.el.menu){return[...root.querySelectorAll('button,input,select,summary')].filter(n=>!n.closest('[hidden]')&&!n.hidden&&!n.disabled&&(n.type!=='radio'||n.checked));}
