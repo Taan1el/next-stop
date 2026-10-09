@@ -9,6 +9,7 @@ class NSGame {
     this.lastCheckpoint=0;this.localSaveAvailable=false;
     this.world=new NSWorld('NEXT-STOP'); this.sim=new NSSimulation(this.world);this.exploration=new NSExploration(this.world);
     this.railway=new NSRailway(this.world);
+    this.village=new NSVillage(this.world);this.sim.village=this.village;
     this.renderer=new NSGlyphRenderer(canvas,this.world);
     this.accumulator=0; this.previous=0; this.lastUI=0; this.toastUntil=0;
     this.width=window.innerWidth; this.height=window.innerHeight;
@@ -30,6 +31,9 @@ class NSGame {
     this.click('pause-button',()=>this.running?this.openMenu('pause'):this.closeMenu());
     this.click('help-button',()=>this.openMenu('help'));this.click('start-help',()=>this.openMenu('help'));
     this.click('journal-button',()=>this.openMenu('journal'));
+    this.listen(document.getElementById('village-list'),'click',event=>{const button=event.target.closest('button[data-job]');if(!button)return;this.notify(this.village.select(button.dataset.job));this.syncJournal();this.el['journal-view'].querySelector('.close-menu').focus();});
+    this.listen(document.getElementById('workshop'),'click',event=>{const button=event.target.closest('button[data-paint]');if(!button)return;this.notify(this.village.buyPaint(button.dataset.paint));this.syncJournal();});
+    this.click('return-work',()=>{this.notify(this.village.cancel());this.syncJournal();});
     this.listen(this.el['journal-list'],'click',event=>{const button=event.target.closest('button[data-landmark]');if(!button)return;this.exploration.select(button.dataset.landmark);this.syncJournal();const target=this.exploration.target(this.sim.player).record;this.notify(`Journal destination: ${target.name} at ${target.station}.`);this.el['journal-view'].querySelector('.close-menu').focus();});
     this.click('settings-button',()=>this.openMenu('settings'));this.click('pause-settings',()=>this.openMenu('settings'));
     this.listen(document.querySelector('.service-choice'),'change',()=>{document.getElementById('cargo-choice').hidden=document.querySelector('input[name=service]:checked').value!=='freight';});
@@ -41,12 +45,13 @@ class NSGame {
     this.listen(document.getElementById('fire-assist'),'change',event=>{this.railway.assisted=event.target.checked;this.railway.apply(this.sim);});
     this.listen(document.getElementById('sound-volume'),'input',event=>{this.soundVolume=Number(event.target.value)/100;this.syncAudio();});
     this.listen(document.getElementById('sound-muted'),'change',event=>{this.soundMuted=event.target.checked;this.syncAudio();});
+    this.listen(document.getElementById('night-brightness'),'input',event=>{this.sim.settings.nightBrightness=Number(event.target.value)/100;document.getElementById('night-brightness-value').textContent=event.target.value+'%';});
     this.listen(this.el.debug,'change',()=>{this.debug=this.el.debug.checked;this.el.diagnostics.hidden=!this.debug;});
     this.click('regenerate',()=>{try{this.regenerate(this.el.seed.value);this.notify('New valley ready. Start beside your train.');}catch(error){this.report(error);}});
     this.click('recover',()=>{this.notify(this.sim.recover()||'Returned to a safe station.');});
     this.click('export',()=>this.exportSave());this.click('import',async()=>{if(!this.host.readSave){document.getElementById('save-file').click();return;}try{this.restore(await this.host.readSave());this.notify('Host save restored.');}catch(error){this.report(error);}});
     this.listen(document.getElementById('save-file'),'change',async event=>{const file=event.target.files[0];if(!file)return;try{if(file.size>1048576)throw new Error('Save is too large (maximum 1 MB).');this.restore(JSON.parse(await file.text()));this.notify('Save imported. Journey restored.');}catch(error){this.report(error);}finally{event.target.value='';}});
-    const held={KeyW:'forward',KeyS:'backward',KeyA:'left',KeyD:'right',Space:'brake',ArrowLeft:'lookLeft',ArrowRight:'lookRight',ArrowUp:'lookUp',ArrowDown:'lookDown'};
+    const held={KeyW:'forward',KeyS:'backward',KeyA:'left',KeyD:'right',Space:'brake',KeyT:'work',ArrowLeft:'lookLeft',ArrowRight:'lookRight',ArrowUp:'lookUp',ArrowDown:'lookDown'};
     this.listen(window,'keydown',event=>{
       if(event.code==='Tab'&&!this.el.menu.hidden){const items=this.menuItems(),first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}return;}
       const editing=['INPUT','SELECT','TEXTAREA'].includes(event.target.tagName);
@@ -56,8 +61,9 @@ class NSGame {
       if(event.code==='KeyH'&&!event.repeat){event.preventDefault();this.openMenu('help');return;}
       if(event.code==='F3'&&!event.repeat){event.preventDefault();this.debug=!this.debug;this.el.debug.checked=this.debug;this.el.diagnostics.hidden=!this.debug;return;}
       if(!this.running)return;
+      if(!event.repeat&&['Digit1','Digit2','Digit3'].includes(event.code)){const count=this.village.completed.size,message=this.village.sort(Number(event.code.at(-1))-1,this.sim);if(message){event.preventDefault();this.notify(message);if(this.village.completed.size>count)this.soundFavour();}return;}
       if(held[event.code]){event.preventDefault();this.input[held[event.code]]=true;}
-      if(!event.repeat){const action={KeyE:'interact',KeyC:'camera',KeyF:'recenter',KeyR:'reverse',KeyB:'stoke',KeyV:'whistle'}[event.code];if(action){event.preventDefault();this.act(action);}}
+      if(!event.repeat){const action={KeyE:'interact',KeyC:'camera',KeyF:'recenter',KeyR:'reverse',KeyB:'stoke',KeyV:'whistle',KeyL:'lantern',KeyT:'work'}[event.code];if(action){event.preventDefault();this.act(action);}}
     });
     this.listen(window,'keyup',event=>{if(held[event.code])this.input[held[event.code]]=false;});
     this.listen(window,'blur',()=>{this.input={};if(this.running)this.openMenu('pause');});
@@ -69,8 +75,10 @@ class NSGame {
     this.listen(window,'pointerup',()=>{this.dragging=false;this.lastPointer=null;});
     this.listen(window,'pointermove',event=>{if(!this.running)return;let dx=0,dy=0;if(document.pointerLockElement===this.canvas){dx=event.movementX;dy=event.movementY;}else if(this.dragging&&this.lastPointer){dx=event.clientX-this.lastPointer[0];dy=event.clientY-this.lastPointer[1];this.lastPointer=[event.clientX,event.clientY];}this.input.lookX=(this.input.lookX||0)+dx;this.input.lookY=(this.input.lookY||0)+dy;});
   }
-  start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.cargo=document.getElementById('cargo').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.ensureAudio();this.notify('E · board the locomotive. H opens the driver’s guide.');}
+  start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.cargo=document.getElementById('cargo').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.ensureAudio();this.notify('E · board. J · station work and field notes. L · hand lantern.');}
   act(action){
+    if(action==='work'){const count=this.village.completed.size;this.notify(this.village.interact(this.sim)||(this.village.sorting?'Finish your letters at the noticeboard, or J: return unfinished work.':'Move beside a parcel, lamp or noticeboard. J lists station work.'));if(this.village.completed.size>count)this.soundFavour();return;}
+    if(action==='lantern'){this.sim.settings.lantern=this.sim.settings.lantern===false;this.notify(this.sim.settings.lantern?'Hand lantern lit.':'Hand lantern put away. Moonlight still guides your feet.');return;}
     if(action==='stoke'||action==='whistle'){const message=this.railway.action(action,this.sim);this.notify(message);if(action==='whistle'&&this.sim.player.mode==='train')this.soundWhistle();return;}
     const before=this.sim.delivery.completed,index=this.sim.delivery.index,mode=this.sim.player.mode;
     if(action==='interact'&&mode==='train'&&Math.abs(this.sim.train.speed)<=.22){const waiting=this.railway.waiting(this.sim);if(waiting){this.notify(waiting);return;}}
@@ -105,6 +113,10 @@ class NSGame {
     if(!this.ensureAudio())return;this.soundCounters.bells++;
     for(let i=0;i<2;i++){const tone=this.audio.createOscillator(),gain=this.audio.createGain(),when=this.audio.currentTime+i*.16;tone.type='sine';tone.frequency.value=i?1320:880;gain.gain.setValueAtTime(.04,when);gain.gain.exponentialRampToValueAtTime(.0001,when+.65);tone.connect(gain);gain.connect(this.audioTransport);tone.start(when);tone.stop(when+.67);tone.onended=()=>{tone.disconnect();gain.disconnect();};}
   }
+  soundFavour(){
+    if(!this.ensureAudio())return;
+    for(const [index,frequency] of [528,660,792].entries()){const tone=this.audio.createOscillator(),gain=this.audio.createGain(),when=this.audio.currentTime+index*.09;tone.type='sine';tone.frequency.value=frequency;gain.gain.setValueAtTime(.025,when);gain.gain.exponentialRampToValueAtTime(.0001,when+.28);tone.connect(gain);gain.connect(this.audioTransport);tone.start(when);tone.stop(when+.3);tone.onended=()=>{tone.disconnect();gain.disconnect();};}
+  }
   updateTrainSound(){
     if(!this.audio||!this.running||this.sim.player.mode!=='train'||Math.abs(this.sim.train.speed)<.15){this.lastSoundBeat=null;this.lastJoint=null;return;}
     const distance=this.sim.train.wheelTravel??this.sim.train.s,beat=Math.floor(distance/(Math.PI*.72/2)),joint=Math.floor(distance/11.3);
@@ -122,7 +134,7 @@ class NSGame {
   setInput(state){this.input={...this.input,...state};}
   tick(now){
     if(this.destroyed)return;const elapsed=this.previous?Math.max(0,(now-this.previous)/1000):0;this.previous=now;
-    if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){this.railway.step(1/60,this.sim);this.sim.step(1/60,this.input);this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
+    if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){this.railway.step(1/60,this.sim);this.sim.step(1/60,this.input);const message=this.village.step(1/60,this.sim,this.input);if(message){this.notify(message);this.soundFavour();}this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
     this.sim.renderAlpha=this.running?this.accumulator*60:1;
     this.updateTrainSound();
     if(this.running&&now-this.lastCheckpoint>10000){this.checkpoint();this.lastCheckpoint=now;}
@@ -134,7 +146,7 @@ class NSGame {
     const train=this.sim.train;document.body.dataset.mode=this.sim.player.mode;
     this.el.objective.textContent=this.sim.delivery.finished?'The valley is yours':this.sim.delivery.started?this.world.stations[this.sim.delivery.index].name:'Pinebank departure';this.el.hint.textContent=this.sim.hint();
     this.el['journey-label'].textContent=this.sim.player.mode==='train'?`${this.sim.delivery.finished?'Free running':`${this.railway.service==='passenger'?'Passenger local':'Goods train'} · ${this.sim.delivery.completed}/3 stops`} · ${this.sim.train.direction===1?'forward':'reverse'}`:NSJourney.label(this.sim);
-    const target=this.exploration.target(this.sim.player);
+    const stationWork=this.village.target(this.sim.player),target=stationWork||this.exploration.target(this.sim.player);
     const explorationStation=this.sim.delivery.finished&&target?this.world.stations.findIndex(s=>s.name===target.record.station):null;
     this.approach=NSJourney.approach(this.sim,explorationStation);
     this.el['journey-ticket'].dataset.approach=this.approach?.phase||'';
@@ -149,16 +161,22 @@ class NSGame {
     const next=this.exploration.target(this.sim.player);
     this.el['field-hint'].hidden=this.sim.player.mode!=='foot';
     this.el['field-hint'].textContent=next&&next.distance<80?`${next.record.name} · ${Math.ceil(next.distance)} m ${NSExploration.bearing(this.sim.player,next.record.anchor)} · J: journal`:`Field journal ${this.exploration.count}/${this.exploration.total} · J: read notes`;
-    if(this.sim.delivery.finished&&next)this.el.objective.textContent=next.record.name;
+    if(this.sim.player.mode==='foot'){
+      if(stationWork){this.el.objective.textContent=stationWork.record.name;this.el['field-hint'].textContent=`${Math.ceil(stationWork.distance)} m ${NSExploration.bearing(this.sim.player,stationWork.record.anchor)} · J: noticeboard`;}
+      const context=this.village.context(this.sim.player);if(context)this.el.hint.textContent=context.hint;
+      else if(stationWork)this.el.hint.textContent=this.village.carrying?'Carry the parcel to the porter · T: hand over':'Walk to station work · T: use';
+    }
+    if(this.sim.delivery.finished&&target&&!(this.sim.player.mode==='foot'&&stationWork))this.el.objective.textContent=target.record.name;
     this.el.speed.textContent=(Math.abs(train.speed)*3.6).toFixed(1);this.el.throttle.textContent=Math.round(train.throttle*100);this.el.brake.textContent=Math.round((this.input.brake?1:train.brake||0)*100);
     document.getElementById('instruments').style.setProperty('--needle',`${-115+Math.min(40,Math.abs(train.speed)*3.6)/40*230}deg`);
     const weather=this.sim.weather;const w=(weather.rain||0)>.45?'RAIN':(weather.fog||0)>.45?'FOG':'CLEAR';const clock=(8+this.sim.time/30)%24;this.el.status.textContent=`${String(Math.floor(clock)).padStart(2,'0')}:${String(Math.floor(clock%1*60)).padStart(2,'0')} · ${w} · ${this.world.seed}`;
     if(now>this.toastUntil)this.el.toast.classList.remove('visible');
     if(this.debug){const d=this.renderer.diagnostics(),sorted=this.frames.slice().sort((a,b)=>a-b),mid=sorted[Math.floor(sorted.length/2)]||0,p95=sorted[Math.floor(sorted.length*.95)]||0;this.el.diagnostics.textContent=`DIRECT GLYPH CELLS\n${JSON.stringify(d,null,2)}\nFrame median ${mid.toFixed(1)} ms / p95 ${p95.toFixed(1)} ms\nSeed checksum ${this.world.checksum()}\nF3 toggles diagnostics`;}
   }
-  syncSettings(){document.getElementById('sound-volume').value=Math.round(this.soundVolume*100);document.getElementById('sound-muted').checked=this.soundMuted;this.el.quality.value=this.sim.settings.quality||'standard';this.el.weather.value=this.sim.settings.weatherMode||'auto';this.el.seed.value=this.world.seed;this.el['reduced-motion'].checked=!!this.sim.settings.reducedMotion;this.el['high-contrast'].checked=!!this.sim.settings.highContrast;document.body.classList.toggle('reduced-motion',!!this.sim.settings.reducedMotion);document.body.classList.toggle('high-contrast',!!this.sim.settings.highContrast);}
+  syncSettings(){document.getElementById('night-brightness').value=Math.round((this.sim.settings.nightBrightness??1)*100);document.getElementById('night-brightness-value').textContent=document.getElementById('night-brightness').value+'%';document.getElementById('sound-volume').value=Math.round(this.soundVolume*100);document.getElementById('sound-muted').checked=this.soundMuted;this.el.quality.value=this.sim.settings.quality||'standard';this.el.weather.value=this.sim.settings.weatherMode||'auto';this.el.seed.value=this.world.seed;this.el['reduced-motion'].checked=!!this.sim.settings.reducedMotion;this.el['high-contrast'].checked=!!this.sim.settings.highContrast;document.body.classList.toggle('reduced-motion',!!this.sim.settings.reducedMotion);document.body.classList.toggle('high-contrast',!!this.sim.settings.highContrast);}
   syncJournal(){
-    const signature=this.world.seed+'|'+this.exploration.serialize().visited.join(',')+'|'+this.exploration.selected;
+    this.syncVillage();
+    const signature=this.world.seed+'|'+this.world.version+'|'+this.exploration.serialize().visited.join(',')+'|'+this.exploration.selected;
     if(signature===this.journalSignature)return;this.journalSignature=signature;
     this.el['journal-count'].textContent=`${this.exploration.count} of ${this.exploration.total} places discovered`;
     this.el['journal-list'].replaceChildren();
@@ -171,18 +189,28 @@ class NSGame {
       this.el['journal-list'].append(item);
     }
   }
+  syncVillage(){
+    const signature=this.world.seed+'|'+this.world.version+'|'+JSON.stringify(this.village.serialize());if(signature===this.villageSignature)return;this.villageSignature=signature;
+    document.getElementById('village-summary').textContent=`Station noticeboard · ${this.village.completed.size}/${this.village.jobs.length} favours`;
+    document.getElementById('village-wallet').textContent=`${this.village.title} · ${this.village.wallet} shillings in your pocket. Work is optional and available before your first departure.`;
+    document.getElementById('return-work').hidden=!this.village.carrying&&!this.village.sorting&&!this.village.selected;
+    const list=document.getElementById('village-list');list.replaceChildren();
+    for(const job of this.village.jobs){const item=document.createElement('li'),name=document.createElement('strong'),description=document.createElement('p'),done=this.village.completed.has(job.id);item.className=done?'discovered':'';name.textContent=(done?'✓ ':'○ ')+job.name;description.textContent=done?`Completed · ${this.village.completed.get(job.id)} shillings earned.`:job.description;item.append(name,description);
+      if(!done){const button=document.createElement('button');button.className='small';button.dataset.job=job.id;button.textContent=this.village.selected===job.id?'Work selected':'Find this work';button.disabled=this.village.selected===job.id||!!this.village.carrying||!!this.village.sorting;button.setAttribute('aria-label','Find work: '+job.name);item.append(button);}list.append(item);}
+    for(const button of document.querySelectorAll('[data-paint]')){const paint=button.dataset.paint,owned=this.village.owned.includes(paint);button.disabled=this.village.paint===paint||(!owned&&this.village.wallet<20);button.textContent=(paint==='original'?'Original paint':paint==='green'?'Forest green':'Ochre brass')+(this.village.paint===paint?' · applied':owned?'':' · 20 shillings');}
+  }
   notify(message){if(!message)return;this.el.toast.textContent=message;this.el.toast.classList.add('visible');this.toastUntil=performance.now()+4500;if(!this.el.menu.hidden)this.el['menu-status'].textContent=message;}
   readLocalCheckpoint(){try{const text=localStorage.getItem('next-stop-checkpoint');this.localSaveAvailable=!!text&&text.length<=65536;}catch{this.localSaveAvailable=false;}const button=document.getElementById('continue-button');button.hidden=!this.localSaveAvailable;}
   checkpoint(){try{localStorage.setItem('next-stop-checkpoint',JSON.stringify(this.serialize()));this.localSaveAvailable=true;}catch{this.localSaveAvailable=false;}const status=document.getElementById('local-save-status');status.textContent=this.localSaveAvailable?'Local progress saved. Continue last journey after reopening this file.':'Local storage unavailable. Export a JSON save to keep progress.';}
   report(error){console.error(error);this.notify(error.message||String(error));this.host.onError?.(error);}
-  serialize(){return{...this.sim.serialize(),exploration:this.exploration.serialize(),railway:this.railway.serialize()};}
+  serialize(){return{...this.sim.serialize(),exploration:this.exploration.serialize(),railway:this.railway.serialize(),...(this.village.touched?{village:this.village.serialize()}:{})};}
   restore(value){
     const data=typeof value==='string'?JSON.parse(value):value;
     if(!data||!data.world||typeof data.world.seed!=='string'||data.world.seed.length>64)throw new Error('Save contains an invalid world seed.');
-    const candidateWorld=new NSWorld(data.world.seed,data.world.version),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld);candidate.restore(data);candidateExploration.restore(data.exploration);candidateRailway.restore(data.railway,candidate);
-    this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.restored=true;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();document.getElementById('fire-assist').checked=this.railway.assisted;this.resize(this.width,this.height);
+    const candidateWorld=new NSWorld(data.world.seed,data.world.version),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld);candidate.restore(data);candidateExploration.restore(data.exploration);candidateRailway.restore(data.railway,candidate);candidateVillage.restore(data.village,candidate);candidate.village=candidateVillage;
+    this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.village=candidateVillage;this.restored=true;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();document.getElementById('fire-assist').checked=this.railway.assisted;this.resize(this.width,this.height);
   }
-  regenerate(seed){const value=String(seed).trim();if(!value||value.length>64)throw new Error('Use a world seed between 1 and 64 characters.');const candidateWorld=new NSWorld(value),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld);candidate.settings={...this.sim.settings};candidateRailway.service=this.railway.service;candidateRailway.cargo=this.railway.cargo;candidateRailway.assisted=this.railway.assisted;candidateRailway.configure(candidate);this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.restored=false;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();}
+  regenerate(seed){const value=String(seed).trim();if(!value||value.length>64)throw new Error('Use a world seed between 1 and 64 characters.');const candidateWorld=new NSWorld(value),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld);candidate.settings={...this.sim.settings};candidate.village=candidateVillage;candidateRailway.service=this.railway.service;candidateRailway.cargo=this.railway.cargo;candidateRailway.assisted=this.railway.assisted;candidateRailway.configure(candidate);this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.village=candidateVillage;this.restored=false;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();}
   diagnostics(){const sorted=this.frames.slice().sort((a,b)=>a-b);return{frames:sorted.length,medianMs:sorted[Math.floor(sorted.length/2)]||0,p95Ms:sorted[Math.floor(sorted.length*.95)]||0,renderer:this.renderer.diagnostics(),seed:this.world.seed,checksum:this.world.checksum(),running:this.running};}
   async exportSave(){try{const data=this.serialize(),text=JSON.stringify(data,null,2);if(this.host.writeSave)await this.host.writeSave(text);else{const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='next-stop-save.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}try{localStorage.setItem('next-stop-save',text);}catch{this.notify('Save exported. Browser storage unavailable; keep your JSON file.');return;}this.notify('Save exported. Keep it for your next journey.');}catch(error){this.report(error);}}
   showFatal(error){document.getElementById('fatal').hidden=false;document.getElementById('fatal-message').textContent=error.message||'The renderer could not start.';document.getElementById('fatal-detail').textContent=error.stack||'';console.error(error);}

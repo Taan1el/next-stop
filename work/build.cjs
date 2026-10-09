@@ -1,7 +1,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
-const parts=['world.js','journey.js','exploration.js','railway.js','renderer.js','app.js'].map(name=>fs.readFileSync(path.join(__dirname,'src',name),'utf8'));
+const parts=['world.js','journey.js','exploration.js','railway.js','village.js','renderer.js','app.js'].map(name=>fs.readFileSync(path.join(__dirname,'src',name),'utf8'));
 const shell=fs.readFileSync(path.join(__dirname,'src','shell.html'),'utf8');
 if(parts.some(code=>code.includes('</script>')))throw new Error('Embedded source contains a closing script tag.');
 const html=shell.replace('<!--__LICENSE__-->','<!--\n'+fs.readFileSync(path.join(root,'LICENSE'),'utf8').trim()+'\n-->').replace('/*__CODE__*/',`'use strict';\n(()=>{\n${parts.join('\n\n')}\n})();`);
