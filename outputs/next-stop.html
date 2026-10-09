@@ -1095,6 +1095,7 @@ class NSRailway {
   uniform float u_far;
   uniform vec3 u_lamps[3];
   uniform highp usampler2D u_labels;
+  uniform vec4 u_stars[64];
 
   struct Hit { float t; vec3 p; vec3 n; int material; vec3 local; vec3 extent; float info; };
 
@@ -1322,11 +1323,14 @@ class NSRailway {
 
   vec3 sky(vec3 rd) {
     float day=smoothstep(-0.18,0.25,u_sun.y);
-    vec3 zenith=mix(vec3(.018,.026,.071),vec3(.15,.35,.50),day);
-    vec3 horizon=mix(vec3(.08,.08,.15),vec3(.51,.64,.66),day);
+    vec3 zenith=mix(vec3(.023,.026,.085),vec3(.10,.32,.49),day);
+    vec3 horizon=mix(vec3(.085,.065,.14),vec3(.68,.72,.67),day);
     vec3 colour=mix(horizon,zenith,pow(clamp(rd.y+0.12,0.0,1.0),0.55));
     float dusk=1.0-smoothstep(0.05,0.42,abs(u_sun.y));
     colour+=vec3(.20,.074,.028)*dusk*pow(1.0-max(rd.y,0.0),5.0);
+    float sunward=.5+.5*dot(normalize(vec3(rd.x,0.0,rd.z)+vec3(.0001,0,.0001)),normalize(vec3(u_sun.x,0.0,u_sun.z)));
+    colour=mix(colour,vec3(.72,.39,.30),dusk*sunward*pow(1.0-max(rd.y,0.0),4.0)*.42);
+    colour=mix(colour,vec3(.24,.25,.43),dusk*(1.0-sunward)*max(rd.y,0.0)*.22);
     float cloud=clouds(rd);
     colour=mix(colour,mix(vec3(.13,.16,.20),vec3(.58,.64,.65),day),
                 cloud*(.72+u_weather.x*.18));
@@ -1433,7 +1437,11 @@ class NSRailway {
     float ambient=mix(.20,.49,day)*(1.0-u_weather.x*.23);
     float diffuse=max(0.0,dot(hit.n,u_sun))*max(0.0,u_sun.y)*.92*(1.0-u_weather.x*.45);
     if (allowShadow) diffuse*=shadow(hit);
-    vec3 colour=base*(vec3(.69,.78,.94)*ambient+vec3(1.0,.91,.73)*diffuse);
+    float heightShade=1.0;
+    if(hit.material>=23&&hit.material!=26&&hit.material!=35)heightShade=mix(.78,1.12,clamp(hit.local.y/max(.02,hit.extent.y)*.5+.5,0.0,1.0));
+    vec3 ambientTint=mix(vec3(.80,.72,.53),vec3(.61,.78,1.0),clamp(hit.n.y*.5+.5,0.0,1.0));
+    vec3 colour=base*heightShade*(ambientTint*ambient+vec3(1.0,.84,.59)*diffuse);
+    if(day>.1&&hit.material!=3)colour+=base*vec3(.20,.14,.07)*max(0.0,-hit.n.y)*day*.20;
     vec3 lampToSurface=hit.p-u_headPosition;
     float lampDistance=length(lampToSurface);
     float beam=smoothstep(.89,.978,dot(lampToSurface/max(.001,lampDistance),u_headDirection));
@@ -1506,12 +1514,11 @@ class NSRailway {
     int material=0;
     float distance=u_far;
     if (!found) {
-      float stars=hash21(floor(vec2(atan(rd.x,rd.z),asin(clamp(rd.y,-1.0,1.0)))*320.0));
       float cloud=clouds(rd);
       glyph=cloud>.45 ? 126u : cloud>.18 ? 45u : 32u;
       background=skyColour*.70;
       foreground=skyColour*.98;
-      if (u_sun.y<-.08 && stars>.994 && rd.y>.02) { glyph=42u; foreground=vec3(.77,.81,.85); }
+      if(u_sun.y<-.08&&cloud<.32){ivec2 cell=ivec2(gl_FragCoord.xy);for(int i=0;i<64;i++){if(all(equal(cell,ivec2(u_stars[i].xy)))){glyph=u_stars[i].z>.83?42u:46u;foreground=mix(vec3(.64,.78,1.0),vec3(1.0,.83,.62),u_stars[i].w)*u_stars[i].z;break;}}}
       if (dot(rd,u_sun)>.996) { glyph=64u; foreground=vec3(1.0,.87,.45); }
     } else {
       material=hit.material; distance=hit.t;
@@ -1538,8 +1545,10 @@ class NSRailway {
       if (material==7) { foreground+=vec3(.11,.12,.12); background*=.45; }
       if (material==9) background=colour*.24;
       if (material==19){foreground=mix(skyColour,vec3(.57,.58,.53),.35);background=skyColour*.70;}
-      float fogDensity=.00055+u_weather.y*u_weather.y*.012+u_weather.x*.0009;
+      float fogDensity=.00115+u_weather.y*u_weather.y*.012+u_weather.x*.0009;
       float fog=1.0-exp(-distance*fogDensity);
+      float aerial=smoothstep(65.0,380.0,distance)*.20;vec3 air=mix(vec3(.12,.12,.22),vec3(.39,.52,.62),smoothstep(-.15,.25,u_sun.y));
+      foreground=mix(foreground,air,aerial);background=mix(background,air*.58,aerial);
       foreground=mix(foreground,skyColour*.90,fog);
       background=mix(background,skyColour*.67,fog);
     }
@@ -1729,12 +1738,14 @@ class NSRailway {
       this.sceneUniforms = uniforms(gl,this.sceneProgram,[
         'terrain','objects','resolution','objectCount','shadowCount','size','water',
         'heightRange','viewport','cellSize','eye','forward','right','up','sun',
-        'headPosition','headDirection','time','weather','motion','far','lamps','labels'
+        'headPosition','headDirection','time','weather','motion','far','lamps','labels','stars'
       ]);
       this.displayUniforms = uniforms(gl,this.displayProgram,[
         'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
       ]);
       this.vao = gl.createVertexArray();
+      this.starRecords=new Float32Array(64*4);
+      this.starCatalogue=Array.from({length:64},(_,i)=>{const a=Math.sin(i*127.1+31.7)*43758.5453,b=Math.sin(i*311.7+7.3)*24634.6345,y=.045+(a-Math.floor(a))*.94,az=(b-Math.floor(b))*Math.PI*2,r=Math.sqrt(1-y*y);return{x:r*Math.sin(az),y,z:r*Math.cos(az),brightness:.65+(i%7)/20,warm:(i%5)/4};});
       this.terrainTexture = texture(gl); this.objectTexture = texture(gl);
       gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,3,MAX_OBJECTS,0,gl.RGBA,gl.FLOAT,null);
       this.maskTexture = texture(gl);
@@ -1865,6 +1876,12 @@ class NSRailway {
         forward[2]*right[0]-forward[0]*right[2],
         forward[0]*right[1]-forward[1]*right[0]
       ]);
+      // Fixed celestial directions, projected once per frame. Eye position is
+      // deliberately absent: translation cannot drag the stars through the sky.
+      for(let i=0;i<64;i++){const star=this.starCatalogue[i],v=[star.x,star.y,star.z],dot=a=>v[0]*a[0]+v[1]*a[1]+v[2]*a[2],depth=dot(forward),j=i*4;
+        this.starRecords[j]=depth>.001?Math.floor((dot(right)/depth/(this.width/this.height*.64)*.5+.5)*this.width/this.cellSize[0]):-10000;
+        this.starRecords[j+1]=depth>.001?Math.floor((dot(up)/depth/.64*.5+.5)*this.height/this.cellSize[1]):-10000;
+        this.starRecords[j+2]=star.brightness;this.starRecords[j+3]=star.warm;}
       this._uploadObjects(sim,eye);
       const time=Number(sim.time) || 0;
       const angle=1.05+time*Math.PI*2/720;
@@ -1889,6 +1906,7 @@ class NSRailway {
       gl.uniform2f(u.viewport,this.width,this.height); gl.uniform2fv(u.cellSize,this.cellSize);
       gl.uniform3fv(u.eye,eye); gl.uniform3fv(u.forward,forward); gl.uniform3fv(u.right,right); gl.uniform3fv(u.up,up);
       gl.uniform3fv(u.sun,sun); gl.uniform3fv(u.headPosition,headPosition); gl.uniform3fv(u.headDirection,headDirection);
+      gl.uniform4fv(u.stars,this.starRecords);
       gl.uniform1f(u.time,time); gl.uniform2f(u.weather,rain,fog);
       gl.uniform1f(u.motion,options.reducedMotion ? .15 : 1); gl.uniform1f(u.far,600);
       gl.uniform3fv(u.lamps,this.lampPositions);
