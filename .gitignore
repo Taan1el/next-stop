@@ -1,5 +1,7 @@
 .omx/
 node_modules/
+dist/
+outputs/releases/
 work/scratch/
 *.log
 .DS_Store

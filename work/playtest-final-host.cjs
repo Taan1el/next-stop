@@ -1,16 +1,16 @@
 'use strict';
-const {chromium}=require('C:/Users/crazy/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {launchBrowser,fileURL}=require('./browser.cjs');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'..'),directory=path.join(root,'.omx/evidence/cycles/08-final-host');fs.mkdirSync(directory,{recursive:true});
 (async()=>{
-  const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+  const browser=await launchBrowser();
   const context=await browser.newContext({viewport:{width:1280,height:720},offline:true});
   const page=await context.newPage();page.setDefaultTimeout(15000);
   const issues=[],requests=[];page.on('pageerror',e=>issues.push({type:'pageerror',text:e.message}));page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.push({type:m.type(),text:m.text()});});page.on('request',r=>requests.push(r.url()));
-  const html=fs.readFileSync(path.join(root,'outputs/next-stop.html')),save=JSON.parse(fs.readFileSync(path.join(root,'.omx/evidence/cycles/06-legacy-night-exploration/discovered-save.json'),'utf8'));
+  const html=fs.readFileSync(path.join(root,'outputs/next-stop.html')),save=JSON.parse(fs.readFileSync(path.join(root,'work/qa/fixtures/world1-exploration.json'),'utf8'));
   const result={status:'running',bytes:html.length,sha256:crypto.createHash('sha256').update(html).digest('hex'),browser:browser.version()};
   try{
-    await page.goto('file:///'+path.join(root,'outputs/next-stop.html').replaceAll('\\','/'),{waitUntil:'domcontentloaded'});
+    await page.goto(fileURL(path.join(root,'outputs/next-stop.html')),{waitUntil:'domcontentloaded',timeout:60000});
     await page.evaluate(save=>{
       window.oldGame=nextStopGame;oldGame.destroy();window.oldFrames=oldGame.renderer.frames;
       window.hostSource=JSON.stringify(save);window.hostWrites=[];window.hostErrors=[];

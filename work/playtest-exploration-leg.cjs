@@ -1,19 +1,19 @@
 'use strict';
-const {chromium}=require('C:/Users/crazy/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {launchBrowser,fileURL}=require('./browser.cjs');
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {walkTo}=require('./playtest-cycle.cjs');
 const root=path.resolve(__dirname,'..'),directory=path.join(root,'.omx/evidence/cycles/06-legacy-night-exploration');fs.mkdirSync(directory,{recursive:true});
 (async()=>{
-  const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
+  const browser=await launchBrowser();
   const context=await browser.newContext({viewport:{width:1280,height:720},offline:true,acceptDownloads:true});
   const page=await context.newPage();page.setDefaultTimeout(15000);
   const issues=[],requests=[];page.on('pageerror',e=>issues.push(e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.push(m.text());});page.on('request',r=>requests.push(r.url()));
   const result={status:'running',browser:browser.version(),start:Date.now()};let timer;
   try{
     const html=fs.readFileSync(path.join(root,'outputs/next-stop.html'));result.bytes=html.length;result.sha256=crypto.createHash('sha256').update(html).digest('hex');
-    await page.goto('file:///'+path.join(root,'outputs/next-stop.html').replaceAll('\\','/'),{waitUntil:'domcontentloaded'});
+    await page.goto(fileURL(path.join(root,'outputs/next-stop.html')),{waitUntil:'domcontentloaded',timeout:60000});
     await page.getByRole('button',{name:'Start journey',exact:true}).click();await page.getByRole('button',{name:'Settings',exact:true}).first().click();
-    const legacy=JSON.parse(fs.readFileSync(path.join(root,'.omx/evidence/circuit.json'),'utf8')).final.save;
+    const legacy=JSON.parse(fs.readFileSync(path.join(root,'work/qa/fixtures/world1-completed.json'),'utf8'));
     const legacyFile=path.join(directory,'legacy-save.json');fs.writeFileSync(legacyFile,JSON.stringify(legacy));
     const chooser=page.waitForEvent('filechooser');await page.locator('#import').click();await(await chooser).setFiles(legacyFile);await page.waitForTimeout(250);
     result.imported=await page.evaluate(()=>nextStopGame.serialize());if(!result.imported.delivery.finished||result.imported.exploration.visited.length)throw Error('Legacy save did not import');

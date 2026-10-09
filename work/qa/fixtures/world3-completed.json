@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "world": {
+    "seed": "NEXT-STOP",
+    "version": 3,
+    "checksum": "0d37a594"
+  },
+  "time": 446.1166666665896,
+  "weather": {
+    "rain": 1.42109682045554e-7,
+    "fog": 0.08000004973838863
+  },
+  "weatherTarget": "clear",
+  "train": {
+    "s": 1730.6873089052724,
+    "speed": 0,
+    "throttle": 0,
+    "brake": 1,
+    "direction": 1
+  },
+  "player": {
+    "x": -38.04209725827594,
+    "y": 2.9179579885583813,
+    "z": 231.01892844312573,
+    "yaw": -1.5650850953361481,
+    "pitch": -0.05,
+    "mode": "foot"
+  },
+  "cameraMode": "chase",
+  "delivery": {
+    "index": 0,
+    "completed": 3,
+    "started": true,
+    "finished": true
+  },
+  "settings": {
+    "quality": "standard",
+    "reducedMotion": false,
+    "weatherMode": "auto",
+    "highContrast": false
+  },
+  "exploration": {
+    "version": 1,
+    "visited": [
+      "pinebank-outlook",
+      "bellweather-tower",
+      "stonehaven-storehouse",
+      "pinebank-meadow",
+      "bellweather-ridge",
+      "stonehaven-fields"
+    ],
+    "selected": null
+  },
+  "railway": {
+    "version": 1,
+    "service": "freight",
+    "cargo": "mixed",
+    "assisted": false,
+    "engine": {
+      "fire": 0.7123783333337239,
+      "pressure": 7.787785016673185,
+      "coal": 100,
+      "water": 99.86433333332911
+    },
+    "overspeed": 1.8833333333333315,
+    "earnings": 54,
+    "stops": [
+      {
+        "station": "Bellweather",
+        "time": 142.46666666667218
+      },
+      {
+        "station": "Stonehaven",
+        "time": 283.2333333334044
+      },
+      {
+        "station": "Pinebank",
+        "time": 423.9499999999431
+      }
+    ],
+    "whistled": [
+      "lake-crossing",
+      "farm-crossing"
+    ],
+    "missed": [],
+    "whistleUntil": 334.6666666666922,
+    "lastStoke": 410.6833333332885,
+    "dwell": null
+  }
+}

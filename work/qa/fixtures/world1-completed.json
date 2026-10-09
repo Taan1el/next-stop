@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "world": {
+    "seed": "NEXT-STOP",
+    "version": 1,
+    "checksum": "4bd6b452"
+  },
+  "time": 300.2166666667223,
+  "weather": {
+    "rain": 0.9999999756118054,
+    "fog": 0.42999999146413254
+  },
+  "weatherTarget": "rain",
+  "train": {
+    "s": 1727.178172171387,
+    "speed": 0,
+    "throttle": 0,
+    "brake": 1,
+    "direction": 1
+  },
+  "player": {
+    "x": -15.06582680825863,
+    "y": 3.516587139902477,
+    "z": 231.07911382913468,
+    "yaw": -0.0014515352972790812,
+    "pitch": -0.05,
+    "mode": "foot"
+  },
+  "cameraMode": "chase",
+  "delivery": {
+    "index": 0,
+    "completed": 3,
+    "started": true,
+    "finished": true
+  },
+  "settings": {
+    "quality": "standard",
+    "reducedMotion": false,
+    "weatherMode": "auto",
+    "highContrast": false
+  }
+}

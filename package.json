@@ -1,0 +1,27 @@
+{
+  "name": "next-stop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An offline rural railway game rendered directly as coloured glyphs.",
+  "license": "MIT",
+  "author": "Taan1el",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Taan1el/next-stop.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node work/build.cjs",
+    "test": "node work/qa/run.cjs",
+    "test:browser": "node work/qa/browser-suite.cjs",
+    "test:circuit": "node work/run-cycle.cjs full-circuit",
+    "test:passenger": "node work/playtest-passenger.cjs passenger",
+    "release:package": "node work/package-release.cjs"
+  },
+  "devDependencies": {
+    "fflate": "0.8.3",
+    "playwright": "1.64.0"
+  }
+}

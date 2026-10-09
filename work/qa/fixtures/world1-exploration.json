@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "world": {
+    "seed": "NEXT-STOP",
+    "version": 1,
+    "checksum": "4bd6b452"
+  },
+  "time": 409.749999999956,
+  "weather": {
+    "rain": 0.000013392263943154555,
+    "fog": 0.08000468729238
+  },
+  "weatherTarget": "clear",
+  "train": {
+    "s": 568.8803692773572,
+    "speed": 0,
+    "throttle": 0,
+    "brake": 1,
+    "direction": 1
+  },
+  "player": {
+    "x": 244.69812648667593,
+    "y": 2.237719537499991,
+    "z": -132.23789031007212,
+    "yaw": -2.3865358903202982,
+    "pitch": -0.05,
+    "mode": "foot"
+  },
+  "cameraMode": "chase",
+  "delivery": {
+    "index": 0,
+    "completed": 3,
+    "started": true,
+    "finished": true
+  },
+  "settings": {
+    "quality": "standard",
+    "reducedMotion": false,
+    "weatherMode": "auto",
+    "highContrast": false
+  },
+  "exploration": {
+    "version": 1,
+    "visited": [
+      "bellweather-tower"
+    ],
+    "selected": null
+  }
+}

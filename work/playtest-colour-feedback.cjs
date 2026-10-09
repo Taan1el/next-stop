@@ -1,13 +1,13 @@
 'use strict';
-const {chromium}=require('C:/Users/crazy/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {launchBrowser,fileURL}=require('./browser.cjs');
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),name=process.argv[2]||'23-colour-feedback';
 if(!/^[a-z0-9-]+$/.test(name))throw Error('Invalid evidence name');
 const directory=path.join(root,'.omx/evidence/cycles',name);fs.mkdirSync(directory,{recursive:true});
 (async()=>{
- const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'}),context=await browser.newContext({viewport:{width:1280,height:720},offline:true,acceptDownloads:true}),page=await context.newPage();
+ const browser=await launchBrowser(),context=await browser.newContext({viewport:{width:1280,height:720},offline:true,acceptDownloads:true}),page=await context.newPage();
  page.setDefaultTimeout(15000);const issues=[],requests=[];page.on('pageerror',e=>issues.push(e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))issues.push(m.text());});page.on('request',r=>requests.push(r.url()));
- const html=fs.readFileSync(path.join(root,'outputs/next-stop.html')),url='file:///'+path.join(root,'outputs/next-stop.html').replaceAll('\\','/');
+ const html=fs.readFileSync(path.join(root,'outputs/next-stop.html')),url=fileURL(path.join(root,'outputs/next-stop.html'));
  const result={status:'running',bytes:html.length,sha256:crypto.createHash('sha256').update(html).digest('hex'),browser:browser.version(),issues,requests};
  try{
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});await page.getByRole('button',{name:'Start journey',exact:true}).click();await page.keyboard.press('KeyE');await page.keyboard.press('KeyB');await page.keyboard.down('KeyW');await page.waitForTimeout(2600);await page.keyboard.up('KeyW');await page.waitForTimeout(12500);

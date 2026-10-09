@@ -1,12 +1,12 @@
 // Real-time browser circuit using player keyboard controls. State is read, never advanced by tests.
-const {chromium}=require('C:/Users/crazy/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {launchBrowser,fileURL}=require('./browser.cjs');
 const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const evidence=path.join(root,'.omx','evidence');
 fs.mkdirSync(evidence,{recursive:true});
 (async()=>{
-  const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+  const browser=await launchBrowser();
   const context=await browser.newContext({viewport:{width:1280,height:720},offline:true});
   const page=await context.newPage();
   const errors=[],warnings=[],requests=[],stops=[];
@@ -15,7 +15,7 @@ fs.mkdirSync(evidence,{recursive:true});
   page.on('request',request=>requests.push(request.url()));
   const started=Date.now();
   try{
-    await page.goto('file:///'+path.join(root,'outputs','next-stop.html').replaceAll('\\','/'));
+    await page.goto(fileURL(path.join(root,'outputs','next-stop.html')));
     await page.getByRole('button',{name:'Start journey',exact:true}).click();
     await page.keyboard.press('KeyE');
     await page.waitForTimeout(350);
