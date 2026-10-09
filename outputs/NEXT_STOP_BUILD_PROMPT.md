@@ -278,3 +278,17 @@ The player selected all three directions: light steam management, passenger/carg
 - Use a local Git repository with small meaningful commits. All author and committer identities must be Taan1el <taaniel.vananurm@gmail.com>; do not add other contributor trailers or infer remote publication.
 
 The 2,000,000-byte ceiling and this-session-only playtest scope remain in force. See the verification report for the exact delivered artifact and measured results.
+
+## 15. Structural detail, colour and feedback amendment
+
+Refine the existing rural railway rather than changing its genre. Keep the numerical glyph renderer and offline single HTML.
+
+- Make the locomotive read as a working steam engine: capped cylindrical boiler, flared chimney, domes, brass/copper pipes, buffers, divided cab, pressure gauges, spoked wheels, crank pins and animated coupling/piston rods. Derive mechanism phase from signed unwrapped travel so reverse and route wrap remain continuous; stop/pause must freeze the mechanisms.
+- Give stations and country houses true triangular gables, masonry/siding, slate courses, framed glazing, doors, sills, chimneys, station canopies, furniture, a tower clock and nameboards formed directly from numeric glyph masks. Leave station spawns and walking routes safe.
+- Add colour through warm highlights, cool shadow/sky bounce, material gradients, brass reflections and distant aerial haze. Keep each surface represented as coloured glyph cells. Stars use fixed celestial directions, with no positional parallax from walking; turning the camera changes their projection.
+- Use appropriate feedback: synthesized steam rhythm tied to wheels, rail-joint clicks, whistle and station bells; earned shillings/service ratings in restrained notices; small button response with reduced-motion support. Existing services, coal/pressure, crossings, boarding waits and exploration supply the core loop. Do not indiscriminately copy arcade targets, combos or screen shake into this quiet railway.
+- Checkpoint locally during play and on pause. Offer an explicit Continue action on reopening. Keep fresh starts, portable JSON and host saves usable when storage is denied. Corrupt checkpoints must not replace valid live state.
+- Preserve numerical world generations 1/2/3; version 4 carries the detailed structures and train. Keep close-detail LOD and actual dynamic reservation within the existing 256-record renderer budget.
+- Verify actual controls, moving/stopped/paused mechanisms, each service/cargo, old-save import, shader drawing, sky translation/rotation, audio mute/volume, checkpoint continuation/storage denial, and a complete offline circuit with six foot discoveries. Distinguish rendering fixtures from ordinary-input playthroughs, report exact loaded artifact versions and retain failed evidence.
+
+Keep small commits authored and committed solely by Taan1el <taaniel.vananurm@gmail.com>. The file-size ceiling remains 2,000,000 bytes; use the available room for worthwhile detail rather than padding.

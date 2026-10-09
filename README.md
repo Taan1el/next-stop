@@ -20,7 +20,11 @@ Choose goods, passenger or free-running service. Goods work offers mixed farm fr
 | J | Saved field notes and six walking destinations |
 | Esc / H | Pause / controls |
 
-Watch steam pressure and fire, ease power for bridges and crossings, and whistle before crossing. Completed stops replenish coal/water and record service earnings. Wind moves foliage, fire flickers, smoke rises, clouds drift and lamps warm their surroundings. Volume/mute controls are in Settings.
+Watch steam pressure and fire, ease power for bridges and crossings, and whistle before crossing. Completed stops replenish coal/water and record service earnings with a station bell. Steam chuffs and rail joints follow movement. Volume/mute controls are in Settings.
+
+The locomotive has a rounded boiler, spoked wheels, moving coupling rods, brass fittings and cab gauges. Stations have brickwork, framed windows, doors, canopies, furniture and readable glyph nameboards. Warm/cool lighting, material gradients and distance haze give the valley depth. Stars keep fixed celestial directions when the camera moves. Wind moves foliage, fire flickers, smoke rises, clouds drift and lamps warm their surroundings.
+
+Progress checkpoints locally every ten seconds and when paused. Reopen the HTML and choose **Continue last journey**. Browser storage may be unavailable for local files; Settings still exports/imports portable JSON saves.
 
 ## Develop
 
@@ -32,7 +36,7 @@ The builder caps the HTML at 2,000,000 bytes. Focused scripts live under **work/
 
 Development tests use local Playwright and Edge/Chrome installations. Adjust those test paths when moving machines; these tools are never bundled in the game.
 
-World versions 1 and 2 preserve their numerical generation for existing saves. New valleys use version 3. Validate saves before swapping live state. Edit source and rebuild instead of patching only generated HTML.
+World versions 1, 2 and 3 preserve their numerical generation for existing saves. New valleys use version 4. Validate saves before swapping live state. Edit source and rebuild instead of patching only generated HTML.
 
 ## History
 
