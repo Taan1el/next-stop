@@ -6,6 +6,7 @@ class NSGame {
     this.destroyed=false; this.started=false; this.running=false; this.debug=false;
     this.soundVolume=.55;this.soundMuted=false;
     this.soundCounters={chuffs:0,joints:0,bells:0};this.lastSoundBeat=null;this.lastJoint=null;
+    this.lastCheckpoint=0;this.localSaveAvailable=false;
     this.world=new NSWorld('NEXT-STOP'); this.sim=new NSSimulation(this.world);this.exploration=new NSExploration(this.world);
     this.railway=new NSRailway(this.world);
     this.renderer=new NSGlyphRenderer(canvas,this.world);
@@ -15,6 +16,7 @@ class NSGame {
     for(const id of ['menu','start-view','pause-view','help-view','settings-view','journal-view','journal-count','journal-list','field-hint','journey-ticket','journey-label','objective','hint','speed','throttle','brake','status','toast','diagnostics','menu-status','quality','weather','seed','reduced-motion','high-contrast','debug','pause-button']) this.el[id]=document.getElementById(id);
     this.bindControls(); this.resize(this.width,this.height); this.syncSettings();this.syncJournal();
     document.getElementById('start-button').focus();
+    this.readLocalCheckpoint();
     this.renderer.onContextLost=()=>{this.wasRunning=this.running;this.pause();this.notify('Graphics interrupted. Waiting for restoration.');};
     this.renderer.onContextRestored=()=>{this.notify('Graphics restored. Your journey is safe.');if(this.wasRunning)this.resume();};
     this.renderer.onError=error=>{this.pause();this.showFatal(error);this.host.onError?.(error);};
@@ -24,6 +26,7 @@ class NSGame {
   click(id,handler) { const node=document.getElementById(id);if(node)this.listen(node,'click',handler); }
   bindControls() {
     this.click('start-button',()=>this.start());
+    this.click('continue-button',()=>{try{const text=localStorage.getItem('next-stop-checkpoint');if(!text)throw Error('Local progress is unavailable. Import your exported save instead.');this.restore(text);this.start();this.notify('Last local journey restored.');}catch(error){this.notify(error.message||'Local progress could not be restored.');}});
     this.click('pause-button',()=>this.running?this.openMenu('pause'):this.closeMenu());
     this.click('help-button',()=>this.openMenu('help'));this.click('start-help',()=>this.openMenu('help'));
     this.click('journal-button',()=>this.openMenu('journal'));
@@ -110,7 +113,7 @@ class NSGame {
     this.lastSoundBeat=beat;this.lastJoint=joint;
   }
   syncAudio(){if(this.audioMaster)this.audioMaster.gain.setValueAtTime(this.soundMuted?0:this.soundVolume,this.audio.currentTime);}
-  pause(){this.running=false;if(this.audioTransport)this.audioTransport.gain.value=0;this.input={};this.dragging=false;this.lastPointer=null;this.accumulator=0;if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
+  pause(){if(this.started&&!this.destroyed)this.checkpoint();this.running=false;if(this.audioTransport)this.audioTransport.gain.value=0;this.input={};this.dragging=false;this.lastPointer=null;this.accumulator=0;if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
   resume(){if(this.destroyed)return;this.started=true;this.running=true;if(this.audioTransport)this.audioTransport.gain.value=1;this.lastSoundBeat=null;this.lastJoint=null;this.accumulator=0;this.previous=performance.now();this.el.menu.hidden=true;this.el['pause-button'].textContent='Pause';this.canvas.focus({preventScroll:true});}
   menuItems(root=this.el.menu){return[...root.querySelectorAll('button,input,select,summary')].filter(n=>!n.closest('[hidden]')&&!n.hidden&&!n.disabled&&(n.type!=='radio'||n.checked));}
   openMenu(view){this.pause();this.el.menu.hidden=false;for(const name of ['start','pause','help','settings','journal'])this.el[name+'-view'].hidden=name!==view;const heading=this.el[view+'-view'].querySelector('h1,h2');heading.id=view+'-heading';this.el.menu.querySelector('.card').setAttribute('aria-labelledby',heading.id);this.syncSettings();this.syncJournal();this.menuItems(this.el[view+'-view'])[0]?.focus();}
@@ -122,6 +125,7 @@ class NSGame {
     if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){this.railway.step(1/60,this.sim);this.sim.step(1/60,this.input);this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
     this.sim.renderAlpha=this.running?this.accumulator*60:1;
     this.updateTrainSound();
+    if(this.running&&now-this.lastCheckpoint>10000){this.checkpoint();this.lastCheckpoint=now;}
     try{if(!this.renderer.lost){this.renderer.render(this.sim,this.sim.camera(Math.min(elapsed,.05)),{quality:this.sim.settings.quality,debug:this.debug,reducedMotion:this.sim.settings.reducedMotion});}}catch(error){this.pause();this.showFatal(error);return;}
     if(this.running&&elapsed>0&&elapsed<.25){this.frames.push(elapsed*1000);if(this.frames.length>600)this.frames.shift();}
     if(now-this.lastUI>150){this.updateUI(now);this.lastUI=now;}this.raf=requestAnimationFrame(this.tick);
@@ -168,6 +172,8 @@ class NSGame {
     }
   }
   notify(message){if(!message)return;this.el.toast.textContent=message;this.el.toast.classList.add('visible');this.toastUntil=performance.now()+4500;if(!this.el.menu.hidden)this.el['menu-status'].textContent=message;}
+  readLocalCheckpoint(){try{const text=localStorage.getItem('next-stop-checkpoint');this.localSaveAvailable=!!text&&text.length<=65536;}catch{this.localSaveAvailable=false;}const button=document.getElementById('continue-button');button.hidden=!this.localSaveAvailable;}
+  checkpoint(){try{localStorage.setItem('next-stop-checkpoint',JSON.stringify(this.serialize()));this.localSaveAvailable=true;}catch{this.localSaveAvailable=false;}const status=document.getElementById('local-save-status');status.textContent=this.localSaveAvailable?'Local progress saved. Continue last journey after reopening this file.':'Local storage unavailable. Export a JSON save to keep progress.';}
   report(error){console.error(error);this.notify(error.message||String(error));this.host.onError?.(error);}
   serialize(){return{...this.sim.serialize(),exploration:this.exploration.serialize(),railway:this.railway.serialize()};}
   restore(value){
