@@ -19,7 +19,11 @@ const root=path.resolve(__dirname,'..'),directory=path.join(root,'.omx/evidence/
     },save);
     await page.waitForTimeout(250);
     result.recreated=await page.evaluate(()=>({oldDestroyed:oldGame.destroyed,oldListeners:oldGame.listeners.length,oldFramesUnchanged:oldGame.renderer.frames===oldFrames,newFrames:nextStopGame.renderer.frames,save:nextStopGame.serialize(),journalVisible:!nextStopGame.el['journal-view'].hidden}));
-    assert(result.recreated.oldDestroyed&&result.recreated.oldListeners===0&&result.recreated.oldFramesUnchanged&&result.recreated.newFrames>0&&result.recreated.journalVisible);assert.deepEqual(result.recreated.save,save);
+    assert(result.recreated.oldDestroyed&&result.recreated.oldListeners===0&&result.recreated.oldFramesUnchanged&&result.recreated.newFrames>0&&result.recreated.journalVisible);
+    // This historical fixture predates steam/service fields. Restore adds the
+    // documented assisted-freight defaults while preserving every old field.
+    const upgraded={...save,railway:{version:1,service:'freight',cargo:'mixed',assisted:true,engine:{fire:.72,pressure:9.2,coal:100,water:100},lastStoke:-10,whistleUntil:-1,whistled:[],missed:[],overspeed:0,dwell:null,earnings:0,stops:[]}};
+    assert.deepEqual(result.recreated.save,upgraded);
     const before=await page.evaluate(()=>JSON.stringify(nextStopGame.serialize()));
     const supported=await page.evaluate(()=>{window.lossExtension=nextStopGame.renderer.gl.getExtension('WEBGL_lose_context');if(!lossExtension)return false;lossExtension.loseContext();return true;});assert(supported,'Context loss extension unavailable');
     await page.waitForFunction(()=>nextStopGame.renderer.lost);await page.waitForTimeout(150);
