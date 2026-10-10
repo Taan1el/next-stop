@@ -2,6 +2,8 @@
 node_modules/
 dist/
 outputs/releases/
+outputs/NEXT_STOP_HANDOFF.md
+outputs/next-stop-source-*.zip
 work/scratch/
 *.log
 .DS_Store

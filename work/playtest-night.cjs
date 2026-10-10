@@ -13,7 +13,7 @@ const directory=path.join(root,'.omx/evidence/cycles',name);fs.mkdirSync(directo
    await page.evaluate(({location,lantern,rain})=>{const g=nextStopGame,st=g.world.stations[0],r=g.world.routeAt(0);g.sim.time=420;g.sim.weather={rain:rain?1:0,fog:rain?.43:.08};g.sim.settings.lantern=lantern;g.sim.settings.nightBrightness=1;g.el.menu.hidden=true;g.sim.train.s=0;g.sim.train.speed=0;
     if(location==='cab'){Object.assign(g.sim.player,{x:r.x,y:r.y,z:r.z,mode:'train',yaw:r.yaw,pitch:-.04});g.sim.cameraMode='cab';}
     else{const p=location==='meadow'?g.exploration.records.find(r=>r.id==='pinebank-meadow').anchor:{x:st.platformX,y:g.world.surfaceAt(st.platformX,st.platformZ).height,z:st.platformZ};Object.assign(g.sim.player,p,{mode:'foot',yaw:st.yaw,pitch:-.16});}
-    g.sim._previousPlayer={...g.sim.player};g.sim.renderAlpha=1;g.sim._camera=null;g.renderer.render(g.sim,g.sim.camera());
+    g.sim._previousPlayer={...g.sim.player};g.sim.renderAlpha=1;g.sim._camera=null;g.updateUI(performance.now());g.renderer.render(g.sim,g.sim.camera());
    },{location,lantern,rain});
    await page.screenshot({path:path.join(directory,label+'.png')});
    const metric=await page.evaluate(()=>{const r=nextStopGame.renderer,gl=r.gl,buffers=[0,1,2].map(i=>{const a=new Uint8Array(r.columns*r.rows*4);gl.bindFramebuffer(gl.READ_FRAMEBUFFER,r.framebuffer);gl.readBuffer(gl.COLOR_ATTACHMENT0+i);gl.readPixels(0,0,r.columns,r.rows,gl.RGBA_INTEGER,gl.UNSIGNED_BYTE,a);return a;});gl.bindFramebuffer(gl.READ_FRAMEBUFFER,null);const samples=[];let background=0;
