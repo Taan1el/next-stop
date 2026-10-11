@@ -1,7 +1,7 @@
 'use strict';
 const {spawnSync}=require('node:child_process'),path=require('node:path');
 const root=path.resolve(__dirname,'../..');
-const scripts=['world-regression','journey-guidance','exploration-regression','railway-regression','refinement-regression','renderer-resources','renderer-budget','village-regression','save-fixtures','audit','release-package'];
+const scripts=['world-regression','journey-guidance','exploration-regression','railway-regression','refinement-regression','renderer-resources','renderer-budget','village-regression','career-regression','save-fixtures','audit','release-package'];
 for(const script of scripts){
   const result=spawnSync(process.execPath,[path.join(__dirname,script+'.cjs')],{cwd:root,stdio:'inherit'});
   if(result.error)throw result.error;

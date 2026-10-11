@@ -413,7 +413,7 @@ class NSSimulation {
     const norm = Math.hypot(f, r);
     if (!norm) return;
     f /= norm; r /= norm;
-    const speed = 4.2, yaw = this.player.yaw;
+    const speed = 4.2 * (this.walkScale || 1), yaw = this.player.yaw;
     const dx = (Math.sin(yaw) * f + Math.cos(yaw) * r) * speed * dt;
     const dz = (Math.cos(yaw) * f - Math.sin(yaw) * r) * speed * dt;
     const attempt = (x, z) => {
