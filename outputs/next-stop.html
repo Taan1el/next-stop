@@ -30,6 +30,7 @@ SOFTWARE.
 <meta name="color-scheme" content="light dark">
 <title>Next Stop · A world in letters</title>
 <style>
+.journal-pages{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid #98885b;padding-bottom:8px;margin-bottom:18px}.journal-pages [aria-selected=true]{background:#35402d;color:#efe6cc;box-shadow:none}#journal-view h3{font-size:17px;font-weight:normal;margin:18px 0 8px}#journal-view section>p{font-size:13px}#journal-view .close-menu{margin-top:20px}
 :root{--ink:#29251c;--paper:#e6dab8;--muted:#756a51;--gold:#b89a59;--glass:#e6dab8;--line:#b2a27d;font-family:Georgia,"Times New Roman",serif;color:var(--ink);background:#171b16}
 *{box-sizing:border-box}body{margin:0;overflow:hidden}button,input,select{font:inherit;color:var(--ink)}button{cursor:pointer;background:#ded0a9;border:1px solid #887950;border-radius:0;padding:9px 14px;box-shadow:inset 0 0 0 2px #e9ddbd}button:hover{background:#f0e3bf}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #77531d;outline-offset:3px}button.primary{background:#35402d;color:#efe6cc;border-color:#263222;box-shadow:inset 0 0 0 2px #62704d}button.primary:hover{background:#46513c}button.small{font-size:12px;padding:7px 10px}button:disabled{opacity:.5;cursor:default}input,select{border:1px solid var(--line);border-radius:0;background:#f0e6ca;padding:9px 10px}
 #world{display:block;width:100vw;height:100vh;touch-action:none}header{position:absolute;right:18px;top:15px;pointer-events:none}.brand{display:none}nav{pointer-events:auto}#pause-button{background:#26291fe6;color:#e8dfc2;border:1px solid #b5a47b;padding:7px 12px;box-shadow:none;font-size:12px}#status{position:absolute;left:18px;top:18px;color:#efe5cb;font:11px "Courier New",monospace;text-shadow:1px 1px #131710;background:#25291d88;padding:5px 8px}
@@ -57,7 +58,37 @@ R reverse while stopped, C camera; mouse capture or drag/arrow-key look; Esc pau
 <div id="pause-view" class="view" hidden><div class="eyebrow">Time stands still</div><h2>Journey paused</h2><p>Your train and delivery are right where you left them.</p><div class="row"><button class="primary resume-button">Resume journey</button><button id="journal-button">Journal</button><button id="help-button">Controls</button><button id="settings-button">Settings</button><button id="pause-settings" hidden>Settings</button></div></div>
 <div id="help-view" class="view" hidden><div class="eyebrow">Pocket guide</div><h2>How to travel</h2><dl class="controls"><dt><kbd>W A S D</kbd></dt><dd>Walk. In the cab, W/S raises or lowers power.</dd><dt><kbd>E</kbd></dt><dd>Board nearby train. At the destination, deliver while stopped. Otherwise leave while stopped.</dd><dt><kbd>Space</kbd></dt><dd>Hold to brake. Begin braking before the platform.</dd><dt><kbd>C</kbd> / <kbd>R</kbd></dt><dd>Switch cab/chase view. Reverse direction while stopped.</dd><dt>Mouse / arrows</dt><dd>Click world to capture mouse. Drag to look if capture is unavailable. Arrow keys also look.</dd><dt><kbd>Esc</kbd> / <kbd>H</kbd></dt><dd>Pause / guide. Escape releases mouse.</dd><dt><kbd>F</kbd></dt><dd>Centre the train camera on the railway.</dd><dt><kbd>B</kbd> / <kbd>V</kbd></dt><dd>Add coal to the fire / sound the whistle. Ease power for bridges and crossings. Pressure supplies the engine’s pull.</dd><dt><kbd>T</kbd></dt><dd>Use parcels and noticeboards on foot. Hold T for 3 seconds beside a lamp to refill it.</dd><dt><kbd>1 2 3</kbd></dt><dd>At a post-sorting board, choose the sack matching the letter’s address: Pinebank, Bellweather, Stonehaven.</dd><dt><kbd>L</kbd></dt><dd>Light or put away your hand lantern. Night visibility can be adjusted in Settings.</dd><dt><kbd>J</kbd></dt><dd>Open your journal, station noticeboard and paint workshop. Discover places on foot along station platforms.</dd></dl><hr class="divider"><p class="note">Destination and interaction hints appear at the bottom. Settings provides weather, portable saves, and recovery.</p><button class="primary close-menu">Back to journey</button></div>
 <div id="settings-view" class="view" hidden><div class="eyebrow">Station office</div><h2>Journey settings</h2><label class="field"><span>Glyph size</span><select id="quality"><option value="coarse">Large · faster</option><option value="standard" selected>Classic · balanced</option><option value="fine">Small · more detail</option></select></label><label class="field"><span>Weather</span><select id="weather"><option value="auto">Changing skies</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="fog">Fog</option></select></label><label class="field check"><input type="checkbox" id="reduced-motion">Reduced camera motion</label><label class="field check"><input type="checkbox" id="fire-assist">Automatic fireman · relaxed driving</label><label class="field"><span>Railway sound volume</span><input type="range" id="sound-volume" min="0" max="100" value="55"></label><label class="field check"><input type="checkbox" id="sound-muted">Mute sound</label><label class="field"><span>Night visibility · <output id="night-brightness-value">100%</output></span><input type="range" id="night-brightness" min="70" max="140" value="100" aria-label="Night visibility"></label><label class="field check"><input type="checkbox" id="high-contrast">High-contrast interface</label><label class="field check"><input type="checkbox" id="debug">Show glyph IDs and diagnostics</label><label class="field"><span>World seed · new valley resets journey</span><input id="seed" maxlength="64" value="NEXT-STOP" autocomplete="off"></label><div class="row"><button id="regenerate">New valley</button><button id="recover">Return to safe station</button></div><hr class="divider"><div class="row"><button id="export">Export save</button><button id="import">Import save</button><input type="file" id="save-file" accept="application/json,.json" hidden></div><p class="note">JSON saves travel with you, even when browser storage is unavailable.</p><p id="local-save-status" class="note">Local progress saves every ten seconds and when you pause. Export JSON for a portable backup.</p><p id="menu-status" class="menu-status" role="status"></p><button class="primary close-menu">Back to journey</button></div>
-<div id="journal-view" class="view" hidden><div class="eyebrow">Letters from the valley</div><h2>Field journal</h2><p id="journal-count">0 of 3 places discovered</p><p>Leave the cab and walk beyond the platforms into the countryside. Find a place, keep a note. Your journal travels in your JSON save.</p><p class="note">Delivery stops come first. After the circuit, your chosen place guides the train.</p><details class="ledger"><summary>Driver’s ledger</summary><p id="service-ledger"></p></details><details class="ledger"><summary id="village-summary">Station noticeboard</summary><p id="village-wallet"></p><ol id="village-list"></ol><button id="return-work" class="small" hidden>Return unfinished work</button></details><details class="ledger" id="workshop"><summary>Village workshop</summary><p>Earn shillings through station work. New boiler paints cost 20 shillings; owned paints can be changed freely.</p><div class="row"><button class="small" data-paint="original">Original paint</button><button class="small" data-paint="green">Forest green</button><button class="small" data-paint="ochre">Ochre brass</button></div></details><ol id="journal-list"></ol><button class="primary close-menu">Back to journey</button></div>
+<div id="journal-view" class="view" hidden>
+<div class="eyebrow">Letters from the valley</div><h2>Field journal</h2>
+<nav id="journal-pages" class="journal-pages" role="tablist" aria-label="Journal pages">
+<button id="tab-railway" class="small" role="tab" data-journal-page="railway" aria-controls="page-railway" aria-selected="false" tabindex="-1">Railway</button>
+<button id="tab-work" class="small" role="tab" data-journal-page="work" aria-controls="page-work" aria-selected="true">Work</button>
+<button id="tab-notes" class="small" role="tab" data-journal-page="notes" aria-controls="page-notes" aria-selected="false" tabindex="-1">Notes</button>
+<button id="tab-workshop" class="small" role="tab" data-journal-page="workshop" aria-controls="page-workshop" aria-selected="false" tabindex="-1">Workshop</button>
+</nav>
+<section id="page-railway" role="tabpanel" aria-labelledby="tab-railway" data-journal-panel="railway" hidden>
+<h3>Driver’s ledger</h3><p id="service-ledger"></p><p id="career-ledger" class="note"></p>
+<label class="field">Next service<select id="next-service-kind"><option value="freight">Goods train</option><option value="passenger">Passenger local</option></select></label>
+<label class="field">Goods load<select id="next-cargo"><option value="mixed">Farm freight</option><option value="mail">Mail bags</option><option value="timber">Timber wagons</option></select></label>
+<button id="next-service" class="small">Begin next service</button>
+<p class="note">Finish at Pinebank, then take another circuit. Your world, parcels, field notes and purse stay with you.</p>
+</section>
+<section id="page-work" role="tabpanel" aria-labelledby="tab-work" data-journal-panel="work">
+<h3 id="village-summary">Station noticeboard</h3><p id="village-wallet"></p>
+<label class="field">Show work<select id="work-filter"><option value="local">Nearby station</option><option value="all">All stations</option><option value="completed">Completed work</option></select></label>
+<ol id="village-list"></ol><div class="row"><button id="return-work" class="small" hidden>Return unfinished work</button><button id="renew-work" class="small">Collect a new work round</button></div>
+<p class="note">New rounds after a railway service or all parcels and letters. Completed lamps keep their warmth.</p>
+</section>
+<section id="page-notes" role="tabpanel" aria-labelledby="tab-notes" data-journal-panel="notes" hidden>
+<p id="journal-count">0 of 6 places discovered</p><p>Leave the cab and find trackside places on foot. Notes travel in your JSON save.</p>
+<p class="note">Delivery stops come first. After the circuit, your chosen place or carried parcel guides the train.</p><ol id="journal-list"></ol>
+</section>
+<section id="page-workshop" role="tabpanel" aria-labelledby="tab-workshop" data-journal-panel="workshop" hidden><div id="workshop">
+<h3>Village workshop</h3><p>Railway fares and station work share one purse. Owned paints can be changed freely.</p>
+<div class="row"><button class="small" data-paint="original">Original paint</button><button class="small" data-paint="green">Forest green</button><button class="small" data-paint="ochre">Ochre brass</button></div>
+<h3>Walking boots</h3><p>Sturdy soles for the station rounds. Walk 12% faster for 40 shillings.</p><button class="small" data-gear="boots">Walking boots · 40 shillings</button>
+</div></section>
+<button class="primary close-menu">Back to journey</button></div>
 </div></section><section id="fatal" hidden><div class="card"><div class="eyebrow">Unable to depart</div><h2>Rendering unavailable</h2><p id="fatal-message"></p><pre id="fatal-detail"></pre><p>Open this file in a browser with WebGL2 enabled. No download or server is required.</p></div></section>
 <script>
 'use strict';
@@ -477,7 +508,7 @@ class NSSimulation {
     const norm = Math.hypot(f, r);
     if (!norm) return;
     f /= norm; r /= norm;
-    const speed = 4.2, yaw = this.player.yaw;
+    const speed = 4.2 * (this.walkScale || 1), yaw = this.player.yaw;
     const dx = (Math.sin(yaw) * f + Math.cos(yaw) * r) * speed * dt;
     const dz = (Math.cos(yaw) * f - Math.sin(yaw) * r) * speed * dt;
     const attempt = (x, z) => {
@@ -981,10 +1012,27 @@ class NSRailway {
     this.engine={fire:.72,pressure:9.2,coal:100,water:100};
     this.overspeed=0;this.earnings=0;this.stops=[];this.whistled=new Set();this.missed=new Set();
     this.whistleUntil=-1;this.lastStoke=-10;this.dwell=null;
+    this.career=null;
     this.sections=[{id:'lake-crossing',name:'Lake bridge',s:world.routeLength*.37,radius:35,limit:4.45},
       {id:'farm-crossing',name:'Farm crossing',s:world.routeLength*.76,radius:24,limit:5}];
   }
   configure(sim){if(this.service==='explore')Object.assign(sim.delivery,{started:true,finished:true,index:0,completed:3});this.apply(sim);}
+  get totalEarnings(){return (this.career?.bankedEarnings||0)+this.earnings;}
+  completedServices(sim){return (this.career?.services||0)+(this.service!=='explore'&&sim.delivery.finished?1:0);}
+  canBegin(sim){return sim.delivery.finished&&Math.abs(sim.train.speed)<.025&&this.world.stationAt(sim.train.s)?.index===0;}
+  beginService(sim,service,cargo){
+    if(!['freight','passenger'].includes(service)||!['mixed','timber','mail'].includes(cargo))throw Error('Choose a goods or passenger service.');
+    if(!this.canBegin(sim))return 'Finish your current service and stop at Pinebank before taking the next one.';
+    const services=this.completedServices(sim),bankedEarnings=this.totalEarnings;
+    if(services>=100000||bankedEarnings>100000000)return 'Your branch-line career is complete. Free exploration remains available.';
+    this.career={services,bankedEarnings,startedAt:sim.time};
+    Object.assign(this,{service,cargo,earnings:0,overspeed:0,stops:[],whistled:new Set(),missed:new Set(),dwell:null,whistleUntil:-1,lastStoke:-10});
+    Object.assign(sim.delivery,{started:false,finished:false,index:0,completed:0});
+    Object.assign(sim.train,{throttle:0,brake:1,direction:1});this.configure(sim);
+    // Starting aboard must load the first leg without making E disembark.
+    if(sim.player.mode==='train')Object.assign(sim.delivery,{started:true,index:1});
+    return `Next ${service==='passenger'?'passenger local':cargo==='mail'?'mail train':cargo==='timber'?'timber train':'goods train'} ready. ${sim.player.mode==='train'?'Release the brake and depart.':'E beside the engine to load and board.'}`;
+  }
   apply(sim){const load=this.service==='freight'&&this.cargo==='timber'?.92:1;sim.tractionScale=(this.assisted?1:Math.max(.36,Math.min(1,this.engine.pressure/8.8)))*load;sim.steamFire=this.engine.fire;sim.steamPressure=this.engine.pressure;sim.serviceMode=this.service;sim.cargoKind=this.cargo;}
   instruction(sim){
     if(sim.player.mode!=='train')return null;
@@ -1048,12 +1096,13 @@ class NSRailway {
   grade(){const score=Math.max(0,100-this.overspeed*.9-this.missed.size*7);return score>=90?'Careful driver':score>=70?'Steady service':'Room to improve';}
   recordStop(sim,index){
     const station=this.world.stations[index],base=this.service==='passenger'?24:this.cargo==='timber'?20:this.cargo==='mail'?22:18;
-    const promptPost=this.service==='freight'&&this.cargo==='mail'&&sim.time<(this.stops.length+1)*120?4:0;
+    if(sim.delivery.completed<1||index!==sim.delivery.completed%3||this.stops.some(stop=>stop.station===station.name))return 'This stop has already been entered in the ledger.';
+    const promptPost=this.service==='freight'&&this.cargo==='mail'&&sim.time-(this.career?.startedAt||0)<sim.delivery.completed*120?4:0;
     this.earnings+=Math.max(8,Math.round(base+promptPost-Math.min(10,this.overspeed*.1)));
     this.stops.push({station:station.name,time:sim.time});this.engine.coal=100;this.engine.water=100;
     return `${this.service==='passenger'?'Passengers served':'Freight handed over'} at ${station.name}. Supplies topped up. ${this.earnings} shillings earned.`;
   }
-  serialize(){return{version:1,service:this.service,cargo:this.cargo,assisted:this.assisted,engine:{...this.engine},overspeed:this.overspeed,earnings:this.earnings,stops:this.stops.map(s=>({...s})),whistled:[...this.whistled],missed:[...this.missed],whistleUntil:this.whistleUntil,lastStoke:this.lastStoke,dwell:this.dwell?{...this.dwell}:null};}
+  serialize(){return{version:1,service:this.service,cargo:this.cargo,assisted:this.assisted,engine:{...this.engine},overspeed:this.overspeed,earnings:this.earnings,stops:this.stops.map(s=>({...s})),whistled:[...this.whistled],missed:[...this.missed],whistleUntil:this.whistleUntil,lastStoke:this.lastStoke,dwell:this.dwell?{...this.dwell}:null,...(this.career?{career:{...this.career}}:{})};}
   restore(data,sim){
     if(data===undefined){this.assisted=true;this.apply(sim);return;}
     const fail=()=>{throw new Error('Invalid save: railway service or boiler data is unsupported.');};
@@ -1061,23 +1110,28 @@ class NSRailway {
     if(!data||Array.isArray(data)||data.version!==1||!['freight','passenger','explore'].includes(data.service)||typeof data.assisted!=='boolean')fail();
     const cargo=data.cargo??'mixed';if(!['mixed','timber','mail'].includes(cargo))fail();
     const e=data.engine;if(!e||!num(e.fire,.10,1)||!num(e.pressure,3.2,11.8)||!num(e.coal,0,100)||!num(e.water,0,100)||!num(data.overspeed,0,1e9)||!num(data.earnings,0,1000))fail();
-    if(!Array.isArray(data.stops)||data.stops.length>3||data.stops.some((s,i)=>!s||s.station!==this.world.stations[(i+1)%3].name||!num(s.time,0,sim.time)||(i>0&&s.time<data.stops[i-1].time)))fail();
+    const stopOrder=stop=>{const index=this.world.stations.findIndex(station=>station.name===stop?.station);return index<0?-1:index===0?3:index;};
+    // Older interrupted saves may omit receipts for already-completed stops.
+    if(!Array.isArray(data.stops)||data.stops.length>3||data.stops.some((s,i)=>!s||stopOrder(s)<1||stopOrder(s)>sim.delivery.completed||!num(s.time,0,sim.time)||(i>0&&(s.time<data.stops[i-1].time||stopOrder(s)<=stopOrder(data.stops[i-1])))))fail();
     const list=a=>Array.isArray(a)&&a.length<=2&&new Set(a).size===a.length&&a.every(id=>this.sections.some(s=>s.id===id));
     if(!list(data.whistled)||!list(data.missed)||!num(data.whistleUntil,-1,sim.time+1.4)||!num(data.lastStoke,-10,sim.time))fail();
     if(data.whistled.some(id=>data.missed.includes(id)))fail();
     if(data.dwell!==null&&(!data.dwell||!Number.isInteger(data.dwell.index)||data.dwell.index<0||data.dwell.index>2||!num(data.dwell.since,0,sim.time)))fail();
     if(data.service==='explore'&&!sim.delivery.finished)fail();
     if(data.service!=='explore'&&data.stops.length>sim.delivery.completed)fail();
+    const career=data.career;
+    if(career!==undefined&&(!career||!Number.isInteger(career.services)||!num(career.services,0,100000)||!Number.isInteger(career.bankedEarnings)||!num(career.bankedEarnings,0,100000000)||!num(career.startedAt,0,sim.time)||data.stops.some(stop=>stop.time<career.startedAt)))fail();
     Object.assign(this,{service:data.service,cargo,assisted:data.assisted,engine:{fire:e.fire,pressure:e.pressure,coal:e.coal,water:e.water},overspeed:data.overspeed,earnings:data.earnings,stops:data.stops.map(s=>({station:s.station,time:s.time})),whistled:new Set(data.whistled),missed:new Set(data.missed),whistleUntil:data.whistleUntil,lastStoke:data.lastStoke,dwell:data.dwell?{index:data.dwell.index,since:data.dwell.since}:null});
-    this.apply(sim);
+    this.career=career?{services:career.services,bankedEarnings:career.bankedEarnings,startedAt:career.startedAt}:null;this.apply(sim);
   }
 }
 
 
 // Optional station work. Pure state; the renderer adds bounded numerical props.
 class NSVillage {
-  constructor(world){
-    this.world=world;this.completed=new Map();this.selected=null;this.carrying=null;this.sorting=null;this.repair=null;
+  constructor(world,railway=null){
+    this.world=world;this.railway=railway;this.completed=new Map();this.selected=null;this.carrying=null;this.sorting=null;this.repair=null;
+    this.round=0;this.pastEarnings=0;this.pastCompleted=0;this.renewedServices=0;this.gear=[];
     this.paint='original';this.owned=['original'];this.touched=false;
     const people=['Nell','Edda','Tomas'];
     const anchor=(station,along)=>{
@@ -1090,28 +1144,44 @@ class NSVillage {
     this.jobs=world.stations.flatMap((station,index)=>[
       {id:'parcel-'+index,kind:'parcel',index,station:station.name,person:people[index],name:station.name+' parcel',anchor:anchor(station,-21),destination:anchor(station,10),description:`Carry the crate-side parcel to ${people[index]} along the platform. 8 shillings, plus 2 if delivered within 25 seconds.`},
       {id:'lamp-'+index,kind:'lamp',index,station:station.name,name:station.name+' lamp round',anchor:anchor(station,17),description:'Hold T by the lamp for 3 seconds to replenish its oil. The pool of light grows warmer. 6 shillings.'},
-      {id:'post-'+index,kind:'post',index,station:station.name,name:station.name+' post sorting',anchor:anchor(station,-9),description:'T at the noticeboard starts three letters. Match each address: 1 Pinebank, 2 Bellweather, 3 Stonehaven. 5 shillings, plus a careful-sorting bonus.'}
+      {id:'post-'+index,kind:'post',index,station:station.name,name:station.name+' post sorting',anchor:anchor(station,-9),description:'T at the noticeboard starts three letters. Match each address: 1 Pinebank, 2 Bellweather, 3 Stonehaven. 5 shillings, plus a careful-sorting bonus.'},
+      {id:'dispatch-'+index,kind:'dispatch',index,station:station.name,destinationStation:world.stations[(index+1)%3].name,person:people[(index+1)%3],name:station.name+' railway parcel',anchor:anchor(station,-30),destination:anchor(world.stations[(index+1)%3],10),description:`Take a parcel aboard the train to ${people[(index+1)%3]} at ${world.stations[(index+1)%3].name}. 18 shillings, plus 4 within 240 seconds. T to collect and hand over on foot.`}
     ]).filter(job=>job.kind!=='lamp'||world.version>=2);
     let hash=0;for(const letter of world.seed)hash=(Math.imul(hash,33)+letter.charCodeAt(0))>>>0;
     const orders=[[0,1,2],[1,2,0],[2,0,1],[0,2,1],[2,1,0],[1,0,2]];
-    this.orders=world.stations.map((_,i)=>orders[(hash+i)%orders.length]);
+    this.orderTable=orders;this.orderHash=hash;this.updateOrders();
   }
-  get earnings(){return[...this.completed.values()].reduce((sum,value)=>sum+value,0);}
-  get wallet(){return this.earnings-(this.owned.length-1)*20;}
-  get title(){return this.completed.size===this.jobs.length?'Friend of the branch line':this.completed.size>=6?'Trusted neighbour':this.completed.size>=3?'Valley helper':'New arrival';}
+  updateOrders(){this.orders=this.world.stations.map((_,i)=>this.orderTable[(this.orderHash+i+this.round)%this.orderTable.length]);}
+  get earnings(){return this.pastEarnings+[...this.completed.values()].reduce((sum,value)=>sum+value,0);}
+  get wallet(){return this.earnings+(this.railway?.totalEarnings||0)-(this.owned.length-1)*20-(this.gear.includes('boots')?40:0);}
+  get title(){const count=this.pastCompleted+this.completed.size;return count>=this.jobs.length?'Friend of the branch line':count>=6?'Trusted neighbour':count>=3?'Valley helper':'New arrival';}
+  apply(sim){sim.walkScale=this.gear.includes('boots')?1.12:1;}
+  canRenew(sim){return !this.carrying&&!this.sorting&&!this.repair&&this.round<100000&&(this.jobs.filter(job=>job.kind!=='lamp').every(job=>this.completed.has(job.id))||(this.railway?.completedServices(sim)||0)>this.renewedServices);}
+  renew(sim){
+    if(!this.canRenew(sim))return 'Finish the letters and parcels, or complete a railway service, before collecting a new work round. Return unfinished work first.';
+    for(const job of this.jobs){if(job.kind==='lamp'||!this.completed.has(job.id))continue;this.pastEarnings+=this.completed.get(job.id);this.pastCompleted++;this.completed.delete(job.id);}
+    this.round++;this.renewedServices=this.railway?.completedServices(sim)||0;this.selected=null;this.updateOrders();this.touched=true;
+    return 'Fresh parcels and letters posted. Previous earnings, equipment and tended lamps kept.';
+  }
+  buyGear(id){
+    if(id!=='boots')throw Error('Unknown workshop equipment.');
+    if(this.gear.includes(id))return 'Walking boots already owned.';
+    if(this.wallet<40)return 'Walking boots cost 40 shillings. Railway fares and station work share the same purse.';
+    this.gear.push(id);this.touched=true;return 'Walking boots fitted. Walk 12% faster; all paths and collisions still apply.';
+  }
   near(player,point,radius=2.5){return player.mode==='foot'&&Math.hypot(player.x-point.x,player.z-point.z)<=radius&&Math.abs(player.y-point.y)<1.5;}
   job(id){return this.jobs.find(job=>job.id===id);}
   target(player){
     const id=this.carrying?.id||this.sorting?.id||this.selected,job=this.job(id);if(!job)return null;
     const point=this.carrying?job.destination:job.anchor;
-    return{record:{...job,anchor:point,name:this.carrying?'Parcel for '+job.person:job.name},distance:Math.hypot(player.x-point.x,player.z-point.z)};
+    return{record:{...job,station:this.carrying?(job.destinationStation||job.station):job.station,anchor:point,name:this.carrying?'Parcel for '+job.person:job.name},distance:Math.hypot(player.x-point.x,player.z-point.z)};
   }
   context(player){
     if(player.mode!=='foot')return null;
     if(this.carrying){const job=this.job(this.carrying.id);return this.near(player,job.destination)?{job,hint:`T · hand parcel to ${job.person}`} : null;}
     if(this.sorting){const job=this.job(this.sorting.id);return this.near(player,job.anchor)?{job,hint:this.sortHint()}:null;}
     let nearest=null;
-    for(const job of this.jobs){if(this.completed.has(job.id)||!this.near(player,job.anchor))continue;const distance=Math.hypot(player.x-job.anchor.x,player.z-job.anchor.z);if(!nearest||distance<nearest.distance)nearest={job,distance,hint:job.kind==='parcel'?'T · collect local parcel':job.kind==='lamp'?`Hold T · refill lamp${this.repair?.id===job.id?' · '+Math.floor(this.repair.progress/3*100)+'%':''}`:'T · sort today’s letters'};}
+    for(const job of this.jobs){if(this.completed.has(job.id)||!this.near(player,job.anchor))continue;const distance=Math.hypot(player.x-job.anchor.x,player.z-job.anchor.z);if(!nearest||distance<nearest.distance)nearest={job,distance,hint:job.kind==='dispatch'?`T · collect parcel for ${job.destinationStation}`:job.kind==='parcel'?'T · collect local parcel':job.kind==='lamp'?`Hold T · refill lamp${this.repair?.id===job.id?' · '+Math.floor(this.repair.progress/3*100)+'%':''}`:'T · sort today’s letters'};}
     return nearest;
   }
   sortHint(){if(!this.sorting)return'';const job=this.job(this.sorting.id),address=this.world.stations[this.orders[job.index][this.sorting.progress]].name;return`Post for ${address} · ${this.sorting.progress+1}/3 · 1 Pinebank / 2 Bellweather / 3 Stonehaven`;}
@@ -1119,8 +1189,8 @@ class NSVillage {
   finish(job,reward){this.completed.set(job.id,reward);this.touched=true;if(this.selected===job.id)this.selected=null;this.repair=null;return`${job.kind==='parcel'?job.person+': Many thanks. ':''}${job.name} complete · +${reward} shillings · ${this.title}. J: noticeboard and workshop.`;}
   interact(sim){
     const context=this.context(sim.player);if(!context)return null;const job=context.job;
-    if(this.carrying){const reward=8+(sim.time-this.carrying.started<=25?2:0);this.carrying=null;return this.finish(job,reward);}
-    if(job.kind==='parcel'){this.carrying={id:job.id,started:sim.time};this.selected=job.id;this.touched=true;return`Parcel collected. Bring it to ${job.person}, ${Math.ceil(Math.hypot(job.destination.x-job.anchor.x,job.destination.z-job.anchor.z))} m along the platform.`;}
+    if(this.carrying){const reward=job.kind==='dispatch'?18+(sim.time-this.carrying.started<=240?4:0):8+(sim.time-this.carrying.started<=25?2:0);this.carrying=null;return this.finish(job,reward);}
+    if(job.kind==='parcel'||job.kind==='dispatch'){this.carrying={id:job.id,started:sim.time};this.selected=job.id;this.touched=true;return job.kind==='dispatch'?`Railway parcel collected. Board the train and bring it to ${job.person} at ${job.destinationStation}. T to hand over on foot.`:`Parcel collected. Bring it to ${job.person}, ${Math.ceil(Math.hypot(job.destination.x-job.anchor.x,job.destination.z-job.anchor.z))} m along the platform.`;}
     if(job.kind==='lamp'){this.repair={id:job.id,progress:0};return'Keep T held for 3 seconds to refill the lamp. Stay beside it.';}
     if(this.sorting)return this.sortHint();
     this.sorting={id:job.id,progress:0,streak:0};this.selected=job.id;this.touched=true;return this.sortHint();
@@ -1143,25 +1213,28 @@ class NSVillage {
   cancel(){this.carrying=null;this.sorting=null;this.repair=null;this.selected=null;this.touched=true;return'Unfinished parcel or letters returned. Completed work and coins kept.';}
   buyPaint(paint){
     if(!['original','green','ochre'].includes(paint))throw Error('Unknown workshop paint.');
-    if(!this.owned.includes(paint)){if(this.wallet<20)return'The workshop needs 20 shillings. Earn them through station work.';this.owned.push(paint);}
+    if(!this.owned.includes(paint)){if(this.wallet<20)return'The workshop needs 20 shillings. Railway fares and station work share the same purse.';this.owned.push(paint);}
     this.paint=paint;this.touched=true;return paint==='original'?'Original locomotive paint restored.':`${paint==='green'?'Forest green':'Ochre brass'} boiler paint applied. ${this.wallet} shillings left.`;
   }
-  serialize(){return{version:1,completed:this.jobs.filter(job=>this.completed.has(job.id)).map(job=>({id:job.id,reward:this.completed.get(job.id)})),selected:this.selected,carrying:this.carrying?{...this.carrying}:null,sorting:this.sorting?{...this.sorting}:null,paint:this.paint,owned:this.owned.slice()};}
+  serialize(){return{version:this.round||this.gear.length?2:1,completed:this.jobs.filter(job=>this.completed.has(job.id)).map(job=>({id:job.id,reward:this.completed.get(job.id)})),selected:this.selected,carrying:this.carrying?{...this.carrying}:null,sorting:this.sorting?{...this.sorting}:null,paint:this.paint,owned:this.owned.slice(),...(this.round||this.gear.length?{round:this.round,pastEarnings:this.pastEarnings,pastCompleted:this.pastCompleted,renewedServices:this.renewedServices,gear:this.gear.slice()}:{})};}
   restore(data,sim){
-    if(data===undefined){Object.assign(this,{completed:new Map(),selected:null,carrying:null,sorting:null,repair:null,paint:'original',owned:['original'],touched:false});return;}
+    if(data===undefined){Object.assign(this,{completed:new Map(),selected:null,carrying:null,sorting:null,repair:null,paint:'original',owned:['original'],touched:false,round:0,pastEarnings:0,pastCompleted:0,renewedServices:0,gear:[]});this.updateOrders();this.apply(sim);return;}
     const fail=()=>{throw Error('Invalid save: station work or workshop state is unsupported.');};
-    if(!data||Array.isArray(data)||data.version!==1||!Array.isArray(data.completed)||data.completed.length>this.jobs.length)fail();
+    if(!data||Array.isArray(data)||![1,2].includes(data.version)||!Array.isArray(data.completed)||data.completed.length>this.jobs.length)fail();
+    const round=data.version===2?data.round:0,pastEarnings=data.version===2?data.pastEarnings:0,pastCompleted=data.version===2?data.pastCompleted:0,renewedServices=data.version===2?data.renewedServices:0,gear=data.version===2?data.gear:[];
+    const integer=(n,max)=>Number.isInteger(n)&&n>=0&&n<=max;
+    if(!integer(round,100000)||!integer(pastCompleted,round*9)||!integer(pastEarnings,pastCompleted*22)||pastEarnings<pastCompleted*6||!integer(renewedServices,this.railway?.completedServices(sim)||0)||!Array.isArray(gear)||gear.length>1||gear.some(id=>id!=='boots'))fail();
     const completed=new Map();
-    for(const entry of data.completed){const job=this.job(entry?.id);if(!job||completed.has(job.id)||!Number.isInteger(entry.reward)||!(job.kind==='parcel'?[8,10]:job.kind==='lamp'?[6]:[6,7,8]).includes(entry.reward))fail();completed.set(job.id,entry.reward);}
+    for(const entry of data.completed){const job=this.job(entry?.id);if(!job||completed.has(job.id)||!Number.isInteger(entry.reward)||!(job.kind==='dispatch'?[18,22]:job.kind==='parcel'?[8,10]:job.kind==='lamp'?[6]:[6,7,8]).includes(entry.reward))fail();completed.set(job.id,entry.reward);}
     const valid=id=>typeof id==='string'&&this.job(id)&&!completed.has(id);
     if(data.selected!==null&&!valid(data.selected))fail();
     const carrying=data.carrying,sorting=data.sorting;
-    if(carrying!==null&&(!carrying||!valid(carrying.id)||this.job(carrying.id).kind!=='parcel'||typeof carrying.started!=='number'||!Number.isFinite(carrying.started)||carrying.started<0||carrying.started>sim.time))fail();
+    if(carrying!==null&&(!carrying||!valid(carrying.id)||!['parcel','dispatch'].includes(this.job(carrying.id).kind)||typeof carrying.started!=='number'||!Number.isFinite(carrying.started)||carrying.started<0||carrying.started>sim.time))fail();
     if(sorting!==null&&(!sorting||!valid(sorting.id)||this.job(sorting.id).kind!=='post'||!Number.isInteger(sorting.progress)||sorting.progress<0||sorting.progress>2||!Number.isInteger(sorting.streak)||sorting.streak<0||sorting.streak>sorting.progress))fail();
     if(carrying&&sorting||carrying&&data.selected!==carrying.id||sorting&&data.selected!==sorting.id)fail();
     if(!Array.isArray(data.owned)||data.owned.length<1||data.owned.length>3||data.owned[0]!=='original'||new Set(data.owned).size!==data.owned.length||data.owned.some(id=>!['original','green','ochre'].includes(id))||!data.owned.includes(data.paint))fail();
-    if((data.owned.length-1)*20>[...completed.values()].reduce((sum,n)=>sum+n,0))fail();
-    Object.assign(this,{completed,selected:data.selected,carrying:carrying?{id:carrying.id,started:carrying.started}:null,sorting:sorting?{id:sorting.id,progress:sorting.progress,streak:sorting.streak}:null,paint:data.paint,owned:data.owned.slice(),repair:null,touched:true});
+    if((data.owned.length-1)*20+gear.length*40>pastEarnings+[...completed.values()].reduce((sum,n)=>sum+n,0)+(this.railway?.totalEarnings||0))fail();
+    Object.assign(this,{completed,selected:data.selected,carrying:carrying?{id:carrying.id,started:carrying.started}:null,sorting:sorting?{id:sorting.id,progress:sorting.progress,streak:sorting.streak}:null,paint:data.paint,owned:data.owned.slice(),repair:null,touched:true,round,pastEarnings,pastCompleted,renewedServices,gear:gear.slice()});this.updateOrders();this.apply(sim);
   }
   objects(sim){
     const objects=[];
@@ -1169,6 +1242,8 @@ class NSVillage {
     for(const station of this.world.stations){if(Math.hypot(sim.player.x-station.x,sim.player.z-station.z)>110)continue;
       const parcel=this.job('parcel-'+this.world.stations.indexOf(station)),post=this.job('post-'+parcel.index);
       if(!this.completed.has(parcel.id)&&this.carrying?.id!==parcel.id){add(parcel,.95,.38,0,.45,.38,.40,30);add(parcel,.95,.77,0,.48,.035,.43,32);add(parcel,.95,.4,0,.035,.39,.41,27);}
+      const dispatch=this.job('dispatch-'+parcel.index);
+      if(!this.completed.has(dispatch.id)&&this.carrying?.id!==dispatch.id){add(dispatch,.95,.40,0,.48,.4,.43,30);add(dispatch,.95,.82,0,.5,.025,.45,32);}
       const centre={x:parcel.destination.x+Math.cos(station.yaw)*.85,y:parcel.destination.y,z:parcel.destination.z-Math.sin(station.yaw)*.85};
       const person={...parcel,anchor:centre,yaw:Math.atan2(sim.player.x-centre.x,sim.player.z-centre.z)},bob=Math.sin(sim.time*1.4+parcel.index)*(sim.settings.reducedMotion?.004:.025);
       add(person,0,1.05+bob,0,.24,.42,.17,33);add(person,0,1.69+bob,0,.18,.20,.17,32,1);add(person,0,1.90+bob,0,.23,.065,.21,8);
@@ -2155,7 +2230,7 @@ class NSGame {
     this.lastCheckpoint=0;this.localSaveAvailable=false;
     this.world=new NSWorld('NEXT-STOP'); this.sim=new NSSimulation(this.world);this.exploration=new NSExploration(this.world);
     this.railway=new NSRailway(this.world);
-    this.village=new NSVillage(this.world);this.sim.village=this.village;
+    this.village=new NSVillage(this.world,this.railway);this.sim.village=this.village;
     this.renderer=new NSGlyphRenderer(canvas,this.world);
     this.accumulator=0; this.previous=0; this.lastUI=0; this.toastUntil=0;
     this.width=window.innerWidth; this.height=window.innerHeight;
@@ -2178,7 +2253,12 @@ class NSGame {
     this.click('help-button',()=>this.openMenu('help'));this.click('start-help',()=>this.openMenu('help'));
     this.click('journal-button',()=>this.openMenu('journal'));
     this.listen(document.getElementById('village-list'),'click',event=>{const button=event.target.closest('button[data-job]');if(!button)return;this.notify(this.village.select(button.dataset.job));this.syncJournal();this.el['journal-view'].querySelector('.close-menu').focus();});
-    this.listen(document.getElementById('workshop'),'click',event=>{const button=event.target.closest('button[data-paint]');if(!button)return;this.notify(this.village.buyPaint(button.dataset.paint));this.syncJournal();});
+    this.listen(document.getElementById('workshop'),'click',event=>{const button=event.target.closest('button[data-paint],button[data-gear]');if(!button)return;this.notify(button.dataset.gear?this.village.buyGear(button.dataset.gear):this.village.buyPaint(button.dataset.paint));this.village.apply(this.sim);this.syncJournal();});
+    this.listen(document.getElementById('journal-pages'),'click',event=>{const button=event.target.closest('[data-journal-page]');if(button)this.showJournalPage(button.dataset.journalPage);});
+    this.listen(document.getElementById('journal-pages'),'keydown',event=>{const tabs=[...document.querySelectorAll('[data-journal-page]')],index=tabs.indexOf(event.target);if(index<0||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;this.showJournalPage(tabs[next].dataset.journalPage);tabs[next].focus();});
+    this.listen(document.getElementById('work-filter'),'change',()=>{this.villageSignature=null;this.syncJournal();});
+    this.click('renew-work',()=>{this.notify(this.village.renew(this.sim));this.syncJournal();});
+    this.click('next-service',()=>{this.notify(this.railway.beginService(this.sim,document.getElementById('next-service-kind').value,document.getElementById('next-cargo').value));this.syncJournal();});
     this.click('return-work',()=>{this.notify(this.village.cancel());this.syncJournal();});
     this.listen(this.el['journal-list'],'click',event=>{const button=event.target.closest('button[data-landmark]');if(!button)return;this.exploration.select(button.dataset.landmark);this.syncJournal();const target=this.exploration.target(this.sim.player).record;this.notify(`Journal destination: ${target.name} at ${target.station}.`);this.el['journal-view'].querySelector('.close-menu').focus();});
     this.click('settings-button',()=>this.openMenu('settings'));this.click('pause-settings',()=>this.openMenu('settings'));
@@ -2273,14 +2353,14 @@ class NSGame {
   syncAudio(){if(this.audioMaster){this.audioMaster.gain.cancelScheduledValues(0);this.audioMaster.gain.value=this.soundMuted?0:this.soundVolume;}}
   pause(){if(this.started&&!this.destroyed)this.checkpoint();this.running=false;if(this.audioTransport)this.audioTransport.gain.value=0;this.input={};this.dragging=false;this.lastPointer=null;this.accumulator=0;if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
   resume(){if(this.destroyed)return;this.started=true;this.running=true;if(this.audioTransport)this.audioTransport.gain.value=1;this.lastSoundBeat=null;this.lastJoint=null;this.accumulator=0;this.previous=performance.now();this.el.menu.hidden=true;this.el['pause-button'].textContent='Pause';this.canvas.focus({preventScroll:true});}
-  menuItems(root=this.el.menu){return[...root.querySelectorAll('button,input,select,summary')].filter(n=>!n.closest('[hidden]')&&!n.hidden&&!n.disabled&&(n.type!=='radio'||n.checked));}
+  menuItems(root=this.el.menu){return[...root.querySelectorAll('button,input,select,summary')].filter(n=>!n.closest('[hidden]')&&!n.hidden&&!n.disabled&&n.tabIndex>=0&&(n.type!=='radio'||n.checked));}
   openMenu(view){this.pause();this.el.menu.hidden=false;for(const name of ['start','pause','help','settings','journal'])this.el[name+'-view'].hidden=name!==view;const heading=this.el[view+'-view'].querySelector('h1,h2');heading.id=view+'-heading';this.el.menu.querySelector('.card').setAttribute('aria-labelledby',heading.id);this.syncSettings();this.syncJournal();this.menuItems(this.el[view+'-view'])[0]?.focus();}
   closeMenu(){if(this.started)this.resume();else this.openMenu('start');}
   resize(width,height){this.width=Math.max(1,width);this.height=Math.max(1,height);this.renderer.resize(this.width,this.height,this.sim.settings.quality||'standard');}
   setInput(state){this.input={...this.input,...state};}
   tick(now){
     if(this.destroyed)return;const elapsed=this.previous?Math.max(0,(now-this.previous)/1000):0;this.previous=now;
-    if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){this.railway.step(1/60,this.sim);this.sim.step(1/60,this.input);const message=this.village.step(1/60,this.sim,this.input);if(message){this.notify(message);this.soundFavour();}this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
+    if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){this.railway.step(1/60,this.sim);this.village.apply(this.sim);this.sim.step(1/60,this.input);const message=this.village.step(1/60,this.sim,this.input);if(message){this.notify(message);this.soundFavour();}this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
     this.sim.renderAlpha=this.running?this.accumulator*60:1;
     this.updateTrainSound();
     if(this.running&&now-this.lastCheckpoint>10000){this.checkpoint();this.lastCheckpoint=now;}
@@ -2300,7 +2380,7 @@ class NSGame {
     const route=this.railway.instruction(this.sim),work=document.getElementById('work-hint');work.hidden=this.sim.player.mode!=='train';
     work.textContent=route?`${route.name} · ${Math.round(route.limit*3.6)} km/h${route.whistled?'':' · V: whistle'}`:!this.railway.assisted&&this.railway.engine.fire<.50?`Fire ${Math.round(this.railway.engine.fire*100)}% · B: add coal`:this.railway.job(this.sim);
     document.getElementById('pressure').textContent=this.railway.engine.pressure.toFixed(1);document.getElementById('fire').textContent=Math.round(this.railway.engine.fire*100);
-    document.getElementById('service-ledger').textContent=`${this.railway.job(this.sim)}. Coal ${Math.round(this.railway.engine.coal)}%, water ${Math.round(this.railway.engine.water)}%. ${this.railway.grade()}. Stops served ${this.railway.stops.length}/3. Earnings ${this.railway.earnings} shillings.`;
+    this.syncRailwayLedger();
     const discovery=this.running?this.exploration.discover(this.sim.player):null;
     if(discovery)this.notify(`Field note: ${discovery.name} · ${this.exploration.count}/${this.exploration.total} places discovered. J opens your journal.`);
     this.syncJournal();
@@ -2335,15 +2415,29 @@ class NSGame {
       this.el['journal-list'].append(item);
     }
   }
+  syncRailwayLedger(){
+    document.getElementById('service-ledger').textContent=`${this.railway.job(this.sim)}. Coal ${Math.round(this.railway.engine.coal)}%, water ${Math.round(this.railway.engine.water)}%. ${this.railway.grade()}. Stops served ${this.sim.delivery.completed}/3. Earnings ${this.railway.earnings} shillings.`;
+  }
+  showJournalPage(page){
+    if(!['railway','work','notes','workshop'].includes(page))return;
+    for(const button of document.querySelectorAll('[data-journal-page]')){const active=button.dataset.journalPage===page;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;}
+    for(const panel of document.querySelectorAll('[data-journal-panel]'))panel.hidden=panel.dataset.journalPanel!==page;
+  }
   syncVillage(){
-    const signature=this.world.seed+'|'+this.world.version+'|'+JSON.stringify(this.village.serialize());if(signature===this.villageSignature)return;this.villageSignature=signature;
-    document.getElementById('village-summary').textContent=`Station noticeboard · ${this.village.completed.size}/${this.village.jobs.length} favours`;
-    document.getElementById('village-wallet').textContent=`${this.village.title} · ${this.village.wallet} shillings in your pocket. Work is optional and available before your first departure.`;
+    this.syncRailwayLedger();
+    const local=this.world.stations.reduce((a,b)=>Math.hypot(this.sim.player.x-a.x,this.sim.player.z-a.z)<Math.hypot(this.sim.player.x-b.x,this.sim.player.z-b.z)?a:b),filter=document.getElementById('work-filter').value;
+    const signature=this.world.seed+'|'+this.world.version+'|'+JSON.stringify(this.village.serialize())+'|'+this.railway.totalEarnings+'|'+this.railway.completedServices(this.sim)+'|'+this.railway.canBegin(this.sim)+'|'+local.name+'|'+filter;if(signature===this.villageSignature)return;this.villageSignature=signature;
+    document.getElementById('village-summary').textContent=`${filter==='local'?local.name+' noticeboard':'Station noticeboard'} · round ${this.village.round+1}`;
+    document.getElementById('village-wallet').textContent=`${this.village.title} · ${this.village.wallet} shillings. Railway fares ${this.railway.totalEarnings} · station work ${this.village.earnings}.`;
+    document.getElementById('renew-work').disabled=!this.village.canRenew(this.sim);
+    document.getElementById('next-service').disabled=!this.railway.canBegin(this.sim);
+    document.getElementById('career-ledger').textContent=`${this.railway.completedServices(this.sim)} services completed · ${this.railway.totalEarnings} shillings in lifetime fares. Next service: finish your circuit and stop at Pinebank. Work rounds reopen after a service, or after all parcels and letters are finished.`;
     document.getElementById('return-work').hidden=!this.village.carrying&&!this.village.sorting&&!this.village.selected;
     const list=document.getElementById('village-list');list.replaceChildren();
-    for(const job of this.village.jobs){const item=document.createElement('li'),name=document.createElement('strong'),description=document.createElement('p'),done=this.village.completed.has(job.id);item.className=done?'discovered':'';name.textContent=(done?'✓ ':'○ ')+job.name;description.textContent=done?`Completed · ${this.village.completed.get(job.id)} shillings earned.`:job.description;item.append(name,description);
+    for(const job of this.village.jobs){const done=this.village.completed.has(job.id),active=this.village.carrying?.id===job.id||this.village.sorting?.id===job.id||this.village.selected===job.id;if(!active&&(filter==='local'&&job.station!==local.name||filter==='completed'&&!done))continue;const item=document.createElement('li'),name=document.createElement('strong'),description=document.createElement('p');item.className=done?'discovered':'';name.textContent=(done?'✓ ':active?'→ ':'○ ')+job.name;description.textContent=done?`Completed · ${this.village.completed.get(job.id)} shillings earned.`:active&&this.village.carrying?`Carrying to ${job.person} at ${job.destinationStation||job.station}. T to hand over on foot. ${job.description}`:job.description;item.append(name,description);
       if(!done){const button=document.createElement('button');button.className='small';button.dataset.job=job.id;button.textContent=this.village.selected===job.id?'Work selected':'Find this work';button.disabled=this.village.selected===job.id||!!this.village.carrying||!!this.village.sorting;button.setAttribute('aria-label','Find work: '+job.name);item.append(button);}list.append(item);}
     for(const button of document.querySelectorAll('[data-paint]')){const paint=button.dataset.paint,owned=this.village.owned.includes(paint);button.disabled=this.village.paint===paint||(!owned&&this.village.wallet<20);button.textContent=(paint==='original'?'Original paint':paint==='green'?'Forest green':'Ochre brass')+(this.village.paint===paint?' · applied':owned?'':' · 20 shillings');}
+    const boots=document.querySelector('[data-gear=boots]'),ownedBoots=this.village.gear.includes('boots');boots.disabled=ownedBoots||this.village.wallet<40;boots.textContent=ownedBoots?'Walking boots · owned':'Walking boots · 40 shillings';
   }
   notify(message){if(!message)return;this.el.toast.textContent=message;this.el.toast.classList.add('visible');this.toastUntil=performance.now()+4500;if(!this.el.menu.hidden)this.el['menu-status'].textContent=message;}
   readLocalCheckpoint(){try{const text=localStorage.getItem('next-stop-checkpoint');this.localSaveAvailable=!!text&&text.length<=65536;}catch{this.localSaveAvailable=false;}const button=document.getElementById('continue-button');button.hidden=!this.localSaveAvailable;}
@@ -2353,10 +2447,10 @@ class NSGame {
   restore(value){
     const data=typeof value==='string'?JSON.parse(value):value;
     if(!data||!data.world||typeof data.world.seed!=='string'||data.world.seed.length>64)throw new Error('Save contains an invalid world seed.');
-    const candidateWorld=new NSWorld(data.world.seed,data.world.version),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld);candidate.restore(data);candidateExploration.restore(data.exploration);candidateRailway.restore(data.railway,candidate);candidateVillage.restore(data.village,candidate);candidate.village=candidateVillage;
+    const candidateWorld=new NSWorld(data.world.seed,data.world.version),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld,candidateRailway);candidate.restore(data);candidateExploration.restore(data.exploration);candidateRailway.restore(data.railway,candidate);candidateVillage.restore(data.village,candidate);candidate.village=candidateVillage;
     this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.village=candidateVillage;this.restored=true;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();document.getElementById('fire-assist').checked=this.railway.assisted;this.resize(this.width,this.height);
   }
-  regenerate(seed){const value=String(seed).trim();if(!value||value.length>64)throw new Error('Use a world seed between 1 and 64 characters.');const candidateWorld=new NSWorld(value),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld);candidate.settings={...this.sim.settings};candidate.village=candidateVillage;candidateRailway.service=this.railway.service;candidateRailway.cargo=this.railway.cargo;candidateRailway.assisted=this.railway.assisted;candidateRailway.configure(candidate);this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.village=candidateVillage;this.restored=false;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();}
+  regenerate(seed){const value=String(seed).trim();if(!value||value.length>64)throw new Error('Use a world seed between 1 and 64 characters.');const candidateWorld=new NSWorld(value),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld,candidateRailway);candidate.settings={...this.sim.settings};candidate.village=candidateVillage;candidateRailway.service=this.railway.service;candidateRailway.cargo=this.railway.cargo;candidateRailway.assisted=this.railway.assisted;candidateRailway.configure(candidate);this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.village=candidateVillage;this.restored=false;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();}
   diagnostics(){const sorted=this.frames.slice().sort((a,b)=>a-b);return{frames:sorted.length,medianMs:sorted[Math.floor(sorted.length/2)]||0,p95Ms:sorted[Math.floor(sorted.length*.95)]||0,renderer:this.renderer.diagnostics(),seed:this.world.seed,checksum:this.world.checksum(),running:this.running};}
   async exportSave(){try{const data=this.serialize(),text=JSON.stringify(data,null,2);if(this.host.writeSave)await this.host.writeSave(text);else{const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='next-stop-save.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}try{localStorage.setItem('next-stop-save',text);}catch{this.notify('Save exported. Browser storage unavailable; keep your JSON file.');return;}this.notify('Save exported. Keep it for your next journey.');}catch(error){this.report(error);}}
   showFatal(error){document.getElementById('fatal').hidden=false;document.getElementById('fatal-message').textContent=error.message||'The renderer could not start.';document.getElementById('fatal-detail').textContent=error.stack||'';console.error(error);}
