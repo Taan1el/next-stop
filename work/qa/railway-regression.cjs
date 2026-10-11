@@ -49,7 +49,7 @@ test('Free running leaves station interactions available without delivery obliga
 });
 test('Cargo choices change manifests, heavy pull and prompt-mail earnings',()=>{
   const {sim,rail}=fresh();rail.cargo='timber';rail.apply(sim);assert(sim.tractionScale<1);assert.match(rail.job(sim),/logs/);
-  rail.cargo='mail';rail.apply(sim);assert.equal(sim.tractionScale,1);assert.match(rail.job(sim),/post/);rail.recordStop(sim,1);assert.equal(rail.earnings,26);
+  rail.cargo='mail';rail.apply(sim);assert.equal(sim.tractionScale,1);assert.match(rail.job(sim),/post/);sim.delivery.completed=1;rail.recordStop(sim,1);assert.equal(rail.earnings,26);
 });
 test('Railway save round trip preserves operational state and legacy saves use assistance',()=>{
   const {sim,rail}=fresh();rail.action('stoke',sim);rail.action('whistle',sim);const saved=plain(rail.serialize()),restored=new NSRailway(world);restored.restore(saved,sim);assert.deepEqual(plain(restored.serialize()),saved);
