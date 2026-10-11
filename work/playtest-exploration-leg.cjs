@@ -17,7 +17,7 @@ const root=path.resolve(__dirname,'..'),directory=path.join(root,'.omx/evidence/
     const legacyFile=path.join(directory,'legacy-save.json');fs.writeFileSync(legacyFile,JSON.stringify(legacy));
     const chooser=page.waitForEvent('filechooser');await page.locator('#import').click();await(await chooser).setFiles(legacyFile);await page.waitForTimeout(250);
     result.imported=await page.evaluate(()=>nextStopGame.serialize());if(!result.imported.delivery.finished||result.imported.exploration.visited.length)throw Error('Legacy save did not import');
-    await page.keyboard.press('Escape');await page.keyboard.press('KeyJ');await page.getByRole('button',{name:'Set destination: Bellweather tower',exact:true}).click();await page.keyboard.press('Enter');await page.keyboard.press('KeyE');await page.waitForTimeout(250);
+    await page.keyboard.press('Escape');await page.keyboard.press('KeyJ');await page.locator('#tab-notes').click();await page.getByRole('button',{name:'Set destination: Bellweather tower',exact:true}).click();await page.keyboard.press('Enter');await page.keyboard.press('KeyE');await page.waitForTimeout(250);
     result.selected=await page.evaluate(()=>({mode:nextStopGame.sim.player.mode,selected:nextStopGame.exploration.selected,approach:nextStopGame.approach}));if(result.selected.mode!=='train'||result.selected.approach.kind!=='exploration')throw Error('Selected station guidance unavailable');
     await page.keyboard.press('KeyC');await page.keyboard.down('KeyW');await page.waitForTimeout(2700);await page.keyboard.up('KeyW');
     await page.keyboard.down('ArrowRight');await page.waitForTimeout(500);await page.keyboard.up('ArrowRight');await page.keyboard.press('KeyF');await page.waitForTimeout(100);
