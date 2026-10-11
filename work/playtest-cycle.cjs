@@ -3,13 +3,23 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
-module.exports=async function runCycle(page,{directory,name,htmlPath,pastCentre=false,visitJournal=false,allDiscoveries=false,operateEngine=false,overshootAndReverse=false,orbitCamera=false,issues=[],requests=[]}){
+module.exports=async function runCycle(page,{directory,name,htmlPath,pastCentre=false,visitJournal=false,allDiscoveries=false,operateEngine=false,overshootAndReverse=false,orbitCamera=false,careerWork=false,issues=[],requests=[]}){
   fs.mkdirSync(directory,{recursive:true});
   const html=fs.readFileSync(htmlPath);
   const result={name,status:'running',stops:[],cues:[],discoveries:[],operations:[],start:Date.now(),bytes:html.length,sha256:crypto.createHash('sha256').update(html).digest('hex')};
   module.exports.active=result;
   try{
     await page.getByRole('button',{name:'Start journey',exact:true}).click();
+    if(careerWork){
+      await page.keyboard.press('KeyJ');await page.locator('#tab-work').click();
+      if(await page.locator('#village-list li').count()!==4)throw Error('Local work filter did not show four Pinebank jobs');
+      await page.getByRole('button',{name:'Find work: Pinebank railway parcel',exact:true}).click();await page.keyboard.press('Escape');
+      const job=await page.evaluate(()=>({...nextStopGame.village.job('dispatch-0')}));await walkTo(page,job.anchor,1.8);await page.keyboard.press('KeyT');
+      if(await page.evaluate(()=>nextStopGame.village.carrying?.id)!=='dispatch-0')throw Error('Railway parcel pickup failed');
+      await page.screenshot({path:path.join(directory,'railway-parcel-collected.png')});
+      const train=await page.evaluate(()=>{const g=nextStopGame,p=g.world.routeAt(g.sim.train.s);return{x:p.x+Math.cos(p.yaw)*4.4,z:p.z-Math.sin(p.yaw)*4.4};});await walkTo(page,train,1.8);
+      result.operations.push({action:'collect-railway-parcel',destination:job.destinationStation});
+    }
     await page.keyboard.press('KeyE');await page.waitForTimeout(250);
     if(await page.evaluate(()=>nextStopGame.sim.player.mode)!=='train')throw Error('Boarding failed');
     for(let stage=0;stage<3;stage++){
@@ -66,6 +76,15 @@ module.exports=async function runCycle(page,{directory,name,htmlPath,pastCentre=
       result.stops.push({arrival,delivered});await page.screenshot({path:path.join(directory,'station-'+(stage+1)+'.png'),scale:'css'});
       if(visitJournal){
         await page.keyboard.up('Space');await page.keyboard.press('KeyE');await page.waitForTimeout(200);
+        if(careerWork&&stage===0){
+          const destination=await page.evaluate(()=>nextStopGame.village.job('dispatch-0').destination);await walkTo(page,destination,1.8);await page.keyboard.press('KeyT');
+          if(!await page.evaluate(()=>nextStopGame.village.completed.has('dispatch-0')))throw Error('Railway parcel handover failed');
+          await page.keyboard.press('KeyJ');await page.locator('#tab-workshop').click();const wallet=await page.evaluate(()=>nextStopGame.village.wallet);
+          if(wallet<40)throw Error('Fares and parcel did not fund boots');await page.locator('[data-gear=boots]').click();
+          if(await page.evaluate(()=>nextStopGame.village.wallet)!==wallet-40)throw Error('Shared purse purchase failed');
+          await page.screenshot({path:path.join(directory,'earned-walking-boots.png')});await page.keyboard.press('Escape');
+          result.operations.push({action:'hand-over-railway-parcel-and-buy-boots',walletBefore:wallet});
+        }
         const records=await page.evaluate(all=>{const g=nextStopGame,p=g.sim.world.routeAt(g.sim.train.s),closest=g.exploration.records.reduce((a,b)=>Math.hypot(a.anchor.x-p.x,a.anchor.z-p.z)<Math.hypot(b.anchor.x-p.x,b.anchor.z-p.z)?a:b);return all?g.exploration.records.filter(r=>r.station===closest.station):[closest];},allDiscoveries);
         for(const record of records){const walked=await walkTo(page,record.anchor,Math.max(1,record.radius-1));
         await page.waitForTimeout(200);
@@ -79,11 +98,28 @@ module.exports=async function runCycle(page,{directory,name,htmlPath,pastCentre=
     }
     await page.keyboard.up('Space');
     if(!visitJournal){await page.keyboard.press('KeyE');await page.waitForTimeout(250);}
-    if(visitJournal){await page.keyboard.press('KeyJ');await page.waitForTimeout(200);await page.screenshot({path:path.join(directory,'completed-journal.png'),scale:'css'});}
+    if(visitJournal){await page.keyboard.press('KeyJ');await page.locator('#tab-notes').click();await page.waitForTimeout(200);await page.screenshot({path:path.join(directory,'completed-journal.png'),scale:'css'});}
     result.final=await page.evaluate(()=>({mode:nextStopGame.sim.player.mode,delivery:{...nextStopGame.sim.delivery},exploration:nextStopGame.exploration?.serialize(),totalPlaces:nextStopGame.exploration.total,railway:nextStopGame.railway?.serialize(),sound:{...nextStopGame.soundCounters},save:nextStopGame.serialize(),stats:nextStopGame.diagnostics(),gl:nextStopGame.renderer.gl.getError()}));
     if(!result.final.delivery.finished||result.final.mode!=='foot'||result.final.gl||issues.length||requests.some(u=>!u.startsWith('file:')))throw Error('Final playthrough gate failed');
     if(visitJournal&&result.final.exploration.visited.length!==(allDiscoveries?result.final.totalPlaces:3))throw Error('Journal incomplete');
     if(result.final.sound.bells!==3||result.final.sound.chuffs===0||result.final.sound.joints===0)throw Error('Train sound and station-bell feedback incomplete');
+    if(careerWork){
+      const wallet=await page.evaluate(()=>nextStopGame.village.wallet),clock=await page.evaluate(()=>nextStopGame.sim.time);
+      await page.locator('#tab-work').click();await page.locator('#renew-work').click();
+      if(await page.evaluate(()=>nextStopGame.village.round)!==1||await page.evaluate(()=>nextStopGame.village.wallet)!==wallet||!await page.locator('#renew-work').isDisabled())throw Error('Work renewal lost money or can be claimed twice');
+      await page.screenshot({path:path.join(directory,'new-work-round.png')});
+      await page.locator('#tab-railway').click();await page.locator('#next-service-kind').selectOption('passenger');await page.locator('#next-service').click();
+      if(await page.evaluate(()=>nextStopGame.sim.delivery.finished)||await page.evaluate(()=>nextStopGame.sim.time)!==clock||await page.evaluate(()=>nextStopGame.village.wallet)!==wallet||!await page.locator('#next-service').isDisabled())throw Error('New service reset progress or can be claimed twice');
+      const saved=await page.evaluate(()=>nextStopGame.serialize());await page.evaluate(saved=>nextStopGame.restore(saved),saved);
+      if(JSON.stringify(await page.evaluate(()=>nextStopGame.serialize()))!==JSON.stringify(saved))throw Error('Renewed state failed host save round-trip');
+      await page.screenshot({path:path.join(directory,'next-passenger-service.png')});await page.keyboard.press('Escape');
+      const train=await page.evaluate(()=>{const g=nextStopGame,p=g.world.routeAt(g.sim.train.s);return{x:p.x+Math.cos(p.yaw)*4.4,z:p.z-Math.sin(p.yaw)*4.4};});await walkTo(page,train,1.8);await page.keyboard.press('KeyE');
+      if(await page.evaluate(()=>nextStopGame.sim.delivery.index)!==1||await page.evaluate(()=>nextStopGame.sim.player.mode)!=='train')throw Error('New service failed to load on reboarding');
+      await page.keyboard.down('KeyW');await page.waitForTimeout(1700);await page.keyboard.up('KeyW');
+      if(await page.evaluate(()=>nextStopGame.sim.train.speed)<=0)throw Error('New service did not depart');await page.keyboard.down('Space');await page.waitForFunction(()=>nextStopGame.sim.train.speed===0);await page.keyboard.up('Space');await page.keyboard.press('Escape');
+      result.career=await page.evaluate(()=>({railway:nextStopGame.railway.serialize(),village:nextStopGame.village.serialize(),wallet:nextStopGame.village.wallet,delivery:nextStopGame.sim.delivery,gl:nextStopGame.renderer.gl.getError()}));
+      if(result.career.gl||issues.length)throw Error('Career playthrough diagnostics failed');
+    }
     result.status='passed';result.wallSeconds=(Date.now()-result.start)/1000;result.issues=issues;result.requests=requests;
   }catch(error){result.status='failed';result.error=error.stack;result.failureState=await page.evaluate(()=>nextStopGame.serialize()).catch(()=>null);}
   fs.writeFileSync(path.join(directory,'circuit.json'),JSON.stringify(result,null,2));return result;
