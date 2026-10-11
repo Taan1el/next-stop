@@ -25,7 +25,7 @@ class NSVillage {
   updateOrders(){this.orders=this.world.stations.map((_,i)=>this.orderTable[(this.orderHash+i+this.round)%this.orderTable.length]);}
   get earnings(){return this.pastEarnings+[...this.completed.values()].reduce((sum,value)=>sum+value,0);}
   get wallet(){return this.earnings+(this.railway?.totalEarnings||0)-(this.owned.length-1)*20-(this.gear.includes('boots')?40:0);}
-  get title(){const count=this.pastCompleted+this.completed.size;return count>=this.jobs.length?'Friend of the branch line':count>=6?'Trusted neighbour':count>=3?'Valley helper':'New arrival';}
+  get title(){const count=this.pastCompleted+this.completed.size;return count>=(this.world.version===1?6:9)?'Friend of the branch line':count>=6?'Trusted neighbour':count>=3?'Valley helper':'New arrival';}
   apply(sim){sim.walkScale=this.gear.includes('boots')?1.12:1;}
   canRenew(sim){return !this.carrying&&!this.sorting&&!this.repair&&this.round<100000&&(this.jobs.filter(job=>job.kind!=='lamp').every(job=>this.completed.has(job.id))||(this.railway?.completedServices(sim)||0)>this.renewedServices);}
   renew(sim){

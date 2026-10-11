@@ -58,6 +58,9 @@ test('Interrupted older saves with missing receipts still earn remaining fares a
   assert.equal(rail.earnings-before,(3-completed)*18);
  }
 });
+test('Completed village saves keep their earned reputation when new railway parcels are added',()=>{
+ for(const version of [1,4]){const w=new NSWorld('NEXT-STOP',version),sim=new NSSimulation(w),v=new NSVillage(w),data=plain(v.serialize());data.completed=v.jobs.filter(job=>job.kind!=='dispatch').map(job=>({id:job.id,reward:job.kind==='lamp'?6:8}));v.restore(data,sim);assert.equal(v.title,'Friend of the branch line');assert.deepEqual(plain(v.serialize()),plain(data));}
+});
 test('Boots affect walking only while preserving the historical base speed',()=>{
  const a=new NSSimulation(world),b=new NSSimulation(world);a._spawnFoot(0);b._spawnFoot(0);b.walkScale=1.12;const beforeA={...a.player},beforeB={...b.player};a.step(1/60,{forward:true});b.step(1/60,{forward:true});const distance=(p,q)=>Math.hypot(p.x-q.x,p.z-q.z);assert(Math.abs(distance(b.player,beforeB)/distance(a.player,beforeA)-1.12)<1e-8);assert.equal(a.train.s,b.train.s);
 });

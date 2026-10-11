@@ -8,7 +8,7 @@ npm run build
 npm test
 ```
 
-The core suites use Node built-ins. They cover 79 numerical/gameplay/resource checks, three committed save fixtures, the source/packaging audit, and release-package contents. Village checks include safe walking anchors across four world generations, one-time rewards, continuous lamp work, letter mistakes, conflicting partial jobs, save atomicity, paint accounting and bounded props. Career checks add repeated services, shared fares/rewards, railway parcels, renewed work, equipment, interrupted older saves with missing receipts and atomic imports. Source checks do not prove GPU rendering.
+The core suites use Node built-ins. They cover 80 numerical/gameplay/resource checks, three committed save fixtures, the source/packaging audit, and release-package contents. Village checks include safe walking anchors across four world generations, one-time rewards, continuous lamp work, letter mistakes, conflicting partial jobs, save atomicity, paint accounting and bounded props. Career checks add repeated services, shared fares/rewards, railway parcels, renewed work, equipment, interrupted older saves with missing receipts and atomic imports. Source checks do not prove GPU rendering.
 
 ## Browser setup
 
