@@ -36,7 +36,11 @@ New worlds use generation 4. Earlier generations retain their numerical descript
 
 ## State and sound
 
-Candidate world, simulation, exploration, railway and village saves validate before replacing live references. Older saves without newer fields receive compatible defaults. Village state is omitted until used, preserving untouched legacy exports. Partial letters and parcels are mutually exclusive; validated reward receipts determine the wallet after paint purchases. Local checkpoints are optional; portable JSON export/import and an explicit host adapter remain available.
+Candidate world, simulation, exploration, railway and village saves validate before replacing live references. Older saves without newer fields receive compatible defaults. Village state is omitted until used, preserving untouched legacy exports. Partial letters and parcels are mutually exclusive. Village receives the candidate railway before validation, so fares and work receipts determine one purse after paint and equipment purchases. Local checkpoints are optional; portable JSON export/import and an explicit host adapter remain available.
+
+Railway version 1 retains its existing per-service fields and adds an optional `career` record only after starting another service: banked fares, completed services and the current start time. Starting a service resets its ledger and delivery circuit, preserving the world, simulation time, wheel travel and carried parcel. Mail bonuses use elapsed service time. Fares are banked once, not copied into village receipts.
+
+Village version 1 remains readable and export-compatible. Version 2 is used after work renewal or a boots purchase; it adds `round`, `pastEarnings`, `pastCompleted`, `renewedServices` and `gear`. Renewal banks completed repeatable receipts before clearing them, retains completed lamps, and rotates deterministic letter orders. One completed service unlocks one renewal; alternatively all repeatable jobs must be done. Active parcels/letters and lamp work block renewal. Railway parcels have fixed next-station destinations and require an on-foot handover. Boots derive a walking multiplier rather than changing collision or world descriptors.
 
 The Web Audio API synthesizes all railway sounds after a player gesture. Voices feed transport and master gains. Pause silences transport; volume/mute apply immediately. Destroy closes audio, cancels animation, removes listeners and releases GPU resources. Real context loss/restoration preserves game progress.
 

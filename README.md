@@ -4,7 +4,7 @@ A small rural railway game made of coloured letters. Take a steam train through 
 
 ![A steam train beside Bellweather station, with the lake and mountain ridges beyond](outputs/NEXT_STOP_PREVIEW.png)
 
-**Desktop prototype · v0.2.0 · MIT license**
+**Desktop prototype · v0.3.0 · MIT license**
 
 ## Download and play
 
@@ -23,8 +23,9 @@ Keyboard and mouse are required. Windows Chromium-based browsers have been teste
 - **Free running:** drive and explore without delivery obligations.
 - **Steam operation:** tend the fire, watch pressure, brake for the bridge and whistle at crossings. An optional automatic fireman makes driving more relaxed.
 - **Walking:** visit six trackside places and keep their notes in the journal.
-- **Station work:** carry parcels to local porters, refill lamps and sort addressed letters. Nine jobs earn shillings and a village reputation.
-- **A personal engine:** spend station-work earnings on green or ochre boiler paint; owned colours remain available to switch for free.
+- **Station work:** carry local parcels, refill lamps and sort addressed letters. Three railway parcels add deliveries to porters at the next station: collect on foot, ride the train, then hand over with T.
+- **More journeys:** finish the circuit and stop at Pinebank to choose another goods or passenger service. New work rounds unlock after a service or after all current parcels and letters are complete; tended lamps keep their warmth.
+- **A shared purse:** fares and village rewards fund green/ochre boiler paint and walking boots. Boots cost 40 shillings and increase walking speed by 12%; paints cost 20 each and owned colours can be switched freely.
 - **After dark:** moonlight keeps paths and hills readable, station lamps light the platforms, and a hand lantern follows you on foot.
 - **A moving world:** wind in the trees, drifting smoke and clouds, firelight, lamps, changing weather and water reflections.
 
@@ -44,10 +45,10 @@ The locomotive has working wheel and rod animation, a rounded boiler and cab ins
 | T | Pick up/deliver parcels, start letters; hold to refill a lamp |
 | 1 / 2 / 3 | Sort an active letter to Pinebank / Bellweather / Stonehaven |
 | L | Toggle the hand lantern |
-| J | Journal, noticeboard, walking destinations and paint workshop |
+| J | Railway, Work, Notes and Workshop journal pages |
 | Esc / H | Pause / controls |
 
-Settings includes night brightness, sound volume/mute, glyph size, weather, reduced motion, high contrast, the automatic fireman and recovery to a safe station. Open **J**, expand the noticeboard and select a job to get walking directions. Letter rounds can be cancelled there before taking different work.
+Settings includes night brightness, sound volume/mute, glyph size, weather, reduced motion, high contrast, the automatic fireman and recovery to a safe station. Open **J → Work** for nearby jobs; choose **All stations** to plan further ahead. Select a job for directions. Finish or return an active parcel or letter round before refreshing work. **J → Railway** starts the next service; **Workshop** spends your shared purse. Use left/right arrows on the journal tabs to change pages.
 
 ## Saving a journey
 

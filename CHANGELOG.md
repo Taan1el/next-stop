@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0
+
+- Finished circuits can lead into new goods or passenger services at Pinebank, preserving the world, clock, notes and lifetime fares.
+- Three railway parcels travel between stations alongside existing local jobs. Parcels remain carried aboard and pay only when handed over on foot.
+- Work rounds reopen after a railway service or all current parcels and letters, with fresh letter orders. Earned coins, reputation and tended lamps remain.
+- Railway fares and village rewards share one purse. Walking boots cost 40 shillings and add 12% walking speed; owned paints remain free to switch.
+- The paper journal separates Railway, Work, Notes and Workshop pages. Nearby work appears first, with filters for all stations and completed jobs.
+- Historical saves remain compatible; optional career state and renewed work/equipment are validated before imports replace live state.
+
 ## 0.2.0
 
 - Moonlit terrain, stronger station light pools and an optional hand lantern make night journeys readable. A saved brightness control adjusts night midtones.
