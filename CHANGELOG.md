@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- Lit material colours fill glyph cells more fully, with separate fill strengths for terrain, water, foliage, glass and metal. Subtle shading within letters adds surface relief; signs and self-lit materials keep their flat ink.
+- Distant foreground/background colours converge through fog and atmospheric perspective, with fuller sky and cloud colour.
+- Integrated woodland palettes, weathered bark, cloud shading and contact shading with the existing railway gameplay.
+- Tree palettes remain stable as foliage moves. Species-specific glyphs now fill the canopy interior while retaining sparse silhouette detail; crown extents remain unchanged.
+- Cloud glyphs respect horizon fading; soil transitions use ordered shader interpolation bounds.
+- Paired colour/reference views, displayed-ink checks, night visibility and real walking/driving inputs cover the visual changes without adding scene queries or changing saved world data.
+
 ## 0.3.0
 
 - Finished circuits can lead into new goods or passenger services at Pinebank, preserving the world, clock, notes and lifetime fares.

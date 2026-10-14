@@ -2,9 +2,9 @@
 
 A small rural railway game made of coloured letters. Take a steam train through fields, woods and mountain weather, stop at country stations, or leave the cab to explore on foot.
 
-![A steam train beside Bellweather station, with the lake and mountain ridges beyond](outputs/NEXT_STOP_PREVIEW.png)
+![A steam locomotive at Pinebank station, rendered as coloured glyphs](outputs/NEXT_STOP_PREVIEW.png)
 
-**Desktop prototype · v0.3.0 · MIT license**
+**Desktop prototype · v0.4.0 · MIT license**
 
 ## Download and play
 
@@ -28,6 +28,7 @@ Keyboard and mouse are required. Windows Chromium-based browsers have been teste
 - **A shared purse:** fares and village rewards fund green/ochre boiler paint and walking boots. Boots cost 40 shillings and increase walking speed by 12%; paints cost 20 each and owned colours can be switched freely.
 - **After dark:** moonlight keeps paths and hills readable, station lamps light the platforms, and a hand lantern follows you on foot.
 - **A moving world:** wind in the trees, drifting smoke and clouds, firelight, lamps, changing weather and water reflections.
+- **Richer glyph colour:** filled material colours give surfaces more weight, subtle shading runs through the letters, and distant colours soften into the atmosphere. Signs and lamps retain clear contrast.
 
 The locomotive has working wheel and rod animation, a rounded boiler and cab instruments. Stations have masonry, framed windows, canopies and glyph nameboards. Steam rhythm, rail joints and station bells are synthesized by the browser.
 

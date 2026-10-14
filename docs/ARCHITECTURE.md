@@ -20,6 +20,8 @@ Next Stop is vanilla JavaScript, inline CSS and raw WebGL2. The assembled HTML i
 
 The scene pass runs at character-grid resolution. Analytical ray queries resolve terrain and solids into three RGBA8UI attachments: glyph/material/depth, foreground and background. The display pass expands embedded 5×7 numerical masks. Glyph selection happens before final display, with no image-to-text stage.
 
+Lit material colour supplies both glyph ink and a fuller cell background, with material-specific fill strengths. Backgrounds stay flat within each cell; only the numerical glyph mask receives a small vertical ink gradient in the display pass. Sky, signs and self-lit materials keep flat ink. Fog and aerial perspective reduce distant ink/fill contrast without changing glyph IDs. This uses the existing attachments and display pass, with no extra scene queries or image textures.
+
 Terrain is a seeded 129×129 height array. CPU and GPU share bilinear sampling. Object records describe boxes, ellipsoids, legacy roof prisms, capped elliptical cylinders, pitched boxes and triangular gables. Materials add numerical masonry, siding, glazing, slate, metal, wheel spokes, instruments and cargo detail.
 
 Budgets are explicit: 256 uploaded records, 192 terrain traversal cells, 48 shadow objects and one reflected scene query with reduced limits. Dynamic shapes reserve their actual count before static selection. Close details use distance LOD; chimney smoke is bounded. Stars are fixed celestial directions projected from camera orientation, independent of camera position.
