@@ -1328,10 +1328,16 @@ class NSVillage {
     return mix(mix(hash21(cell),hash21(cell+vec2(1,0)),f.x),
                mix(hash21(cell+vec2(0,1)),hash21(cell+vec2(1,1)),f.x),f.y);
   }
-  float clouds(vec3 rd) {
+  float clouds(vec3 rd, out float thickness) {
     vec2 p=rd.xz/max(.10,rd.y)*.72+vec2(u_time*.005*u_motion,u_time*.0015*u_motion);
     float shape=fieldNoise(p)*.52+fieldNoise(p*2.13+7.1)*.28+fieldNoise(p*4.31-3.7)*.14+fieldNoise(p*8.1)*.06;
-    return smoothstep(.47-u_weather.x*.07,.69,shape)*smoothstep(.025,.13,rd.y);
+    float threshold=.47-u_weather.x*.07;
+    thickness=clamp((shape-threshold)/max(0.01,.72-threshold),0.0,1.0);
+    return smoothstep(threshold,.69,shape)*smoothstep(.025,.13,rd.y);
+  }
+  float clouds(vec3 rd) {
+    float thickness;
+    return clouds(rd, thickness);
   }
   float heightAt(vec2 p) {
     vec2 q = clamp((p + u_size * 0.5) / u_size * float(u_resolution - 1),
@@ -1436,10 +1442,13 @@ class NSVillage {
     vec4 data=texelFetch(u_objects,ivec2(2,index),0);
     // Sparse vapour cells allow the ordinary world query through between wisps.
     if(int(data.z+.5)==19 && hash21(floor(gl_FragCoord.xy)+vec2(float(index)*3.1,floor(u_time*2.0)))<.78)return false;
+    float treeSpecies=0.0;
     if(int(data.z+.5)==12){
+      treeSpecies=hash21(centre.xz*0.04+0.13);
       float wind=u_time*.9+centre.x*.043+centre.z*.061;
-      centre.x+=sin(wind)*.48*u_motion;
-      centre.z+=sin(wind*.73+2.1)*.30*u_motion;
+      float sway=(treeSpecies>.68 ? .56 : .38)*u_motion;
+      centre.x+=sin(wind)*sway;
+      centre.z+=sin(wind*.73+2.1)*sway*.65;
       centre.w+=.6;
     }
     vec3 offset=centre.xyz-ro;
@@ -1513,7 +1522,10 @@ class NSVillage {
     hit.n=normalize(vec3(data.x*normal.x+data.y*normal.z,normal.y,
                         -data.y*normal.x+data.x*normal.z));
     hit.local=localRo+localRd*t;
-    hit.extent=shape.xyz;hit.info=data.w;
+    hit.extent=shape.xyz;
+    hit.info=data.w;
+    if(int(data.z+.5)==12)hit.info=treeSpecies;
+    else if(int(data.z+.5)==11)hit.info=hash21(centre.xz*0.04+0.13);
     hit.material=int(data.z+0.5);
     return true;
   }
@@ -1550,22 +1562,53 @@ class NSVillage {
     float sunward=.5+.5*dot(normalize(vec3(rd.x,0.0,rd.z)+vec3(.0001,0,.0001)),normalize(vec3(u_sun.x,0.0,u_sun.z)));
     colour=mix(colour,vec3(.72,.39,.30),dusk*sunward*pow(1.0-max(rd.y,0.0),4.0)*.42);
     colour=mix(colour,vec3(.24,.25,.43),dusk*(1.0-sunward)*max(rd.y,0.0)*.22);
-    float cloud=clouds(rd);
-    colour=mix(colour,mix(vec3(.13,.16,.20),vec3(.58,.64,.65),day),
-                cloud*(.72+u_weather.x*.18));
+    float thickness=0.0;
+    float cloud=clouds(rd,thickness);
+    if(cloud>.01){
+      float baseShade=mix(.68,1.08,pow(max(.01,thickness),.7));
+      vec3 cloudBase=mix(vec3(.11,.13,.17),vec3(.52,.57,.60),day)*baseShade;
+      vec3 cloudSunlit=mix(vec3(.15,.18,.23),vec3(.82,.85,.86),day);
+      vec3 cloudCol=mix(cloudBase,cloudSunlit,clamp(rd.y*2.5,0.0,1.0));
+      float sunAngle=max(0.0,dot(rd,u_sun));
+      float sunRim=pow(sunAngle,6.0)*dusk;
+      vec3 rimCol=mix(vec3(.95,.62,.32),vec3(1.0,.84,.52),sunAngle);
+      cloudCol+=rimCol*sunRim*(1.0-thickness*.5)*1.4;
+      colour=mix(colour,cloudCol,cloud*(.75+u_weather.x*.18));
+    }
     colour=mix(colour,mix(vec3(.07,.085,.11),vec3(.35,.43,.45),day),u_weather.x*.48);
     float sunDisc=pow(max(0.0,dot(rd,u_sun)),900.0);
     colour+=vec3(1.0,.70,.24)*sunDisc*day;
     return colour;
   }
-  vec3 palette(int material,vec3 p) {
+  vec3 palette(Hit h) {
+    int material=h.material; vec3 p=h.p;
     if (material==1) {
       float field=fieldNoise(p.xz*.016);
-      vec3 grass=mix(vec3(.18,.30,.12),vec3(.32,.39,.18),field);
+      float slope=1.0-h.n.y;
+      float heightRel=clamp((p.y-u_water)/35.0,0.0,1.0);
+      vec3 hollowGrass=vec3(.11,.22,.08);
+      vec3 pasture=mix(vec3(.18,.31,.12),vec3(.28,.37,.15),field);
+      vec3 sunRidge=mix(vec3(.36,.38,.16),vec3(.52,.44,.20),field);
+      vec3 soil=mix(vec3(.36,.26,.16),vec3(.46,.34,.20),fieldNoise(p.xz*.08));
+      vec3 grass=mix(hollowGrass,pasture,smoothstep(0.0,0.25,heightRel));
+      grass=mix(grass,sunRidge,smoothstep(0.35,0.85,heightRel));
+      float sunFacing=max(0.0,dot(h.n,vec3(u_sun.x,0.2,u_sun.z)));
+      grass=mix(grass,sunRidge*1.08,sunFacing*smoothstep(0.3,0.8,heightRel)*0.35);
+      float soilExposure=smoothstep(0.05,0.16,slope)+(1.0-smoothstep(.2,1.8,p.y-u_water))*.6;
+      grass=mix(grass,soil,clamp(soilExposure,0.0,0.75));
       vec3 grain=mix(vec3(.41,.36,.17),vec3(.57,.46,.22),.5+.5*sin(p.x*.48+p.z*.12));
       return mix(grass,grain,smoothstep(.60,.66,field)*smoothstep(0.5,4.0,p.y));
     }
-    if (material==2) return mix(vec3(.39,.40,.37),vec3(.77,.80,.76),smoothstep(123.0,166.0,p.y));
+    if (material==2) {
+      float alt=smoothstep(20.0,160.0,p.y);
+      float graniteNoise=fieldNoise(p.xz*0.04+vec2(p.y*0.06,0.0));
+      vec3 valleyRock=mix(vec3(.34,.32,.29),vec3(.42,.39,.34),graniteNoise);
+      vec3 highRock=mix(vec3(.45,.46,.45),vec3(.78,.81,.78),smoothstep(123.0,166.0,p.y));
+      vec3 rock=mix(valleyRock,highRock,alt);
+      float strata=sin(p.y*0.45+graniteNoise*3.0);
+      rock=mix(rock,vec3(.52,.41,.31),smoothstep(0.7,0.95,strata)*0.45);
+      return rock;
+    }
     if (material==3) return vec3(.065,.24,.28);
     if (material==4) return vec3(.64,.48,.31);
     if (material==5) return vec3(.50,.23,.18);
@@ -1574,8 +1617,25 @@ class NSVillage {
     if (material==8) return vec3(.73,.15,.095);
     if (material==9) return vec3(1.0,.73,.22);
     if (material==10) return vec3(.54,.51,.42);
-    if (material==11) return vec3(.35,.24,.12);
-    if (material==12) return mix(vec3(.075,.25,.12),vec3(.21,.36,.15),.5+.5*sin(p.y*.8+p.x*.3));
+    if (material==11) {
+      float treeHash=h.info;
+      vec3 pineBark=vec3(.38,.22,.14);
+      vec3 oakBark=vec3(.32,.25,.18);
+      float birchGrain=step(.84,fract(h.local.y*3.2+hash21(floor(h.local.yy*3.2))*0.3));
+      vec3 birchBark=mix(vec3(.72,.71,.66),vec3(.20,.18,.16),birchGrain);
+      vec3 bark=treeHash<.35 ? pineBark : (treeHash<.70 ? oakBark : birchBark);
+      float fissure=step(.88,fract(atan(h.local.z,h.local.x)*3.5));
+      return mix(bark,bark*0.65,fissure*0.35);
+    }
+    if (material==12) {
+      float treeHash=h.info;
+      vec3 pineFoliage=mix(vec3(.06,.20,.12),vec3(.12,.27,.16),.5+.5*sin(p.y*.9+p.x*.4));
+      vec3 oakFoliage=mix(vec3(.09,.26,.11),vec3(.24,.37,.14),.5+.5*sin(p.y*.8+p.x*.3));
+      vec3 birchFoliage=mix(vec3(.16,.33,.12),vec3(.32,.44,.18),.5+.5*sin(p.y*1.1+p.z*.5));
+      vec3 foliage=treeHash<.35 ? pineFoliage : (treeHash<.70 ? oakFoliage : birchFoliage);
+      float crownTop=clamp(h.local.y/max(.1,h.extent.y)*.5+.5,0.0,1.0);
+      return mix(foliage*0.82,foliage*1.16,crownTop);
+    }
     if (material==13) return vec3(.36,.39,.40);
     if (material==17) return vec3(1.0,.72,.26);
     if (material==18) return vec3(1.0,.32,.035);
@@ -1651,7 +1711,7 @@ class NSVillage {
     return 1.0;
   }
   vec3 illuminate(Hit hit,bool allowShadow) {
-    vec3 base=palette(hit.material,hit.p);if(hit.material>=23)base=detailColour(hit,base);
+    vec3 base=palette(hit);if(hit.material>=23)base=detailColour(hit,base);
     float day=smoothstep(-.15,.25,u_sun.y);
     float night=1.0-day;
     float ambient=mix(.37,.49,day)*(1.0-u_weather.x*.12);
@@ -1659,10 +1719,19 @@ class NSVillage {
     if (allowShadow) diffuse*=shadow(hit);
     float heightShade=1.0;
     if(hit.material>=23&&hit.material!=26&&hit.material!=35)heightShade=mix(.78,1.12,clamp(hit.local.y/max(.02,hit.extent.y)*.5+.5,0.0,1.0));
+    float contactAO=1.0;
+    if(hit.material!=3 && hit.material!=19 && hit.material!=18) {
+      if(hit.material==1 || hit.material==2) {
+        if(hit.p.y < u_water + 0.35) contactAO *= mix(0.76, 1.0, clamp((hit.p.y - u_water)/0.35, 0.0, 1.0));
+      } else if(hit.extent.y > 0.12) {
+        float baseDist = (hit.local.y + hit.extent.y) / max(0.05, hit.extent.y * 2.0);
+        contactAO *= mix(0.78, 1.0, smoothstep(0.0, 0.35, baseDist));
+      }
+    }
     vec3 ambientTint=mix(vec3(.80,.72,.53),vec3(.61,.78,1.0),clamp(hit.n.y*.5+.5,0.0,1.0));
-    vec3 colour=base*heightShade*(ambientTint*ambient+vec3(1.0,.84,.59)*diffuse);
+    vec3 colour=base*heightShade*contactAO*(ambientTint*ambient+vec3(1.0,.84,.59)*diffuse);
     vec3 moon=normalize(vec3(-u_sun.x,max(.25,-u_sun.y),-u_sun.z));
-    colour+=base*heightShade*vec3(.51,.67,.94)*max(0.0,dot(hit.n,moon))*.26*night;
+    colour+=base*heightShade*contactAO*vec3(.51,.67,.94)*max(0.0,dot(hit.n,moon))*.26*night;
     if(day>.1&&hit.material!=3)colour+=base*vec3(.20,.14,.07)*max(0.0,-hit.n.y)*day*.20;
     vec3 lampToSurface=hit.p-u_headPosition;
     float lampDistance=length(lampToSurface);
@@ -1694,38 +1763,58 @@ class NSVillage {
   }
 
   uint glyphFor(Hit h,float light) {
+    float objPattern=hash21(floor(h.local.xz*2.4)+floor(h.local.y)*5.0);
     float pattern=hash21(floor(h.p.xz*1.6)+floor(h.p.y)*7.0);
     bool side=abs(h.n.y)<.5;
-    if (h.material==1) return pattern>.78 ? (sin(h.p.x*.13+h.p.z*.19+u_time*1.1*u_motion)>.1 ? 34u : 39u) : pattern>.40 ? 44u : 46u;
-    if (h.material==2) return h.n.y<.6 ? (h.n.x*h.n.z>0.0 ? 47u : 92u) : pattern>.55 ? 37u : 58u;
+    if (h.material==1) {
+      float distFade=smoothstep(35.0,120.0,h.t);
+      if (distFade>0.7) return pattern>.48 ? 44u : 46u;
+      return pattern>.80 ? 34u : pattern>.56 ? 39u : pattern>.30 ? 44u : 46u;
+    }
+    if (h.material==2) {
+      float distRock=smoothstep(80.0,260.0,h.t);
+      if (distRock>0.65) return h.n.y<.6 ? (h.n.x*h.n.z>0.0 ? 47u : 92u) : 58u;
+      return h.n.y<.6 ? (h.n.x*h.n.z>0.0 ? 47u : 92u) : pattern>.55 ? 37u : 58u;
+    }
     if (h.material==3) return pattern>.67 ? 126u : pattern>.31 ? 61u : 45u;
     if (h.material==4) return side ? (fract(h.local.y*.60)>.7 ? 45u : 124u) : 58u;
     if (h.material==5) return h.n.x>0.1 ? 47u : h.n.x<-.1 ? 92u : 61u;
     if (h.material==6) return side ? 124u : 61u;
     if (h.material==7) return side ? 124u : 61u;
-    if (h.material==8) return side ? (pattern>.60 ? 72u : 35u) : 61u;
+    if (h.material==8) return side ? (objPattern>.60 ? 72u : 35u) : 61u;
     if (h.material==9) return light>.65 ? 35u : 43u;
     if (h.material==10) return side ? 45u : pattern>.5 ? 58u : 46u;
-    if (h.material==11) return side ? 124u : 43u;
-    if (h.material==12) return pattern>.73 ? 64u : pattern>.35 ? 42u : 43u;
+    if (h.material==11) {
+      if (!side) return 43u;
+      float knothole=hash21(floor(h.local.yy*1.8)+h.info*13.0);
+      return knothole>.85 ? 35u : knothole>.65 ? 58u : 124u;
+    }
+    if (h.material==12) {
+      float folPattern=hash21(floor(h.local.xz*1.8)+floor(h.local.y*1.8)+h.info*19.0);
+      float facing=abs(dot(h.n,normalize(u_eye-h.p)));
+      if (facing<.22) return folPattern>.5 ? 34u : 46u;
+      if (h.info<.35) return folPattern>.68 ? 42u : folPattern>.32 ? 94u : 43u;
+      if (h.info<.70) return folPattern>.70 ? 64u : folPattern>.36 ? 37u : 42u;
+      return folPattern>.65 ? 42u : folPattern>.32 ? 43u : 46u;
+    }
     if (h.material==13) return side ? 72u : 61u;
     if (h.material==17) return 42u;
     if (h.material==18){float fire=hash21(floor(h.local.xy*5.0)+vec2(floor(u_time*9.0),floor(u_time*4.0)));return fire>.65 ? 94u : fire>.30 ? 42u : 58u;}
     if (h.material==19) return pattern>.7 ? 126u : pattern>.3 ? 58u : 46u;
     if (h.material==20) return 42u;
-    if (h.material==23) return side ? (pattern>.6 ? 35u : 72u) : 61u;
-    if (h.material==24) return fract(h.local.y*3.5)>.87?45u:pattern>.7?58u:35u;
+    if (h.material==23) return side ? (objPattern>.6 ? 35u : 72u) : 61u;
+    if (h.material==24) return fract(h.local.y*3.5)>.87?45u:objPattern>.7?58u:35u;
     if (h.material==25||h.material==30) return fract(h.local.y*4.1)>.88?45u:124u;
     if (h.material==26) return light>.40?43u:34u;
     if (h.material==27||h.material==38||h.material==39) return side?124u:61u;
-    if (h.material==28) return pattern>.6?35u:61u;
+    if (h.material==28) return objPattern>.6?35u:61u;
     if (h.material==29){float a=atan(h.local.z/h.extent.z,h.local.y/h.extent.y)-h.info;return abs(cos(a*5.0))>.85?43u:46u;}
     if (h.material==31) return h.n.y>.6?61u:h.n.x>0.0?47u:92u;
     if (h.material==32) return side?124u:45u;
     if (h.material==33) return 124u;
     if (h.material==34||h.material==36) return 46u;
     if (h.material==35) return labelInk(h)?35u:32u;
-    if (h.material==37) return pattern>.5?35u:42u;
+    if (h.material==37) return objPattern>.5?35u:42u;
     if (h.material==40) return abs(h.local.z/h.extent.z)>.85?64u:61u;
     if (h.material==42) return 58u;
     return 63u;
@@ -1744,9 +1833,11 @@ class NSVillage {
     int material=0;
     float distance=u_far;
     if (!found) {
-      float cloud=clouds(rd);
-      glyph=cloud>.45 ? 126u : cloud>.18 ? 45u : 32u;
-      background=skyColour*.70;
+      float thickness=0.0;
+      float cloud=clouds(rd,thickness);
+      glyph=32u;
+      if(cloud>.15)glyph=thickness>.62 ? 35u : thickness>.38 ? 61u : 126u;
+      background=skyColour*.82;
       foreground=skyColour*.98;
       if(u_sun.y<-.08&&cloud<.32){ivec2 cell=ivec2(gl_FragCoord.xy);for(int i=0;i<64;i++){if(all(equal(cell,ivec2(u_stars[i].xy)))){glyph=u_stars[i].z>.83?42u:46u;foreground=mix(vec3(.64,.78,1.0),vec3(1.0,.83,.62),u_stars[i].w)*u_stars[i].z;break;}}}
       if (dot(rd,u_sun)>.996) { glyph=64u; foreground=vec3(1.0,.87,.45); }
@@ -1767,20 +1858,58 @@ class NSVillage {
         float fresnel=.30+.64*pow(1.0-max(0.0,dot(-rd,hit.n)),3.0);
         colour=mix(colour,reflection,fresnel);
         if (reflectionFound && reflectedHit.material==8) colour+=vec3(.045,.0,.0);
+        if (u_sun.y<.25) {
+          float nightFactor=1.0-smoothstep(-.15,.25,u_sun.y);
+          for (int i=0; i<3; i++) {
+            vec3 toLamp=u_lamps[i]-hit.p; float lampD=length(toLamp);
+            if (lampD<120.0) {
+              vec3 halfL=normalize(toLamp/lampD-rd);
+              float specL=pow(max(0.0,dot(hit.n,halfL)),28.0);
+              float wave=0.7+0.3*sin(hit.p.x*0.7+hit.p.z*0.35+u_time*2.5);
+              colour+=vec3(1.0,.72,.30)*specL*wave*max(0.0,1.0-lampD/120.0)*(1.0+u_lampCare[i]*.35)*nightFactor*2.4;
+            }
+          }
+          vec3 toHead=u_headPosition-hit.p; float headD=length(toHead);
+          if (headD<110.0) {
+            vec3 halfH=normalize(toHead/headD-rd);
+            float specH=pow(max(0.0,dot(hit.n,halfH)),24.0);
+            colour+=vec3(1.0,.85,.55)*specH*max(0.0,1.0-headD/110.0)*nightFactor*1.8;
+          }
+        }
       }
       float light=dot(colour,vec3(.2126,.7152,.0722));
       glyph=glyphFor(hit,light);
-      foreground=colour*1.28+vec3(.022);
-      background=colour*mix(.39,.31,smoothstep(-.15,.25,u_sun.y));
-      if (material==7) { foreground+=vec3(.11,.12,.12); background*=.45; }
-      if (material==9) background=colour*.24;
-      if (material==19){foreground=mix(skyColour,vec3(.57,.58,.53),.35);background=skyColour*.70;}
+      // The lit material fills the cell; its glyph carries finer surface detail.
+      // Keep fill constant within a cell so adjoining letters have no tile seams.
+      float fill=.64;
+      if(material==1)fill=.70;
+      if(material==2)fill=.68;
+      if(material==3)fill=.74;
+      if(material==12)fill=.60;
+      if(material==26)fill=.48;
+      if(material==7)fill=.42;
+      if(material==9||material==17||material==18||material==20)fill=.50;
+      if(material==35)fill=.32;
+      foreground=colour*1.25+vec3(.024);
+      background=colour*fill;
+      if (material==7) foreground+=vec3(.11,.12,.12);
+      if (material==4||material==8||material==27||material==30||material==35) {
+        foreground*=1.10;
+      }
+      if (material==19){foreground=mix(skyColour,vec3(.57,.58,.53),.35);background=skyColour*.82;}
       float fogDensity=.00115+u_weather.y*u_weather.y*.012+u_weather.x*.0009;
       float fog=1.0-exp(-distance*fogDensity);
+      float valleyAltitude=max(0.0,hit.p.y-u_water);
+      float valleyMistDensity=exp(-valleyAltitude*0.09)*(.0028+u_weather.y*.035);
+      float valleyMist=1.0-exp(-distance*valleyMistDensity);
+      vec3 mistColour=mix(vec3(.12,.16,.24),vec3(.74,.78,.80),smoothstep(-.15,.25,u_sun.y));
+      mistColour=mix(mistColour,vec3(.78,.62,.52),(1.0-smoothstep(0.05,0.42,abs(u_sun.y)))*0.35);
       float aerial=smoothstep(65.0,380.0,distance)*.20;vec3 air=mix(vec3(.12,.12,.22),vec3(.39,.52,.62),smoothstep(-.15,.25,u_sun.y));
-      foreground=mix(foreground,air,aerial);background=mix(background,air*.58,aerial);
+      foreground=mix(foreground,air,aerial);background=mix(background,air*.78,aerial);
+      foreground=mix(foreground,mistColour*1.08,valleyMist);
+      background=mix(background,mistColour*.82,valleyMist);
       foreground=mix(foreground,skyColour*.90,fog);
-      background=mix(background,skyColour*.67,fog);
+      background=mix(background,skyColour*.86,fog);
     }
     // Sparse rain records live in cell state. Near surfaces occlude drops;
     // depth and deterministic column phase prevent a uniform full-screen veil.
@@ -1816,7 +1945,8 @@ class NSVillage {
     vec2 logical=gl_FragCoord.xy/u_physical*u_viewport;
     ivec2 cell=clamp(ivec2(floor(logical/u_cellSize)),ivec2(0),u_grid-ivec2(1));
     vec2 inside=fract(logical/u_cellSize);
-    uint glyph=texelFetch(u_records,cell,0).r;
+    uvec4 record=texelFetch(u_records,cell,0);
+    uint glyph=record.r;
     vec3 foreground=vec3(texelFetch(u_foreground,cell,0).rgb)/255.0;
     vec3 background=vec3(texelFetch(u_background,cell,0).rgb)/255.0;
     vec2 ink=(inside-vec2(.15,.18))/vec2(.70,.64);
@@ -1826,7 +1956,13 @@ class NSVillage {
       uint mask=texelFetch(u_masks,ivec2(int(glyph),6-bit.y),0).r;
       on=(mask & (1u << uint(4-bit.x)))!=0u;
     }
-    vec3 colour=on ? foreground : background;
+    // A small vertical ink gradient adds relief without changing any glyph bits.
+    // Sky, nameboards and self-lit materials retain their flat readable colour.
+    uint material=record.g;
+    float inkShade=1.0;
+    if(material!=0u&&material!=9u&&material!=17u&&material!=18u&&material!=20u&&material!=26u&&material!=35u)
+      inkShade=mix(.94,1.08,clamp(ink.y,0.0,1.0));
+    vec3 colour=on ? foreground*inkShade : background;
     if (u_debug && inside.x<.045 && inside.y<.065)
       colour=vec3(float(glyph&7u)/7.0,float((glyph>>3)&7u)/7.0,float(glyph>>6));
     out_colour=vec4(colour,1.0);
@@ -2049,15 +2185,18 @@ class NSVillage {
       const previous=this._selectionPosition;
       if (!previous || this._selectionCapacity!==staticCapacity ||
           Math.hypot(eye[0]-previous[0],eye[2]-previous[1])>5) {
+        const prevSelected = new Set((this._selection || []).map(s => s.entry.object));
         const candidates=[];
         for (const entry of this.staticObjects) {
           const o=entry.object;
           const distance=Math.hypot(o.x-eye[0],o.z-eye[2]);
           if (distance-entry.radius>420) continue;
-          if(o.detail&&distance-entry.radius>(o.lod||70))continue;
-          // Preserve station/building/tree silhouettes before filling the local
-          // numerical track corridor. All candidates remain authoritative data.
-          candidates.push({ entry,distance,score:distance+(o.material===7 ? 28 : 0) });
+          const wasSelected=prevSelected.has(o);
+          const lodLimit=(o.lod||70)+(wasSelected ? 10 : 0);
+          if(o.detail&&distance-entry.radius>lodLimit)continue;
+          // Distance hysteresis prevents abrupt detail popping near selection thresholds
+          const hysteresisBias=wasSelected ? -3 : 0;
+          candidates.push({ entry,distance,score:distance+(o.material===7 ? 28 : 0)+hysteresisBias });
         }
         candidates.sort((a,b)=>a.score-b.score);
         this._selection=candidates.slice(0,staticCapacity);

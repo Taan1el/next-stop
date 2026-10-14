@@ -1,6 +1,6 @@
 {
   "name": "next-stop",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "An offline rural railway game rendered directly as coloured glyphs.",
   "license": "MIT",
@@ -18,7 +18,8 @@
     "test:browser": "node work/qa/browser-suite.cjs",
     "test:circuit": "node work/run-cycle.cjs full-circuit",
     "test:passenger": "node work/playtest-passenger.cjs passenger",
-    "release:package": "node work/package-release.cjs"
+    "release:package": "node work/package-release.cjs",
+    "test:fill": "node work/qa/fill-suite.cjs"
   },
   "devDependencies": {
     "fflate": "0.8.3",
