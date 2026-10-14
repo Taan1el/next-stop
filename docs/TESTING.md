@@ -41,6 +41,12 @@ Legacy states in [work/qa/fixtures/](../work/qa/fixtures/) contain only saved ga
 ## Longer runs
 
 ```sh
+npm run test:fill
+```
+
+The fill suite creates an ignored unfilled reference from the current scene and glyph logic, then compares eight identical cameras against production colour encoding. It checks unchanged glyph records, stronger material backgrounds, displayed ink variation, nameboard contrast and the actual cab camera with visible gauges. Both builds also exercise real walking, boarding, coal firing, driving, braking and pause. Two 600-frame paused-camera samples isolate rendering cost; every positive frame interval is retained, including long stalls. These fixed views and timing samples are inspections, not full train circuits. The suite ends with the night-visibility fixtures.
+
+```sh
 npm run test:circuit
 npm run test:passenger
 ```

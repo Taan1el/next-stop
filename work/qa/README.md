@@ -18,3 +18,5 @@ The nine focused suites cover 80 behavior/resource checks. Career checks cover r
 Real browser scripts live under `work/playtest-*.cjs` and `work/run-cycle.cjs`. Run `npm ci`, `npx playwright install chromium` and `npm run test:browser`. The shared launcher also supports installed Chrome/Edge or an explicit executable path. Launch processes serially to keep measurements meaningful. Full circuits use normal keyboard inputs and real elapsed time; fixed-time/camera shader inspections are labeled separately.
 
 Three historical save states are committed under `fixtures/` and checked by `save-fixtures.cjs`. Browser scripts require no ignored evidence files as inputs. Generated results remain under ignored `.omx/evidence/`. See [testing](../../docs/TESTING.md) and [release validation](../../docs/RELEASE_VALIDATION.md) for coverage and limits.
+
+`npm run test:fill` builds its own unfilled reference, so its paired shader comparison also needs no earlier local reports. It covers displayed ink, material fills, signs, production cab views, real player controls and serial 600-frame rendering samples. The reference and evidence stay under ignored `.omx/`.
