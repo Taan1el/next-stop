@@ -178,14 +178,14 @@
     vec4 data=texelFetch(u_objects,ivec2(2,index),0);
     // Sparse vapour cells allow the ordinary world query through between wisps.
     if(int(data.z+.5)==19 && hash21(floor(gl_FragCoord.xy)+vec2(float(index)*3.1,floor(u_time*2.0)))<.78)return false;
+    float treeSpecies=0.0;
     if(int(data.z+.5)==12){
-      float treeSpecies=hash21(centre.xz*0.04+0.13);
+      treeSpecies=hash21(centre.xz*0.04+0.13);
       float wind=u_time*.9+centre.x*.043+centre.z*.061;
       float sway=(treeSpecies>.68 ? .56 : .38)*u_motion;
       centre.x+=sin(wind)*sway;
       centre.z+=sin(wind*.73+2.1)*sway*.65;
       centre.w+=.6;
-      if(treeSpecies<.35 && shape.x<shape.y) shape.xz*=.88;
     }
     vec3 offset=centre.xyz-ro;
     float along=dot(offset,rd);
@@ -259,7 +259,9 @@
                         -data.y*normal.x+data.x*normal.z));
     hit.local=localRo+localRd*t;
     hit.extent=shape.xyz;
-    hit.info=(int(data.z+.5)==12 || int(data.z+.5)==11) ? hash21(centre.xz*0.04+0.13) : data.w;
+    hit.info=data.w;
+    if(int(data.z+.5)==12)hit.info=treeSpecies;
+    else if(int(data.z+.5)==11)hit.info=hash21(centre.xz*0.04+0.13);
     hit.material=int(data.z+0.5);
     return true;
   }
@@ -328,7 +330,7 @@
       grass=mix(grass,sunRidge,smoothstep(0.35,0.85,heightRel));
       float sunFacing=max(0.0,dot(h.n,vec3(u_sun.x,0.2,u_sun.z)));
       grass=mix(grass,sunRidge*1.08,sunFacing*smoothstep(0.3,0.8,heightRel)*0.35);
-      float soilExposure=smoothstep(0.05,0.16,slope)+smoothstep(1.8,0.2,p.y-u_water)*0.6;
+      float soilExposure=smoothstep(0.05,0.16,slope)+(1.0-smoothstep(.2,1.8,p.y-u_water))*.6;
       grass=mix(grass,soil,clamp(soilExposure,0.0,0.75));
       vec3 grain=mix(vec3(.41,.36,.17),vec3(.57,.46,.22),.5+.5*sin(p.x*.48+p.z*.12));
       return mix(grass,grain,smoothstep(.60,.66,field)*smoothstep(0.5,4.0,p.y));
@@ -525,8 +527,8 @@
     }
     if (h.material==12) {
       float folPattern=hash21(floor(h.local.xz*1.8)+floor(h.local.y*1.8)+h.info*19.0);
-      float crownDist=length(h.local/max(vec3(.1),h.extent));
-      if (crownDist>.88) return folPattern>.5 ? 34u : 46u;
+      float facing=abs(dot(h.n,normalize(u_eye-h.p)));
+      if (facing<.22) return folPattern>.5 ? 34u : 46u;
       if (h.info<.35) return folPattern>.68 ? 42u : folPattern>.32 ? 94u : 43u;
       if (h.info<.70) return folPattern>.70 ? 64u : folPattern>.36 ? 37u : 42u;
       return folPattern>.65 ? 42u : folPattern>.32 ? 43u : 46u;
@@ -569,8 +571,9 @@
     if (!found) {
       float thickness=0.0;
       float cloud=clouds(rd,thickness);
-      glyph=thickness>.62 ? 35u : thickness>.38 ? 61u : cloud>.15 ? 126u : 32u;
-      background=skyColour*.70;
+      glyph=32u;
+      if(cloud>.15)glyph=thickness>.62 ? 35u : thickness>.38 ? 61u : 126u;
+      background=skyColour*.82;
       foreground=skyColour*.98;
       if(u_sun.y<-.08&&cloud<.32){ivec2 cell=ivec2(gl_FragCoord.xy);for(int i=0;i<64;i++){if(all(equal(cell,ivec2(u_stars[i].xy)))){glyph=u_stars[i].z>.83?42u:46u;foreground=mix(vec3(.64,.78,1.0),vec3(1.0,.83,.62),u_stars[i].w)*u_stars[i].z;break;}}}
       if (dot(rd,u_sun)>.996) { glyph=64u; foreground=vec3(1.0,.87,.45); }
@@ -612,14 +615,24 @@
       }
       float light=dot(colour,vec3(.2126,.7152,.0722));
       glyph=glyphFor(hit,light);
-      foreground=colour*1.28+vec3(.022);
-      background=colour*mix(.39,.31,smoothstep(-.15,.25,u_sun.y));
-      if (material==7) { foreground+=vec3(.11,.12,.12); background*=.45; }
-      if (material==9) background=colour*.24;
+      // The lit material fills the cell; its glyph carries finer surface detail.
+      // Keep fill constant within a cell so adjoining letters have no tile seams.
+      float fill=.64;
+      if(material==1)fill=.70;
+      if(material==2)fill=.68;
+      if(material==3)fill=.74;
+      if(material==12)fill=.60;
+      if(material==26)fill=.48;
+      if(material==7)fill=.42;
+      if(material==9||material==17||material==18||material==20)fill=.50;
+      if(material==35)fill=.32;
+      foreground=colour*1.25+vec3(.024);
+      background=colour*fill;
+      if (material==7) foreground+=vec3(.11,.12,.12);
       if (material==4||material==8||material==27||material==30||material==35) {
-        foreground*=1.12; background*=.78;
+        foreground*=1.10;
       }
-      if (material==19){foreground=mix(skyColour,vec3(.57,.58,.53),.35);background=skyColour*.70;}
+      if (material==19){foreground=mix(skyColour,vec3(.57,.58,.53),.35);background=skyColour*.82;}
       float fogDensity=.00115+u_weather.y*u_weather.y*.012+u_weather.x*.0009;
       float fog=1.0-exp(-distance*fogDensity);
       float valleyAltitude=max(0.0,hit.p.y-u_water);
@@ -628,11 +641,11 @@
       vec3 mistColour=mix(vec3(.12,.16,.24),vec3(.74,.78,.80),smoothstep(-.15,.25,u_sun.y));
       mistColour=mix(mistColour,vec3(.78,.62,.52),(1.0-smoothstep(0.05,0.42,abs(u_sun.y)))*0.35);
       float aerial=smoothstep(65.0,380.0,distance)*.20;vec3 air=mix(vec3(.12,.12,.22),vec3(.39,.52,.62),smoothstep(-.15,.25,u_sun.y));
-      foreground=mix(foreground,air,aerial);background=mix(background,air*.58,aerial);
+      foreground=mix(foreground,air,aerial);background=mix(background,air*.78,aerial);
       foreground=mix(foreground,mistColour*1.08,valleyMist);
-      background=mix(background,mistColour*0.62,valleyMist);
+      background=mix(background,mistColour*.82,valleyMist);
       foreground=mix(foreground,skyColour*.90,fog);
-      background=mix(background,skyColour*.67,fog);
+      background=mix(background,skyColour*.86,fog);
     }
     // Sparse rain records live in cell state. Near surfaces occlude drops;
     // depth and deterministic column phase prevent a uniform full-screen veil.
@@ -668,7 +681,8 @@
     vec2 logical=gl_FragCoord.xy/u_physical*u_viewport;
     ivec2 cell=clamp(ivec2(floor(logical/u_cellSize)),ivec2(0),u_grid-ivec2(1));
     vec2 inside=fract(logical/u_cellSize);
-    uint glyph=texelFetch(u_records,cell,0).r;
+    uvec4 record=texelFetch(u_records,cell,0);
+    uint glyph=record.r;
     vec3 foreground=vec3(texelFetch(u_foreground,cell,0).rgb)/255.0;
     vec3 background=vec3(texelFetch(u_background,cell,0).rgb)/255.0;
     vec2 ink=(inside-vec2(.15,.18))/vec2(.70,.64);
@@ -678,7 +692,13 @@
       uint mask=texelFetch(u_masks,ivec2(int(glyph),6-bit.y),0).r;
       on=(mask & (1u << uint(4-bit.x)))!=0u;
     }
-    vec3 colour=on ? foreground : background;
+    // A small vertical ink gradient adds relief without changing any glyph bits.
+    // Sky, nameboards and self-lit materials retain their flat readable colour.
+    uint material=record.g;
+    float inkShade=1.0;
+    if(material!=0u&&material!=9u&&material!=17u&&material!=18u&&material!=20u&&material!=26u&&material!=35u)
+      inkShade=mix(.94,1.08,clamp(ink.y,0.0,1.0));
+    vec3 colour=on ? foreground*inkShade : background;
     if (u_debug && inside.x<.045 && inside.y<.065)
       colour=vec3(float(glyph&7u)/7.0,float((glyph>>3)&7u)/7.0,float(glyph>>6));
     out_colour=vec4(colour,1.0);
