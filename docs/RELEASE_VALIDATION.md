@@ -1,5 +1,33 @@
 # Release validation
 
+## 0.4.0
+
+Checked on 14 October 2026 on Windows with Node.js 24.14.1, locked Playwright 1.64.0 and managed Chromium 156.0.8078.4. This version integrates woodland/cloud rendering with the career gameplay and adds material-specific cell fills, distance fading and subtle vertical shading inside glyph ink. World descriptors, physics and save formats are unchanged.
+
+| Check | Result |
+|---|---|
+| `npm test` | Passed; 80 focused checks, three historical fixtures, offline/source audit and deterministic archive validation |
+| `npm run test:browser` | Passed; all six scripts serially and offline, including legacy import, host lifecycle, station work, UI and night visibility |
+| Paired colour comparison | Passed; eight fixed views use identical scene and glyph fixes, with only colour encoding and ink shading changed in the reference |
+| Actual short control checks | Passed on reference and final builds; walk, board, change camera, consume coal/increase fire, drive, brake and pause |
+| Five night fixtures | Passed; platform, lantern meadow, moonlit meadow, rain and actual cab at 22:00; checked WebGL errors zero |
+| Fresh local Git clone assembly | Passed; dependency-free assembler reproduced the exact 193,236-byte HTML |
+| Player package opened offline | Passed; five-file ZIP, 63,432 bytes, twelve jobs, board, fire, move, brake and pause; exact HTML/checksums and WebGL error zero |
+| Source syntax, relative links and archive reproducibility | Passed; identical player ZIP checksum across three time zones |
+
+All eight comparison views retain identical glyph IDs. Mean background luminance increased by 2.12 times for the engine view's grass, 1.80 times for lake water, 1.73 times for woodland leaves and 1.86 times for ridge rock. Default-framebuffer samples confirm the ink gradient reaches displayed glyphs while nameboard contrast remains readable; 1,064 cab gauge cells remain present. Screenshots of the engine, woodland and actual night cab were inspected. The reference builder preserves the same vegetation, cloud and glyph fixes as production, avoiding geometry differences in the colour comparison.
+
+The warmed, paused-camera comparison used 600 consecutive positive frame intervals at 1280×720 with standard 160×60 glyphs. Reference median/p95: 16.7/16.8 ms; final: 16.7/17.1 ms. Maximum intervals were 17.8 and 22.7 ms, with none over 50 ms. CPU submission median/p95 changed from 0.4/1.5 to 0.5/2.4 ms. These are one-machine rendering samples, not a moving full-circuit benchmark or a universal frame-rate claim. The full circuit and passenger journeys recorded under 0.3.0 are historical; no new complete circuit is claimed for this visual update.
+
+An initial browser-suite attempt exceeded the legacy runner's 30-second startup allowance. An unchanged build passed on retry. The runner now reports boot readiness, detects fatal startup, and uses the other runners' 60-second allowance. The complete suite then passed; legacy startup measured 40.772 seconds. First startup can therefore remain slow on this test machine even though warmed frame rendering is smooth. No game code was changed to hide that timeout.
+
+Independent code and architecture reviews cleared the changes after fixes to stable tree variation, unreachable canopy glyph selection, a cloud-horizon coverage check, actual cab test coverage and frame-sample reporting. Generation 1–4 checksums remain unchanged. This remains a desktop Chromium prototype; other browser families, operating systems and touch controls are unverified. No GitHub release publication is implied.
+
+```text
+7f60cc3d74e585c6ad0f9ce831751d3cef74354fac7210d296cd96762016e310  next-stop.html
+6e245292d481c8497ba2e0e8750a25d5f928b1b8052aded39232f84fe2be550a  next-stop-v0.4.0.zip
+```
+
 ## 0.3.0
 
 Checked on 11 October 2026 on Windows with Node.js 24.14.1, locked Playwright 1.64.0 and managed Chromium 156.0.8078.4. Gameplay was isolated from concurrent visual work; the renderer and world descriptors retain the 0.2.0 implementation.
