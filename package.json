@@ -19,6 +19,9 @@
     "test:circuit": "node work/run-cycle.cjs full-circuit",
     "test:passenger": "node work/playtest-passenger.cjs passenger",
     "release:package": "node work/package-release.cjs",
+    "build:pages": "node work/build.cjs && node work/package-pages.cjs",
+    "test:watch-touch": "node work/qa/watch-touch.cjs",
+    "test:glyph-stability": "node work/qa/glyph-stability.cjs",
     "test:fill": "node work/qa/fill-suite.cjs"
   },
   "devDependencies": {
