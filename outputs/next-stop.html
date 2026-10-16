@@ -36,7 +36,21 @@ SOFTWARE.
 #world{display:block;width:100vw;height:100vh;touch-action:none}header{position:absolute;right:18px;top:15px;pointer-events:none}.brand{display:none}nav{pointer-events:auto}#pause-button{background:#26291fe6;color:#e8dfc2;border:1px solid #b5a47b;padding:7px 12px;box-shadow:none;font-size:12px}#status{position:absolute;left:18px;top:18px;color:#efe5cb;font:11px "Courier New",monospace;text-shadow:1px 1px #131710;background:#25291d88;padding:5px 8px}
 #hud{position:absolute;left:18px;right:18px;bottom:18px;display:flex;align-items:end;justify-content:space-between;gap:20px;pointer-events:none}.ticket{background:#e6dab8ed;border:1px solid #8f805f;border-left:4px solid #6c7249;padding:9px 12px;max-width:310px;box-shadow:2px 3px 0 #22261c60}.eyebrow{font:10px "Courier New",monospace;letter-spacing:1px;text-transform:uppercase;color:#716343}#journey-label{font-size:9px}#objective{font-size:17px;line-height:1.2;margin:4px 0}#hint{font:11px "Courier New",monospace;line-height:1.4;color:#514b38}#field-hint{font:10px "Courier New",monospace;line-height:1.4;margin-top:4px;color:#595a36}#journey-ticket[data-approach=brake]{border-left-color:#934825}#journey-ticket[data-approach=brake] #hint{color:#8a351d;font-weight:bold}#journey-ticket[data-approach=ready]{border-left-color:#406039}
 #instruments{display:flex;align-items:center;gap:12px;padding:10px 14px;color:#ddce9d;background:#25271f;border:2px solid #6e6040;border-radius:5px;box-shadow:inset 0 0 0 1px #b9a367,2px 3px 0 #141a1499}body[data-mode=foot] #instruments{display:none}.gauge{font:10px "Courier New",monospace}.gauge label{display:block;font-size:9px;text-transform:uppercase;color:#a79b76;margin-bottom:5px}.gauge strong{font-size:19px;font-weight:normal}.gauge small{font-size:9px}
-#water-label.low{color:#e07a4f}.gauge:first-child{position:relative;text-align:center;min-width:90px;height:90px;padding-top:31px;border:3px solid #ad9560;border-radius:50%;background:radial-gradient(circle,#e3d8b9 0 62%,#332e20 63%);color:#302c20}.gauge:first-child label{position:absolute;top:17px;left:0;right:0;color:#786c4f;font-size:8px}.gauge:first-child:after{content:"";position:absolute;width:2px;height:26px;background:#8e3f29;left:calc(50% - 1px);top:5px;transform-origin:50% 39px;transform:rotate(var(--needle,-115deg))}.gauge:first-child strong{position:relative;z-index:1;font-size:22px}.gauge:first-child small{display:block}.gauge:nth-child(n+2){min-width:41px}.gauge:nth-child(n+2) strong{font-size:15px}
+#water-label.low{color:#e07a4f}
+#watch-banner{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);background:#26291fe6;color:#efe5cb;border:1px solid #b5a47b;padding:9px 16px;font-size:14px;text-align:center;pointer-events:none;max-width:88vw}
+#watch-banner small{display:block;font:10px "Courier New",monospace;color:#c9bb92;margin-top:3px;letter-spacing:.04em}
+body.watching #hud,body.watching #toast,body.watching #pause-button,body.watching #touch{display:none}
+#touch{position:absolute;inset:auto 0 0 0;height:0;pointer-events:none}
+#stick{position:absolute;left:22px;bottom:24px;width:132px;height:132px;border-radius:50%;background:#26291f99;border:1px solid #b5a47b88;pointer-events:auto;touch-action:none}
+#stick-knob{position:absolute;left:38px;top:38px;width:56px;height:56px;border-radius:50%;background:#e6dab8cc;pointer-events:none}
+#touch-buttons{position:absolute;right:14px;bottom:18px;display:grid;grid-template-columns:repeat(3,58px);gap:8px;pointer-events:auto;touch-action:none}
+#touch-buttons button{width:58px;height:52px;padding:0;background:#26291fcc;color:#efe5cb;border:1px solid #b5a47b;box-shadow:none;font:15px "Courier New",monospace;user-select:none;-webkit-user-select:none}
+#touch-buttons button small{display:block;font-size:9px;color:#c9bb92}
+#touch-buttons button.held{background:#b89a59;color:#25291d}
+body[data-mode=train] #touch .mode-foot,body:not([data-mode=train]) #touch .mode-train{display:none}
+body.touch #hud{top:46px;bottom:auto;align-items:start}
+body.touch #toast{bottom:190px}
+@media(max-width:460px){#touch-buttons{grid-template-columns:repeat(3,50px)}#touch-buttons button{width:50px;height:46px}#stick{width:112px;height:112px}#stick-knob{left:30px;top:30px;width:52px;height:52px}}.gauge:first-child{position:relative;text-align:center;min-width:90px;height:90px;padding-top:31px;border:3px solid #ad9560;border-radius:50%;background:radial-gradient(circle,#e3d8b9 0 62%,#332e20 63%);color:#302c20}.gauge:first-child label{position:absolute;top:17px;left:0;right:0;color:#786c4f;font-size:8px}.gauge:first-child:after{content:"";position:absolute;width:2px;height:26px;background:#8e3f29;left:calc(50% - 1px);top:5px;transform-origin:50% 39px;transform:rotate(var(--needle,-115deg))}.gauge:first-child strong{position:relative;z-index:1;font-size:22px}.gauge:first-child small{display:block}.gauge:nth-child(n+2){min-width:41px}.gauge:nth-child(n+2) strong{font-size:15px}
 #toast{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);max-width:min(460px,88vw);background:#e9dfc0f2;border:1px solid #98885b;color:#3d3626;padding:9px 14px;font-size:13px;text-align:center;pointer-events:none;opacity:0;transition:opacity .15s}#toast.visible{opacity:1}#diagnostics{position:absolute;top:55px;left:18px;background:#1b231ce8;color:#dacfaa;font:10px monospace;padding:12px;white-space:pre;pointer-events:none}
 #menu{position:absolute;z-index:2;inset:0;background:#15201885;display:grid;place-items:center;padding:20px}#menu[hidden],.view[hidden],[hidden]{display:none!important}.card{position:relative;width:min(510px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:linear-gradient(100deg,#ddd0ae,#ebe0c2 47%,#ded3b3);border:1px solid #7a6b4d;outline:4px solid #b5a581;outline-offset:-8px;box-shadow:4px 8px 0 #161d1366;padding:35px;color:var(--ink)}.card h1{font-size:65px;line-height:.98;margin:20px 0 15px;letter-spacing:-2px;font-weight:normal}.card h2{font-size:31px;line-height:1.1;margin:12px 0 20px;font-weight:normal}.card p{font-size:15px;line-height:1.6;color:#60583f}.card .eyebrow{text-align:center;font-size:10px}.divider{border:0;border-top:1px solid #aa9971;margin:22px 0}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.field{display:block;margin:14px 0;font-size:13px;color:#5a513b}.field span{display:block;margin-bottom:6px}.field input:not([type=checkbox]),.field select{width:100%}.field.check{display:flex;align-items:center;gap:9px}.field.check input{width:17px;height:17px;accent-color:#576341}.route-strip{display:flex;align-items:center;justify-content:space-between;gap:9px;font:10px "Courier New",monospace;margin:23px 0}.route-strip i{height:1px;flex:1;background:#958563}kbd{display:inline-block;border:1px solid #a89972;padding:2px 5px;font:11px "Courier New",monospace}.controls{display:grid;grid-template-columns:105px 1fr;gap:12px;font-size:13px;line-height:1.4}.controls dd{margin:0;color:#655b43}.note{font:11px/1.6 "Courier New",monospace!important}.menu-status{min-height:18px;color:#785329!important}#journal-list,#village-list{list-style:none;padding:0;margin:18px 0 24px}#journal-list li,#village-list li{border-top:1px solid #b3a27c;padding:15px 0 0;margin:14px 0}#journal-list strong,#village-list strong{font-size:16px;color:#574c35}#journal-list .discovered strong,#village-list .discovered strong{color:#4c6339}#journal-list p,#village-list p{font-size:13px;margin:8px 0}.high-contrast{--muted:#332b1c;--line:#625639}.high-contrast .ticket{background:#f6efd9}.high-contrast #hint{color:#262214}.reduced-motion *{transition:none!important}#fatal{position:absolute;z-index:3;inset:0;display:grid;place-items:center;background:#242a20;padding:25px}#fatal pre{white-space:pre-wrap;font:11px monospace;color:#743c26}
 @media(max-width:760px){header{right:12px;top:12px}#status{left:12px;top:14px;font-size:10px}#hud{left:12px;right:12px;bottom:12px;gap:12px}.ticket{max-width:270px;padding:8px 10px}#objective{font-size:15px}#instruments{gap:9px;padding:7px 10px}.gauge:first-child{min-width:75px;height:75px;padding-top:24px}.gauge:first-child label{top:12px}.gauge:first-child:after{transform-origin:50% 32px;height:22px;top:3px}.gauge:first-child strong{font-size:19px}.card{padding:28px}.card h1{font-size:56px}}
@@ -53,12 +67,15 @@ R reverse while stopped, C camera; mouse capture or drag/arrow-key look; Esc pau
 <header><nav aria-label="Game menu"><button id="pause-button" class="small" title="Pause · Escape">Pause</button></nav></header>
 <div id="status">Generating valley…</div>
 <section id="hud" aria-label="Journey status"><div class="ticket" id="journey-ticket"><div class="eyebrow" id="journey-label">Your first departure</div><div id="objective">Find your train.</div><div id="hint">WASD walk · E board · H help</div><div id="field-hint" hidden></div><div id="work-hint" hidden></div></div><div id="instruments"><div class="gauge"><label>SPEED</label><strong id="speed">0.0</strong> <small>km/h</small></div><div class="gauge"><label>POWER</label><strong id="throttle">0</strong><small>%</small></div><div class="gauge"><label>BRAKE</label><strong id="brake">0</strong><small>%</small></div><div class="gauge"><label>STEAM</label><strong id="pressure">9.2</strong><small> bar</small><label>FIRE <span id="fire">72</span>%</label><label id="water-label" hidden>WATER <span id="water">100</span>%</label></div></div></section>
-<div id="toast" role="status" aria-live="polite"></div><pre id="diagnostics" hidden></pre>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="watch-banner" hidden><strong>Next Stop</strong> · <span id="watch-where">Leaving Pinebank</span><small>Press any key or tap to take the controls</small></div>
+<div id="touch" hidden aria-label="Touch controls"><div id="stick" aria-label="Walk, or raise and lower power"><div id="stick-knob"></div></div>
+<div id="touch-buttons"><button data-tap="interact">E<small>board</small></button><button data-hold="work" class="mode-foot">T<small>use</small></button><button data-tap="lantern" class="mode-foot">L<small>lamp</small></button><button data-hold="brake" class="mode-train">=<small>brake</small></button><button data-tap="stoke" class="mode-train">B<small>coal</small></button><button data-tap="whistle" class="mode-train">V<small>whistle</small></button><button data-tap="reverse" class="mode-train">R<small>reverse</small></button><button data-tap="camera" class="mode-train">C<small>camera</small></button><button data-tap="journal">J<small>journal</small></button><button data-tap="pause">II<small>pause</small></button></div></div><pre id="diagnostics" hidden></pre>
 <section id="menu" aria-label="Journey menu"><div class="card" role="dialog" aria-modal="true" aria-labelledby="menu-heading">
-<div id="start-view" class="view"><div class="eyebrow">Pinebank &amp; Valley Railway</div><h1 id="menu-heading">Next Stop</h1><p>The morning goods train is waiting at Pinebank.<br>Take the branch line through farms, woods and mountain weather. Or stay on foot: mend a station fence, fish by the lake, or shelter beside a waiting-room fire.</p><div class="route-strip"><span>PINEBANK</span><i></i><span>BELLWEATHER</span><i></i><span>STONEHAVEN</span></div><fieldset class="service-choice"><legend>CHOOSE YOUR MORNING TURN</legend><label><input type="radio" name="service" value="freight" checked>Goods train <small>milk, post and coal</small></label><label><input type="radio" name="service" value="passenger">Passenger local <small>workers, market and home</small></label><label><input type="radio" name="service" value="explore">Free running <small>no delivery obligations</small></label></fieldset><label class="field" id="cargo-choice"><span>Freight manifest</span><select id="cargo"><option value="mixed">Mixed goods · milk, post and coal</option><option value="timber">Timber turn · heavier wagons</option><option value="mail">Mail train · prompt arrival bonus</option></select></label><div class="row"><button id="continue-button" hidden>Continue last journey</button><button id="start-button" class="primary">Start journey</button><button id="start-help">Controls</button></div><hr class="divider"><p class="note">Bring the freight home, or linger at a station.<br>The valley is yours to explore.</p></div>
+<div id="start-view" class="view"><div class="eyebrow">Pinebank &amp; Valley Railway</div><h1 id="menu-heading">Next Stop</h1><p>The morning goods train is waiting at Pinebank.<br>Take the branch line through farms, woods and mountain weather. Or stay on foot: mend a station fence, fish by the lake, or shelter beside a waiting-room fire.</p><div class="route-strip"><span>PINEBANK</span><i></i><span>BELLWEATHER</span><i></i><span>STONEHAVEN</span></div><fieldset class="service-choice"><legend>CHOOSE YOUR MORNING TURN</legend><label><input type="radio" name="service" value="freight" checked>Goods train <small>milk, post and coal</small></label><label><input type="radio" name="service" value="passenger">Passenger local <small>workers, market and home</small></label><label><input type="radio" name="service" value="explore">Free running <small>no delivery obligations</small></label></fieldset><label class="field" id="cargo-choice"><span>Freight manifest</span><select id="cargo"><option value="mixed">Mixed goods · milk, post and coal</option><option value="timber">Timber turn · heavier wagons</option><option value="mail">Mail train · prompt arrival bonus</option></select></label><div class="row"><button id="continue-button" hidden>Continue last journey</button><button id="start-button" class="primary">Start journey</button><button id="watch-button">Watch the line</button><button id="start-help">Controls</button></div><hr class="divider"><p class="note">Bring the freight home, or linger at a station.<br>The valley is yours to explore.</p></div>
 <div id="pause-view" class="view" hidden><div class="eyebrow">Time stands still</div><h2>Journey paused</h2><p>Your train and delivery are right where you left them.</p><div class="row"><button class="primary resume-button">Resume journey</button><button id="journal-button">Journal</button><button id="help-button">Controls</button><button id="settings-button">Settings</button><button id="pause-settings" hidden>Settings</button></div></div>
 <div id="help-view" class="view" hidden><div class="eyebrow">Pocket guide</div><h2>How to travel</h2><dl class="controls"><dt><kbd>W A S D</kbd></dt><dd>Walk. In the cab, W/S raises or lowers power.</dd><dt><kbd>E</kbd></dt><dd>Board nearby train. At the destination, deliver while stopped. Otherwise leave while stopped.</dd><dt><kbd>Space</kbd></dt><dd>Hold to brake. Begin braking before the platform.</dd><dt><kbd>C</kbd> / <kbd>R</kbd></dt><dd>Switch cab/chase view. Reverse direction while stopped.</dd><dt>Mouse / arrows</dt><dd>Click world to capture mouse. Drag to look if capture is unavailable. Arrow keys also look.</dd><dt><kbd>Esc</kbd> / <kbd>H</kbd></dt><dd>Pause / guide. Escape releases mouse.</dd><dt><kbd>F</kbd></dt><dd>Centre the train camera on the railway.</dd><dt><kbd>B</kbd> / <kbd>V</kbd></dt><dd>Add coal to the fire / sound the whistle. Ease power for bridges and crossings. Pressure supplies the engine’s pull.</dd><dt><kbd>T</kbd></dt><dd>Use parcels and noticeboards on foot. Hold T for lamps or the water crane. Enter waiting rooms, sit at benches, or cast and reel at the fishing jetty. J: Around the station gives directions.</dd><dt><kbd>X</kbd></dt><dd>Put away the fishing rod, stop a refill or stand from a bench. E leaves the waiting room.</dd><dt><kbd>1 2 3</kbd></dt><dd>At a post-sorting board, choose the sack matching the letter’s address: Pinebank, Bellweather, Stonehaven.</dd><dt><kbd>L</kbd></dt><dd>Light or put away your hand lantern. Night visibility can be adjusted in Settings.</dd><dt><kbd>J</kbd></dt><dd>Open your journal, station noticeboard and paint workshop. Discover places on foot along station platforms.</dd></dl><hr class="divider"><p class="note">Destination and interaction hints appear at the bottom. Settings provides weather, portable saves, and recovery.</p><button class="primary close-menu">Back to journey</button></div>
-<div id="settings-view" class="view" hidden><div class="eyebrow">Station office</div><h2>Journey settings</h2><label class="field"><span>Glyph size</span><select id="quality"><option value="coarse">Large · faster</option><option value="standard" selected>Classic · balanced</option><option value="fine">Small · more detail</option></select></label><label class="field"><span>Weather</span><select id="weather"><option value="auto">Changing skies</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="fog">Fog</option></select></label><label class="field check"><input type="checkbox" id="reduced-motion">Reduced camera motion</label><label class="field check"><input type="checkbox" id="fire-assist">Automatic fireman · relaxed driving</label><label class="field check"><input type="checkbox" id="manual-water">Use station water cranes · optional manual refills</label><p class="note">Off: station crews top up water when you deliver. On: the tank drains much faster under power, so plan crane stops. Automatic fireman always handles water. Cranes remain free to use either way.</p><label class="field"><span>Railway &amp; valley sound volume</span><input type="range" id="sound-volume" min="0" max="100" value="55"></label><label class="field check"><input type="checkbox" id="sound-muted">Mute sound</label><label class="field"><span>Night visibility · <output id="night-brightness-value">100%</output></span><input type="range" id="night-brightness" min="70" max="140" value="100" aria-label="Night visibility"></label><label class="field check"><input type="checkbox" id="high-contrast">High-contrast interface</label><label class="field check"><input type="checkbox" id="debug">Show glyph IDs and diagnostics</label><label class="field"><span>World seed · new valley resets journey</span><input id="seed" maxlength="64" value="NEXT-STOP" autocomplete="off"></label><div class="row"><button id="regenerate">New valley</button><button id="recover">Return to safe station</button></div><hr class="divider"><div class="row"><button id="export">Export save</button><button id="import">Import save</button><input type="file" id="save-file" accept="application/json,.json" hidden></div><p class="note">JSON saves travel with you, even when browser storage is unavailable.</p><p id="local-save-status" class="note">Local progress saves every ten seconds and when you pause. Export JSON for a portable backup.</p><p id="menu-status" class="menu-status" role="status"></p><button class="primary close-menu">Back to journey</button></div>
+<div id="settings-view" class="view" hidden><div class="eyebrow">Station office</div><h2>Journey settings</h2><label class="field"><span>Glyph size</span><select id="quality"><option value="coarse">Large · faster</option><option value="standard" selected>Classic · balanced</option><option value="fine">Small · more detail</option></select></label><label class="field"><span>Weather</span><select id="weather"><option value="auto">Changing skies</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="fog">Fog</option></select></label><label class="field check"><input type="checkbox" id="ink-outlines" checked>Ink outlines · engraved silhouettes</label><label class="field check"><input type="checkbox" id="reduced-motion">Reduced camera motion</label><label class="field check"><input type="checkbox" id="fire-assist">Automatic fireman · relaxed driving</label><label class="field check"><input type="checkbox" id="manual-water">Use station water cranes · optional manual refills</label><p class="note">Off: station crews top up water when you deliver. On: the tank drains much faster under power, so plan crane stops. Automatic fireman always handles water. Cranes remain free to use either way.</p><label class="field"><span>Railway &amp; valley sound volume</span><input type="range" id="sound-volume" min="0" max="100" value="55"></label><label class="field check"><input type="checkbox" id="sound-muted">Mute sound</label><label class="field"><span>Night visibility · <output id="night-brightness-value">100%</output></span><input type="range" id="night-brightness" min="70" max="140" value="100" aria-label="Night visibility"></label><label class="field check"><input type="checkbox" id="high-contrast">High-contrast interface</label><label class="field check"><input type="checkbox" id="debug">Show glyph IDs and diagnostics</label><label class="field"><span>World seed · new valley resets journey</span><input id="seed" maxlength="64" value="NEXT-STOP" autocomplete="off"></label><div class="row"><button id="regenerate">New valley</button><button id="recover">Return to safe station</button></div><hr class="divider"><div class="row"><button id="export">Export save</button><button id="import">Import save</button><input type="file" id="save-file" accept="application/json,.json" hidden></div><p class="note">JSON saves travel with you, even when browser storage is unavailable.</p><p id="local-save-status" class="note">Local progress saves every ten seconds and when you pause. Export JSON for a portable backup.</p><p id="menu-status" class="menu-status" role="status"></p><button class="primary close-menu">Back to journey</button></div>
 <div id="journal-view" class="view" hidden>
 <div class="eyebrow">Letters from the valley</div><h2>Field journal</h2>
 <nav id="journal-pages" class="journal-pages" role="tablist" aria-label="Journal pages">
@@ -873,6 +890,7 @@ class NSSimulation {
       weatherMode: choice(s.weatherMode, ['auto', 'clear', 'rain', 'fog'], 'weather mode'), highContrast: s.highContrast === undefined ? false : bool(s.highContrast, 'high contrast') };
     if(s.nightBrightness!==undefined)settings.nightBrightness=number(s.nightBrightness,.7,1.4,'night brightness');
     if(s.lantern!==undefined)settings.lantern=bool(s.lantern,'hand lantern');
+    if(s.inkOutlines!==undefined)settings.inkOutlines=bool(s.inkOutlines,'ink outlines');
     Object.assign(this, { time, weather: restoredWeather, weatherTarget, train, player, cameraMode, delivery, settings });
     this._lastRouteYaw = this.world.routeAt(train.s).yaw; this._camera = null;
     this._previousS = train.s; this._previousPlayer = { ...player }; this.renderAlpha = 1;
@@ -1585,6 +1603,67 @@ class NSAmbience {
 }
 
 
+// A self-driving free-running train for the title backdrop and watch mode.
+// It owns a private simulation, so the player's journey and saves are never touched.
+class NSAutopilot {
+  constructor(world,settings) {
+    this.world=world;this.sim=new NSSimulation(world);this.sim.settings=settings||this.sim.settings;
+    this.railway=new NSRailway(world);this.railway.service='explore';this.railway.assisted=true;this.railway.configure(this.sim);
+    Object.assign(this.sim.player,{mode:'train',pitch:-.08});this.sim.train.direction=1;this.sim.cameraMode='chase';
+    this.dwell=0;this.leaving=null;this.shot=0;this.shotTime=0;this.anchor=null;this.time=0;
+  }
+  ahead(s) {const length=this.world.routeLength;return((s-this.sim.train.s)%length+length)%length;}
+  // Distance to the next station stop, skipping the one being left.
+  nextStop() {
+    let best=Infinity;
+    this.world.stations.forEach((station,index)=>{if(index===this.leaving)return;const d=this.ahead(station.s);if(d<best)best=d;});
+    return best;
+  }
+  // Ahead-distance of the station just passed, if any (near the full route length).
+  nextStopBehind() {let best=0;this.world.stations.forEach((station,index)=>{if(index===this.leaving)return;const d=this.ahead(station.s);if(d>best)best=d;});return best;}
+  input(dt) {
+    const train=this.sim.train,speed=Math.abs(train.speed);
+    if(this.dwell>0){this.dwell-=dt;return{brake:true,backward:true};}
+    if(this.leaving!==null){const past=this.world.routeLength-this.ahead(this.world.stations[this.leaving].s);if(past>40&&past<this.world.routeLength/2)this.leaving=null;}
+    const stop=this.nextStop();
+    const overshot=this.world.routeLength-this.nextStopBehind();
+    if((stop<2.5||overshot<6)&&speed<.12){const station=this.world.stationAt(train.s);this.leaving=station?station.index:null;this.dwell=7;return{brake:true,backward:true};}
+    let target=5.4;
+    for(const section of this.railway.sections){const d=this.ahead(section.s-section.radius),inside=this.ahead(section.s+section.radius)<section.radius*2;if(inside||d<45)target=Math.min(target,section.limit-.35);}
+    // Comfortable braking curve into the platform: v = sqrt(2 a d).
+    target=Math.min(target,Math.max(stop>1.2?.45:0,Math.sqrt(2*.9*Math.max(0,stop-1))));
+    if(speed>target+.15)return{brake:true,backward:true};
+    if(speed<target-.2)return{forward:true};
+    if(speed>target)return{backward:true};
+    return{};
+  }
+  step(dt) {
+    this.time+=dt;this.shotTime+=dt;
+    this.railway.step(dt,this.sim);this.sim.step(dt,this.input(dt));
+    if(this.shotTime>13){this.shotTime=0;this.shot=(this.shot+1)%4;this.anchor=null;}
+  }
+  point(s,side,up) {
+    const p=this.world.routeAt(((s%this.world.routeLength)+this.world.routeLength)%this.world.routeLength),x=p.x+Math.cos(p.yaw)*side,z=p.z-Math.sin(p.yaw)*side;
+    return[x,Math.max(this.world.heightAt(x,z),this.world.waterLevel)+up,z];
+  }
+  camera(dt,reducedMotion) {
+    const sim=this.sim,s=sim.train.s,loco=this.point(s,0,2.2);
+    if(reducedMotion||this.shot===0){sim.cameraMode='chase';return sim.camera(dt);}
+    if(this.shot===3){sim.cameraMode='cab';return sim.camera(dt);}
+    sim.cameraMode='chase';
+    if(this.shot===1){
+      // Trackside: wait ahead of the train and watch it roll past.
+      if(!this.anchor){const side=(Math.floor(this.time/26)%2?1:-1)*9;this.anchor=this.point(s+55,side,2.6);}
+      return{position:this.anchor.slice(),target:loco};
+    }
+    // High, slowly circling view of the whole train in its valley.
+    const angle=this.shotTime*.12+this.time*.01,radius=34,position=[loco[0]+Math.sin(angle)*radius,0,loco[2]+Math.cos(angle)*radius];
+    position[1]=Math.max(this.world.heightAt(position[0],position[2]),this.world.waterLevel)+20;
+    return{position,target:this.point(s-10,0,1)};
+  }
+}
+
+
 /* Next Stop: numerical world -> integer character records -> numeric glyph masks.
  * This renderer never creates a conventional world-colour image or samples fonts.
  */
@@ -2091,10 +2170,18 @@ class NSAmbience {
     return colour;
   }
 
+  // World-space size of one character cell at the hit. Patterns finer than a
+  // cell alias into per-frame letter changes, so they coarsen in octaves.
+  float g_footprint=0.0;
+  float lod(float frequency){return exp2(floor(log2(max(1.0,g_footprint*frequency))));}
+  bool resolves(float frequency){return g_footprint*frequency<.5;}
   uint glyphFor(Hit h,float light) {
-    float objPattern=hash21(floor(h.local.xz*2.4)+floor(h.local.y)*5.0);
-    float pattern=hash21(floor(h.p.xz*1.6)+floor(h.p.y)*7.0);
+    float lo=lod(2.4),lw=lod(1.6);
+    float objPattern=hash21(floor(h.local.xz*2.4/lo)+floor(h.local.y/lo+.5)*5.0+lo);
     bool side=abs(h.n.y)<.5;
+    // Ground and water are single-valued in x/z, so height only seeds vertical
+    // faces; otherwise contour lines and float noise at y=0 flip the hash.
+    float pattern=hash21(floor(h.p.xz*1.6/lw)+(side?floor(h.p.y/lw+.5)*7.0:0.0)+lw);
     if (h.material==1) {
       float distFade=smoothstep(35.0,120.0,h.t);
       if (distFade>0.7) return pattern>.48 ? 44u : 46u;
@@ -2106,7 +2193,7 @@ class NSAmbience {
       return h.n.y<.6 ? (h.n.x*h.n.z>0.0 ? 47u : 92u) : pattern>.55 ? 37u : 58u;
     }
     if (h.material==3) return pattern>.67 ? 126u : pattern>.31 ? 61u : 45u;
-    if (h.material==4) return side ? (fract(h.local.y*.60)>.7 ? 45u : 124u) : 58u;
+    if (h.material==4) return side ? (resolves(.60)&&fract(h.local.y*.60)>.7 ? 45u : 124u) : 58u;
     if (h.material==5) return h.n.x>0.1 ? 47u : h.n.x<-.1 ? 92u : 61u;
     if (h.material==6) return side ? 124u : 61u;
     if (h.material==7) return side ? 124u : 61u;
@@ -2115,11 +2202,11 @@ class NSAmbience {
     if (h.material==10) return side ? 45u : pattern>.5 ? 58u : 46u;
     if (h.material==11) {
       if (!side) return 43u;
-      float knothole=hash21(floor(h.local.yy*1.8)+h.info*13.0);
+      float lk=lod(1.8),knothole=hash21(floor(h.local.yy*1.8/lk)+h.info*13.0+lk);
       return knothole>.85 ? 35u : knothole>.65 ? 58u : 124u;
     }
     if (h.material==12) {
-      float folPattern=hash21(floor(h.local.xz*1.8)+floor(h.local.y*1.8)+h.info*19.0);
+      float lf=lod(1.8),folPattern=hash21(floor(h.local.xz*1.8/lf)+floor(h.local.y*1.8/lf)+h.info*19.0+lf);
       float facing=abs(dot(h.n,normalize(u_eye-h.p)));
       if (facing<.22) return folPattern>.5 ? 34u : 46u;
       if (h.info<.35) return folPattern>.68 ? 42u : folPattern>.32 ? 94u : 43u;
@@ -2132,8 +2219,8 @@ class NSAmbience {
     if (h.material==19) return pattern>.7 ? 126u : pattern>.3 ? 58u : 46u;
     if (h.material==20) return 42u;
     if (h.material==23) return side ? (objPattern>.6 ? 35u : 72u) : 61u;
-    if (h.material==24) return fract(h.local.y*3.5)>.87?45u:objPattern>.7?58u:35u;
-    if (h.material==25||h.material==30) return fract(h.local.y*4.1)>.88?45u:124u;
+    if (h.material==24) return resolves(3.5)&&fract(h.local.y*3.5)>.87?45u:objPattern>.7?58u:35u;
+    if (h.material==25||h.material==30) return resolves(4.1)&&fract(h.local.y*4.1)>.88?45u:124u;
     if (h.material==26) return light>.40?43u:34u;
     if (h.material==27||h.material==38||h.material==39) return side?124u:61u;
     if (h.material==28) return objPattern>.6?35u:61u;
@@ -2207,6 +2294,7 @@ class NSAmbience {
         }
       }
       float light=dot(colour,vec3(.2126,.7152,.0722));
+      g_footprint=hit.t*1.28*u_cellSize.y/u_viewport.y/max(.12,abs(dot(hit.n,-rd)));
       glyph=glyphFor(hit,light);
       // The lit material fills the cell; its glyph carries finer surface detail.
       // Keep fill constant within a cell so adjoining letters have no tile seams.
@@ -2251,7 +2339,8 @@ class NSAmbience {
         foreground=mix(foreground,vec3(.57,.70,.75),.61);
       }
     }
-    out_record=uvec4(glyph,uint(material),uint(clamp(distance/u_far*255.0,0.0,255.0)),255u);
+    // Alpha carries log depth: fine near the eye, where silhouettes need it.
+    out_record=uvec4(glyph,uint(material),uint(clamp(distance/u_far*255.0,0.0,255.0)),uint(clamp(log2(1.0+distance)/log2(1.0+u_far)*255.0,0.0,255.0)));
     out_foreground=colourRecord(foreground);
     out_background=colourRecord(background);
   }`;
@@ -2270,6 +2359,26 @@ class NSAmbience {
   uniform vec2 u_physical;
   uniform ivec2 u_grid;
   uniform bool u_debug;
+  uniform bool u_ink;
+  // Matches the scene's fixed 600 m far plane.
+  float depthOf(uvec4 record){return exp2(float(record.a)/255.0*log2(601.0))-1.0;}
+  bool selfLit(uint material){return material==0u||material==9u||material==17u||material==18u||material==19u||material==20u||material==26u||material==35u;}
+  bool inside(ivec2 cell){return all(greaterThanEqual(cell,ivec2(0)))&&all(lessThan(cell,u_grid));}
+  // A neighbour that is sky, or landscape farther than the surface through this cell and
+  // its opposite neighbour predicts, puts a silhouette edge here. Planes are
+  // affine in inverse depth across the screen, so grazing ground and water
+  // near the horizon never read as edges.
+  bool behind(ivec2 cell,ivec2 opposite,float depth){
+    if(!inside(cell))return false;
+    uvec4 other=texelFetch(u_records,cell,0);
+    if(other.g==0u)return true;
+    // Only landscape (grass, rock, water) counts as backdrop: object-over-object
+    // breaks such as roof slats and fences would scatter strokes into noise.
+    if(other.g>3u)return false;
+    float here=1.0/(depth+.5),there=1.0/(depthOf(other)+.5),predicted=here;
+    if(inside(opposite)){uvec4 back=texelFetch(u_records,opposite,0);if(back.g!=0u)predicted=max(here*.5,2.0*here-1.0/(depthOf(back)+.5));}
+    return there<predicted*.7;
+  }
   void main() {
     vec2 logical=gl_FragCoord.xy/u_physical*u_viewport;
     ivec2 cell=clamp(ivec2(floor(logical/u_cellSize)),ivec2(0),u_grid-ivec2(1));
@@ -2278,6 +2387,22 @@ class NSAmbience {
     uint glyph=record.r;
     vec3 foreground=vec3(texelFetch(u_foreground,cell,0).rgb)/255.0;
     vec3 background=vec3(texelFetch(u_background,cell,0).rgb)/255.0;
+    // Ink outlines: the nearer side of each depth break is redrawn as an
+    // oriented stroke, like an engraving. Cells read their four neighbours only.
+    if(u_ink&&!selfLit(record.g)){
+      float depth=depthOf(record);
+      bool left=behind(cell+ivec2(-1,0),cell+ivec2(1,0),depth),right=behind(cell+ivec2(1,0),cell+ivec2(-1,0),depth),up=behind(cell+ivec2(0,1),cell+ivec2(0,-1),depth),down=behind(cell+ivec2(0,-1),cell+ivec2(0,1),depth);
+      int count=int(left)+int(right)+int(up)+int(down);
+      uint stroke=0u;
+      if(count==1||count==2){
+        if(up&&left||down&&right)stroke=47u;
+        else if(up&&right||down&&left)stroke=92u;
+        else if(left||right)stroke=124u;
+        else if(down)stroke=95u;
+        else stroke=45u;
+      }
+      if(stroke!=0u){glyph=stroke;foreground=mix(background*.32,foreground,.28);}
+    }
     vec2 ink=(inside-vec2(.15,.18))/vec2(.70,.64);
     bool on=false;
     if (ink.x>=0.0 && ink.x<1.0 && ink.y>=0.0 && ink.y<1.0) {
@@ -2436,7 +2561,7 @@ class NSAmbience {
         'headPosition','headDirection','time','weather','motion','far','lamps','labels','stars','lantern','stationGlow','shelter','nightBrightness','paint','lampCare'
       ]);
       this.displayUniforms = uniforms(gl,this.displayProgram,[
-        'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
+        'records','foreground','background','masks','viewport','cellSize','physical','grid','debug','ink'
       ]);
       this.vao = gl.createVertexArray();
       this.starRecords=new Float32Array(64*4);
@@ -2640,7 +2765,7 @@ class NSAmbience {
       const d=this.displayUniforms;
       gl.uniform2f(d.viewport,this.width,this.height); gl.uniform2fv(d.cellSize,this.cellSize);
       gl.uniform2f(d.physical,this.canvas.width,this.canvas.height); gl.uniform2i(d.grid,this.columns,this.rows);
-      gl.uniform1i(d.debug,Boolean(options.debug)); gl.drawArrays(gl.TRIANGLES,0,3);
+      gl.uniform1i(d.debug,Boolean(options.debug)); gl.uniform1i(d.ink,options.ink!==false); gl.drawArrays(gl.TRIANGLES,0,3);
       if (!this._validated) {
         const error=gl.getError();
         if (error!==gl.NO_ERROR) throw new Error('WebGL could not draw the glyph scene (GPU error '+error+').');
@@ -2719,6 +2844,7 @@ class NSGame {
     this.railway=new NSRailway(this.world);
     this.village=new NSVillage(this.world,this.railway);this.sim.village=this.village;
     this.stationLife=new NSStationLife(this.world,this.village,this.railway);this.sim.stationLife=this.stationLife;this.activitySelection=null;this.boarded=false;
+    this.watching=false;this.pilot=null;this.pilotAccumulator=0;this.dragPointer=null;
     this.renderer=new NSGlyphRenderer(canvas,this.world);
     this.accumulator=0; this.previous=0; this.lastUI=0; this.toastUntil=0;
     this.width=window.innerWidth; this.height=window.innerHeight;
@@ -2731,11 +2857,17 @@ class NSGame {
     this.renderer.onContextRestored=()=>{this.notify('Graphics restored. Your journey is safe.');if(this.wasRunning)this.resume();};
     this.renderer.onError=error=>{this.pause();this.showFatal(error);this.host.onError?.(error);};
     this.tick=this.tick.bind(this); this.raf=requestAnimationFrame(this.tick);
+    if(window.matchMedia?.('(pointer: coarse)').matches)this.enableTouch();
+    if(/^#watch\b/.test(window.location.hash))this.watch();
   }
   listen(target,type,handler,options) { target.addEventListener(type,handler,options);this.listeners.push(()=>target.removeEventListener(type,handler,options)); }
   click(id,handler) { const node=document.getElementById(id);if(node)this.listen(node,'click',handler); }
   bindControls() {
     this.click('start-button',()=>this.start());
+    this.click('watch-button',()=>this.watch());
+    this.bindTouch();
+    // Any key, click or tap hands a watched journey back to the title card.
+    this.listen(window,'pointerdown',()=>{if(this.watching&&performance.now()-this.watchSince>400)this.stopWatching();},{capture:true});
     this.click('continue-button',()=>{try{const text=localStorage.getItem('next-stop-checkpoint');if(!text)throw Error('Local progress is unavailable. Import your exported save instead.');this.restore(text);this.start();this.notify('Last local journey restored.');}catch(error){this.notify(error.message||'Local progress could not be restored.');}});
     this.click('pause-button',()=>this.running?this.openMenu('pause'):this.closeMenu());
     this.click('help-button',()=>this.openMenu('help'));this.click('start-help',()=>this.openMenu('help'));
@@ -2744,6 +2876,7 @@ class NSGame {
     this.listen(document.getElementById('workshop'),'click',event=>{const button=event.target.closest('button[data-paint],button[data-gear]');if(!button)return;this.notify(button.dataset.gear?this.village.buyGear(button.dataset.gear):this.village.buyPaint(button.dataset.paint));this.village.apply(this.sim);this.syncJournal();});
     this.listen(document.getElementById('station-life'),'click',event=>{const button=event.target.closest('[data-activity]');if(!button)return;if(this.village.carrying||this.village.sorting){this.notify('Finish your parcel or letters first, or return them at the noticeboard.');return;}const kind=button.dataset.activity;let site=this.nearestSite();if(!site[kind])site=this.stationLife.sites.filter(s=>s[kind]).sort((a,b)=>Math.hypot(this.sim.player.x-a[kind].x,this.sim.player.z-a[kind].z)-Math.hypot(this.sim.player.x-b[kind].x,this.sim.player.z-b[kind].z))[0];if(!site){this.notify('No fishing water is accessible in this valley. Other station activities remain available.');return;}this.activitySelection={kind,index:site.index};this.village.selected=null;this.syncJournal();this.notify(this.activityName(kind)+' at '+site.station.name+'. Follow the ticket on foot.');});
     for(const kind of ['fence','fireplace'])this.click('repair-'+kind,()=>{this.notify(this.stationLife.repair(kind+'-'+this.nearestSite().index,this.sim));this.syncJournal();});
+    this.listen(document.getElementById('ink-outlines'),'change',event=>{this.sim.settings.inkOutlines=event.target.checked;});
     this.listen(document.getElementById('manual-water'),'change',event=>{this.stationLife.setManualWater(event.target.checked);this.notify(event.target.checked?'Manual water refills selected. Hold T at a crane with your train stopped alongside.':'Station crews will top up water when you deliver.');});
     this.listen(document.getElementById('journal-pages'),'click',event=>{const button=event.target.closest('[data-journal-page]');if(button)this.showJournalPage(button.dataset.journalPage);});
     this.listen(document.getElementById('journal-pages'),'keydown',event=>{const tabs=[...document.querySelectorAll('[data-journal-page]')],index=tabs.indexOf(event.target);if(index<0||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;this.showJournalPage(tabs[next].dataset.journalPage);tabs[next].focus();});
@@ -2770,6 +2903,7 @@ class NSGame {
     this.listen(document.getElementById('save-file'),'change',async event=>{const file=event.target.files[0];if(!file)return;try{if(file.size>1048576)throw new Error('Save is too large (maximum 1 MB).');this.restore(JSON.parse(await file.text()));this.notify('Save imported. Journey restored.');}catch(error){this.report(error);}finally{event.target.value='';}});
     const held={KeyW:'forward',KeyS:'backward',KeyA:'left',KeyD:'right',Space:'brake',KeyT:'work',ArrowLeft:'lookLeft',ArrowRight:'lookRight',ArrowUp:'lookUp',ArrowDown:'lookDown'};
     this.listen(window,'keydown',event=>{
+      if(this.watching){event.preventDefault();if(!event.repeat)this.stopWatching();return;}
       if(event.code==='Tab'&&!this.el.menu.hidden){const items=this.menuItems(),first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}return;}
       const editing=['INPUT','SELECT','TEXTAREA'].includes(event.target.tagName);
       if(event.code==='Escape'){event.preventDefault();if(!event.repeat){if(this.el.menu.hidden)this.openMenu('pause');else this.closeMenu();}return;}
@@ -2788,9 +2922,9 @@ class NSGame {
     this.listen(window,'resize',()=>this.resize(window.innerWidth,window.innerHeight));
     this.listen(this.canvas,'click',()=>{if(!this.running)return;this.canvas.focus({preventScroll:true});if(!document.pointerLockElement&&this.canvas.requestPointerLock){try{const result=this.canvas.requestPointerLock();if(result?.catch)result.catch(()=>this.notify('Mouse capture unavailable. Drag or use arrow keys to look.'));}catch{this.notify('Drag or use arrow keys to look.');}}});
     this.listen(document,'pointerlockerror',()=>this.notify('Drag or use arrow keys to look.'));
-    this.listen(this.canvas,'pointerdown',event=>{if(event.button===0&&this.running){this.dragging=true;this.lastPointer=[event.clientX,event.clientY];}});
-    this.listen(window,'pointerup',()=>{this.dragging=false;this.lastPointer=null;});
-    this.listen(window,'pointermove',event=>{if(!this.running)return;let dx=0,dy=0;if(document.pointerLockElement===this.canvas){dx=event.movementX;dy=event.movementY;}else if(this.dragging&&this.lastPointer){dx=event.clientX-this.lastPointer[0];dy=event.clientY-this.lastPointer[1];this.lastPointer=[event.clientX,event.clientY];}this.input.lookX=(this.input.lookX||0)+dx;this.input.lookY=(this.input.lookY||0)+dy;});
+    this.listen(this.canvas,'pointerdown',event=>{if(event.button===0&&this.running&&this.dragPointer===null){this.dragging=true;this.dragPointer=event.pointerId;this.lastPointer=[event.clientX,event.clientY];}});
+    for(const type of ['pointerup','pointercancel'])this.listen(window,type,event=>{if(event.pointerId!==this.dragPointer)return;this.dragging=false;this.dragPointer=null;this.lastPointer=null;});
+    this.listen(window,'pointermove',event=>{if(!this.running)return;let dx=0,dy=0;if(document.pointerLockElement===this.canvas){dx=event.movementX;dy=event.movementY;}else if(this.dragging&&this.lastPointer&&event.pointerId===this.dragPointer){dx=event.clientX-this.lastPointer[0];dy=event.clientY-this.lastPointer[1];this.lastPointer=[event.clientX,event.clientY];}this.input.lookX=(this.input.lookX||0)+dx;this.input.lookY=(this.input.lookY||0)+dy;});
   }
   start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.cargo=document.getElementById('cargo').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.ensureAudio();this.notify('E · board. J · station work and field notes. L · hand lantern.');}
   act(action){
@@ -2851,24 +2985,48 @@ class NSGame {
     this.lastSoundBeat=beat;this.lastJoint=joint;
   }
   syncAudio(){if(this.audioMaster){this.audioMaster.gain.cancelScheduledValues(0);this.audioMaster.gain.value=this.soundMuted?0:this.soundVolume;}}
-  pause(){if(this.started&&!this.destroyed)this.checkpoint();this.running=false;if(this.audioTransport)this.audioTransport.gain.value=0;this.input={};this.dragging=false;this.lastPointer=null;this.accumulator=0;if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
+  pause(){if(this.started&&!this.destroyed)this.checkpoint();this.running=false;if(this.audioTransport)this.audioTransport.gain.value=0;this.input={};this.dragging=false;this.dragPointer=null;this.lastPointer=null;this.accumulator=0;this.resetTouch?.();if(document.pointerLockElement===this.canvas)document.exitPointerLock();if(this.el['pause-button'])this.el['pause-button'].textContent='Resume';}
   resume(){if(this.destroyed)return;this.started=true;this.running=true;if(this.audioTransport)this.audioTransport.gain.value=1;this.lastSoundBeat=null;this.lastJoint=null;this.accumulator=0;this.previous=performance.now();this.el.menu.hidden=true;this.el['pause-button'].textContent='Pause';this.canvas.focus({preventScroll:true});}
   menuItems(root=this.el.menu){return[...root.querySelectorAll('button,input,select,summary')].filter(n=>!n.closest('[hidden]')&&!n.hidden&&!n.disabled&&n.tabIndex>=0&&(n.type!=='radio'||n.checked));}
   openMenu(view){this.pause();this.el.menu.hidden=false;for(const name of ['start','pause','help','settings','journal'])this.el[name+'-view'].hidden=name!==view;const heading=this.el[view+'-view'].querySelector('h1,h2');heading.id=view+'-heading';this.el.menu.querySelector('.card').setAttribute('aria-labelledby',heading.id);this.syncSettings();this.syncJournal();this.menuItems(this.el[view+'-view'])[0]?.focus();}
   closeMenu(){if(this.started)this.resume();else this.openMenu('start');}
   resize(width,height){this.width=Math.max(1,width);this.height=Math.max(1,height);this.renderer.resize(this.width,this.height,this.sim.settings.quality||'standard');}
+  enableTouch(){if(this.touch)return;this.touch=true;document.body.classList.add('touch');document.getElementById('touch').hidden=false;}
+  resetTouch(){for(const button of document.querySelectorAll('#touch [data-hold]'))button.classList.remove('held');const knob=document.getElementById('stick-knob');if(knob)knob.style.transform='';this.stickPointer=null;}
+  bindTouch(){
+    this.listen(window,'touchstart',()=>this.enableTouch(),{passive:true,once:true});
+    const pad=document.getElementById('touch'),stick=document.getElementById('stick'),knob=document.getElementById('stick-knob');
+    const steer=event=>{const box=stick.getBoundingClientRect(),radius=box.width/2,dx=Math.max(-1,Math.min(1,(event.clientX-box.left-radius)/radius)),dy=Math.max(-1,Math.min(1,(event.clientY-box.top-radius)/radius));knob.style.transform=`translate(${dx*radius*.55}px,${dy*radius*.55}px)`;Object.assign(this.input,{forward:dy<-.3,backward:dy>.3,left:dx<-.3,right:dx>.3});};
+    this.listen(stick,'pointerdown',event=>{if(!this.running)return;event.preventDefault();this.stickPointer=event.pointerId;stick.setPointerCapture?.(event.pointerId);steer(event);});
+    this.listen(stick,'pointermove',event=>{if(event.pointerId===this.stickPointer)steer(event);});
+    for(const type of ['pointerup','pointercancel'])this.listen(stick,type,event=>{if(event.pointerId!==this.stickPointer)return;Object.assign(this.input,{forward:false,backward:false,left:false,right:false});this.resetTouch();});
+    this.listen(pad,'pointerdown',event=>{const button=event.target.closest('button');if(!button||!this.running&&button.dataset.tap!=='pause')return;event.preventDefault();
+      if(button.dataset.hold){this.input[button.dataset.hold]=true;button.classList.add('held');button.setPointerCapture?.(event.pointerId);if(button.dataset.hold==='work')this.act('work');return;}
+      const tap=button.dataset.tap;if(tap==='journal')this.openMenu('journal');else if(tap==='pause')this.running?this.openMenu('pause'):this.closeMenu();else this.act(tap);});
+    for(const type of ['pointerup','pointercancel','lostpointercapture'])this.listen(pad,type,event=>{const button=event.target.closest?.('button[data-hold]');if(!button)return;this.input[button.dataset.hold]=false;button.classList.remove('held');});
+  }
   setInput(state){this.input={...this.input,...state};}
   tick(now){
     if(this.destroyed)return;const elapsed=this.previous?Math.max(0,(now-this.previous)/1000):0;this.previous=now;
     if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){const railwayMessage=this.railway.step(1/60,this.sim);if(railwayMessage)this.notify(railwayMessage);this.village.apply(this.sim);this.sim.step(1/60,this.input);const message=this.village.step(1/60,this.sim,this.input);if(message){this.notify(message);this.soundFavour();}const activityMessage=this.stationLife.step(1/60,this.sim,this.input);if(activityMessage){this.notify(activityMessage);if(/caught|restored|repaired/i.test(activityMessage))this.soundFavour();}this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
+    // The autopilot drives the title backdrop and watch mode on its own simulation.
+    const attract=!this.started||this.watching,pilot=attract?this.autopilot():null;
+    if(pilot&&!document.hidden){this.pilotAccumulator+=Math.min(elapsed,.15);let steps=0;while(this.pilotAccumulator>=1/60&&steps<9){pilot.step(1/60);this.pilotAccumulator-=1/60;steps++;}pilot.sim.renderAlpha=this.pilotAccumulator*60;}
     this.sim.renderAlpha=this.running?this.accumulator*60:1;
     this.updateTrainSound();this.ambience?.update(this.sim,this.stationLife,this.running&&!document.hidden);
     if(this.running&&now-this.lastCheckpoint>10000){this.checkpoint();this.lastCheckpoint=now;}
-    try{if(!this.renderer.lost){this.renderer.render(this.sim,this.sim.camera(Math.min(elapsed,.05)),{quality:this.sim.settings.quality,debug:this.debug,reducedMotion:this.sim.settings.reducedMotion});}}catch(error){this.pause();this.showFatal(error);return;}
+    try{if(!this.renderer.lost){const view=pilot?pilot.sim:this.sim,camera=pilot?pilot.camera(Math.min(elapsed,.05),this.sim.settings.reducedMotion):this.sim.camera(Math.min(elapsed,.05));this.renderer.render(view,camera,{quality:this.sim.settings.quality,debug:this.debug,reducedMotion:this.sim.settings.reducedMotion,ink:this.sim.settings.inkOutlines!==false});}}catch(error){this.pause();this.showFatal(error);return;}
     if(this.running&&elapsed>0&&elapsed<.25){this.frames.push(elapsed*1000);if(this.frames.length>600)this.frames.shift();}
     if(now-this.lastUI>150){this.updateUI(now);this.lastUI=now;}this.raf=requestAnimationFrame(this.tick);
   }
+  autopilot(){
+    if(!this.pilot||this.pilot.world!==this.world){this.pilot=new NSAutopilot(this.world,this.sim.settings);this.pilotAccumulator=0;}
+    this.pilot.sim.settings=this.sim.settings;this.pilot.sim.stationLife=this.stationLife;return this.pilot;
+  }
+  watch(){if(this.destroyed)return;if(this.running)this.pause();this.watching=true;this.watchSince=performance.now();this.el.menu.hidden=true;document.body.classList.add('watching');document.getElementById('watch-banner').hidden=false;}
+  stopWatching(){if(!this.watching)return;this.watching=false;document.body.classList.remove('watching');document.getElementById('watch-banner').hidden=true;this.openMenu(this.started?'pause':'start');}
   updateUI(now){
+    if(this.watching){const pilot=this.autopilot(),station=this.world.stationAt(pilot.sim.train.s),stop=pilot.nextStop(),next=this.world.stations.findIndex((s,i)=>i!==pilot.leaving&&pilot.ahead(s.s)===stop);document.getElementById('watch-where').textContent=pilot.dwell>0&&station?'Standing at '+station.name:'Bound for '+(this.world.stations[next]?.name||'the next station');}
     const train=this.sim.train;document.body.dataset.mode=this.sim.player.mode;if(this.sim.player.mode==='train')this.boarded=true;
     this.el.objective.textContent=this.sim.delivery.finished?'The valley is yours':this.sim.delivery.started?this.world.stations[this.sim.delivery.index].name:'Pinebank departure';this.el.hint.textContent=this.sim.hint();
     this.el['journey-label'].textContent=this.sim.player.mode==='train'?`${this.sim.delivery.finished?'Free running':`${this.railway.service==='passenger'?'Passenger local':'Goods train'} · ${this.sim.delivery.completed}/3 stops`} · ${this.sim.train.direction===1?'forward':'reverse'}`:NSJourney.label(this.sim);
@@ -2900,7 +3058,7 @@ class NSGame {
     if(now>this.toastUntil)this.el.toast.classList.remove('visible');
     if(this.debug){const d=this.renderer.diagnostics(),sorted=this.frames.slice().sort((a,b)=>a-b),mid=sorted[Math.floor(sorted.length/2)]||0,p95=sorted[Math.floor(sorted.length*.95)]||0;this.el.diagnostics.textContent=`DIRECT GLYPH CELLS\n${JSON.stringify(d,null,2)}\nFrame median ${mid.toFixed(1)} ms / p95 ${p95.toFixed(1)} ms\nSeed checksum ${this.world.checksum()}\nF3 toggles diagnostics`;}
   }
-  syncSettings(){document.getElementById('manual-water').checked=this.stationLife.manualWater;document.getElementById('night-brightness').value=Math.round((this.sim.settings.nightBrightness??1)*100);document.getElementById('night-brightness-value').textContent=document.getElementById('night-brightness').value+'%';document.getElementById('sound-volume').value=Math.round(this.soundVolume*100);document.getElementById('sound-muted').checked=this.soundMuted;this.el.quality.value=this.sim.settings.quality||'standard';this.el.weather.value=this.sim.settings.weatherMode||'auto';this.el.seed.value=this.world.seed;this.el['reduced-motion'].checked=!!this.sim.settings.reducedMotion;this.el['high-contrast'].checked=!!this.sim.settings.highContrast;document.body.classList.toggle('reduced-motion',!!this.sim.settings.reducedMotion);document.body.classList.toggle('high-contrast',!!this.sim.settings.highContrast);}
+  syncSettings(){document.getElementById('ink-outlines').checked=this.sim.settings.inkOutlines!==false;document.getElementById('manual-water').checked=this.stationLife.manualWater;document.getElementById('night-brightness').value=Math.round((this.sim.settings.nightBrightness??1)*100);document.getElementById('night-brightness-value').textContent=document.getElementById('night-brightness').value+'%';document.getElementById('sound-volume').value=Math.round(this.soundVolume*100);document.getElementById('sound-muted').checked=this.soundMuted;this.el.quality.value=this.sim.settings.quality||'standard';this.el.weather.value=this.sim.settings.weatherMode||'auto';this.el.seed.value=this.world.seed;this.el['reduced-motion'].checked=!!this.sim.settings.reducedMotion;this.el['high-contrast'].checked=!!this.sim.settings.highContrast;document.body.classList.toggle('reduced-motion',!!this.sim.settings.reducedMotion);document.body.classList.toggle('high-contrast',!!this.sim.settings.highContrast);}
   syncJournal(){
     this.syncVillage();this.syncStationLife();
     const signature=this.world.seed+'|'+this.world.version+'|'+this.exploration.serialize().visited.join(',')+'|'+this.exploration.selected;
