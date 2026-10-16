@@ -46,6 +46,8 @@
   uniform float u_far;
   uniform vec3 u_lamps[3];
   uniform vec4 u_lantern;
+  uniform vec4 u_stationGlow;
+  uniform float u_shelter;
   uniform float u_nightBrightness;
   uniform int u_paint;
   uniform vec3 u_lampCare;
@@ -478,6 +480,10 @@
     vec3 toLantern=u_lantern.xyz-hit.p;float lanternDistance=length(toLantern);
     float lanternGlow=pow(max(0.0,1.0-lanternDistance/15.0),2.0)*u_lantern.w;
     colour+=base*vec3(1.0,.76,.39)*lanternGlow*max(.26,dot(hit.n,toLantern/max(.01,lanternDistance)))*mix(2.5,.35,day);
+    vec3 toHearth=u_stationGlow.xyz-hit.p;float hearthDistance=length(toHearth);
+    float hearthGlow=pow(max(0.0,1.0-hearthDistance/12.0),2.0)*u_stationGlow.w;
+    hearthGlow*=.96+.04*sin(u_time*5.3);
+    colour+=base*vec3(1.0,.62,.24)*hearthGlow*max(.30,dot(hit.n,toHearth/max(.01,hearthDistance)));
     if (hit.material==9) colour=base*mix(1.12,.62,day);
     for(int i=0;i<3;i++){
       vec3 toLamp=u_lamps[i]-hit.p;float d=length(toLamp);
@@ -649,7 +655,7 @@
     }
     // Sparse rain records live in cell state. Near surfaces occlude drops;
     // depth and deterministic column phase prevent a uniform full-screen veil.
-    if (u_weather.x>.02 && distance>4.0) {
+    if (u_weather.x>.02 && distance>mix(4.0,22.0,u_shelter)) {
       vec2 cell=floor(gl_FragCoord.xy);
       float fall=floor(u_time*16.0*u_motion);
       float rain=hash21(vec2(cell.x+floor(fall*.25),floor((cell.y+fall)/3.0)));
@@ -840,7 +846,7 @@
       this.sceneUniforms = uniforms(gl,this.sceneProgram,[
         'terrain','objects','resolution','objectCount','shadowCount','size','water',
         'heightRange','viewport','cellSize','eye','forward','right','up','sun',
-        'headPosition','headDirection','time','weather','motion','far','lamps','labels','stars','lantern','nightBrightness','paint','lampCare'
+        'headPosition','headDirection','time','weather','motion','far','lamps','labels','stars','lantern','stationGlow','shelter','nightBrightness','paint','lampCare'
       ]);
       this.displayUniforms = uniforms(gl,this.displayProgram,[
         'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
@@ -916,15 +922,28 @@
     }
 
     _uploadObjects(sim,eye) {
-      const dynamic=[...(typeof sim.dynamicObjects==='function' ? sim.dynamicObjects() : []),...(sim.village?.objects(sim)||[])];
+      const life=sim.stationLife,indoor=life?.indoor,room=indoor?life.sites[indoor.index].room:null;
+      const stationObjects=typeof NSStationScenery!=='undefined'?NSStationScenery.objects(life,sim):[];
+      const ordinary=[...(typeof sim.dynamicObjects==='function' ? sim.dynamicObjects() : []),...(sim.village?.objects(sim)||[])];
+      // Indoor shell must be written first, leaving nearby room furniture intact
+      // under the fixed GPU record cap. Outdoors all train/village props retain
+      // priority; reserve 32 records for static silhouettes and rails.
+      const dynamic=indoor?[...stationObjects,...ordinary].slice(0,224):[...ordinary,...stationObjects.slice(0,Math.max(0,224-ordinary.length))];
       const staticCapacity=Math.max(0,MAX_OBJECTS-dynamic.length);
       const previous=this._selectionPosition;
-      if (!previous || this._selectionCapacity!==staticCapacity ||
+      const roomKey=indoor?indoor.index:-1;
+      if (!previous || this._selectionRoom!==roomKey || this._selectionCapacity!==staticCapacity ||
           Math.hypot(eye[0]-previous[0],eye[2]-previous[1])>5) {
         const prevSelected = new Set((this._selection || []).map(s => s.entry.object));
         const candidates=[];
         for (const entry of this.staticObjects) {
           const o=entry.object;
+          if(room){
+            const dx=o.x-room.x,dz=o.z-room.z,side=dx*Math.cos(room.yaw)-dz*Math.sin(room.yaw),along=dx*Math.sin(room.yaw)+dz*Math.cos(room.yaw);
+            // Replace only the existing station shell and its attached trim.
+            // World descriptors, collisions, terrain and distant scenery stay exact.
+            if(Math.abs(side)<4.5&&Math.abs(along)<9.5)continue;
+          }
           const distance=Math.hypot(o.x-eye[0],o.z-eye[2]);
           if (distance-entry.radius>420) continue;
           const wasSelected=prevSelected.has(o);
@@ -943,6 +962,7 @@
         });
         this._selectionPosition=[eye[0],eye[2]];
         this._selectionCapacity=staticCapacity;
+        this._selectionRoom=roomKey;
       }
       let count=0;
       const write=object => {
@@ -1013,6 +1033,11 @@
       gl.uniform3fv(u.sun,sun); gl.uniform3fv(u.headPosition,headPosition); gl.uniform3fv(u.headDirection,headDirection);
       const walker=sim.player,lanternOn=walker?.mode==='foot'&&sim.settings?.lantern!==false;
       gl.uniform4fv(u.lantern,lanternOn?[walker.x+Math.cos(walker.yaw)*.35,walker.y+1.0,walker.z-Math.sin(walker.yaw)*.35,1]:[0,0,0,0]);
+      const life=sim.stationLife,roomSite=life?.indoor?life.sites[life.indoor.index]:life?.sites?.find(site=>life.projects.has('fireplace-'+site.index)&&Math.hypot(site.room.x-eye[0],site.room.z-eye[2])<28);
+      let stationGlow=[0,0,0,0];
+      if(roomSite){const room=roomSite.room,lit=life.projects.has('fireplace-'+roomSite.index);stationGlow=[room.x+Math.sin(room.yaw)*3.8,room.y+1.2,room.z+Math.cos(room.yaw)*3.8,life.indoor?(lit?1.9:.62):.8];}
+      gl.uniform4fv(u.stationGlow,stationGlow);
+      gl.uniform1f(u.shelter,life?.indoor||walker?.mode==='train'&&sim.cameraMode==='cab'?1:0);
       gl.uniform1f(u.nightBrightness,sim.settings?.nightBrightness??1);
       gl.uniform1i(u.paint,sim.village?.paint==='green'?1:sim.village?.paint==='ochre'?2:0);
       gl.uniform3fv(u.lampCare,[0,1,2].map(index=>sim.village?.completed.has('lamp-'+index)?1:0));

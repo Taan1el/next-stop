@@ -9,6 +9,7 @@ class NSWorld {
     this.size = 1000;
     this.resolution = 129;
     this.waterLevel = 0;
+    this.lake = Object.freeze({ x: 55, z: -157, rx: 188, rz: 121 });
     this.heights = new Float32Array(this.resolution * this.resolution);
     this.objects = [];
     this.route = [];
@@ -123,7 +124,7 @@ class NSWorld {
         h=6+noise*1.6+Math.sin(wx*.016+this._phase)*Math.cos(wz*.013)*4;
         h+=foothill*foothill*22+Math.pow(ridge,1.15)*(95+this._noise(wx,wz,72)*92)*crest;
       }
-      const lake = ((wx - 55) / 188) ** 2 + ((wz + 157) / 121) ** 2;
+      const lake = ((wx - this.lake.x) / this.lake.rx) ** 2 + ((wz - this.lake.z) / this.lake.rz) ** 2;
       if (lake < 1.24) {
         const basin = -3.5 + Math.min(lake, 1) * 2 + this._noise(wx, wz, 36) * .25;
         const blend = Math.max(0, Math.min(1, (lake - 1) / .24));
@@ -397,7 +398,7 @@ class NSSimulation {
     } else {
       // An unattended locomotive stays safely braked.
       this.train.throttle = 0; this.train.brake = 1;
-      this._walk(dt, input);
+      if(this.stationLife?.indoor)this.stationLife.walk(dt,input,this);else this._walk(dt, input);
     }
     this._trainStep(dt);
     if (this.player.mode === 'train') {
@@ -552,6 +553,7 @@ class NSSimulation {
     return 'E: leave train · W/S: throttle · R: direction · C: camera';
   }
   camera(dt = 1 / 60) {
+    if(this.stationLife?.indoor)return this.stationLife.camera(this);
     let position, target;
     const alpha = Math.max(0, Math.min(1, Number.isFinite(this.renderAlpha) ? this.renderAlpha : 1));
     const p = { ...this.player };

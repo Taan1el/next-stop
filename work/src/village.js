@@ -3,7 +3,7 @@ class NSVillage {
   constructor(world,railway=null){
     this.world=world;this.railway=railway;this.completed=new Map();this.selected=null;this.carrying=null;this.sorting=null;this.repair=null;
     this.round=0;this.pastEarnings=0;this.pastCompleted=0;this.renewedServices=0;this.gear=[];
-    this.paint='original';this.owned=['original'];this.touched=false;
+    this.paint='original';this.owned=['original'];this.touched=false;this.stationSpending=0;
     const people=['Nell','Edda','Tomas'];
     const anchor=(station,along)=>{
       for(const side of [4.4,5.2,3.8,-4.4]){
@@ -24,7 +24,7 @@ class NSVillage {
   }
   updateOrders(){this.orders=this.world.stations.map((_,i)=>this.orderTable[(this.orderHash+i+this.round)%this.orderTable.length]);}
   get earnings(){return this.pastEarnings+[...this.completed.values()].reduce((sum,value)=>sum+value,0);}
-  get wallet(){return this.earnings+(this.railway?.totalEarnings||0)-(this.owned.length-1)*20-(this.gear.includes('boots')?40:0);}
+  get wallet(){return this.earnings+(this.railway?.totalEarnings||0)-(this.owned.length-1)*20-(this.gear.includes('boots')?40:0)-this.stationSpending;}
   get title(){const count=this.pastCompleted+this.completed.size;return count>=(this.world.version===1?6:9)?'Friend of the branch line':count>=6?'Trusted neighbour':count>=3?'Valley helper':'New arrival';}
   apply(sim){sim.walkScale=this.gear.includes('boots')?1.12:1;}
   canRenew(sim){return !this.carrying&&!this.sorting&&!this.repair&&this.round<100000&&(this.jobs.filter(job=>job.kind!=='lamp').every(job=>this.completed.has(job.id))||(this.railway?.completedServices(sim)||0)>this.renewedServices);}
@@ -89,7 +89,7 @@ class NSVillage {
   }
   serialize(){return{version:this.round||this.gear.length?2:1,completed:this.jobs.filter(job=>this.completed.has(job.id)).map(job=>({id:job.id,reward:this.completed.get(job.id)})),selected:this.selected,carrying:this.carrying?{...this.carrying}:null,sorting:this.sorting?{...this.sorting}:null,paint:this.paint,owned:this.owned.slice(),...(this.round||this.gear.length?{round:this.round,pastEarnings:this.pastEarnings,pastCompleted:this.pastCompleted,renewedServices:this.renewedServices,gear:this.gear.slice()}:{})};}
   restore(data,sim){
-    if(data===undefined){Object.assign(this,{completed:new Map(),selected:null,carrying:null,sorting:null,repair:null,paint:'original',owned:['original'],touched:false,round:0,pastEarnings:0,pastCompleted:0,renewedServices:0,gear:[]});this.updateOrders();this.apply(sim);return;}
+    if(data===undefined){Object.assign(this,{completed:new Map(),selected:null,carrying:null,sorting:null,repair:null,paint:'original',owned:['original'],touched:false,round:0,pastEarnings:0,pastCompleted:0,renewedServices:0,gear:[],stationSpending:0});this.updateOrders();this.apply(sim);return;}
     const fail=()=>{throw Error('Invalid save: station work or workshop state is unsupported.');};
     if(!data||Array.isArray(data)||![1,2].includes(data.version)||!Array.isArray(data.completed)||data.completed.length>this.jobs.length)fail();
     const round=data.version===2?data.round:0,pastEarnings=data.version===2?data.pastEarnings:0,pastCompleted=data.version===2?data.pastCompleted:0,renewedServices=data.version===2?data.renewedServices:0,gear=data.version===2?data.gear:[];
@@ -105,7 +105,7 @@ class NSVillage {
     if(carrying&&sorting||carrying&&data.selected!==carrying.id||sorting&&data.selected!==sorting.id)fail();
     if(!Array.isArray(data.owned)||data.owned.length<1||data.owned.length>3||data.owned[0]!=='original'||new Set(data.owned).size!==data.owned.length||data.owned.some(id=>!['original','green','ochre'].includes(id))||!data.owned.includes(data.paint))fail();
     if((data.owned.length-1)*20+gear.length*40>pastEarnings+[...completed.values()].reduce((sum,n)=>sum+n,0)+(this.railway?.totalEarnings||0))fail();
-    Object.assign(this,{completed,selected:data.selected,carrying:carrying?{id:carrying.id,started:carrying.started}:null,sorting:sorting?{id:sorting.id,progress:sorting.progress,streak:sorting.streak}:null,paint:data.paint,owned:data.owned.slice(),repair:null,touched:true,round,pastEarnings,pastCompleted,renewedServices,gear:gear.slice()});this.updateOrders();this.apply(sim);
+    Object.assign(this,{completed,selected:data.selected,carrying:carrying?{id:carrying.id,started:carrying.started}:null,sorting:sorting?{id:sorting.id,progress:sorting.progress,streak:sorting.streak}:null,paint:data.paint,owned:data.owned.slice(),repair:null,touched:true,round,pastEarnings,pastCompleted,renewedServices,gear:gear.slice(),stationSpending:0});this.updateOrders();this.apply(sim);
   }
   objects(sim){
     const objects=[];

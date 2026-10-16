@@ -5,7 +5,7 @@ class NSRailway {
     this.engine={fire:.72,pressure:9.2,coal:100,water:100};
     this.overspeed=0;this.earnings=0;this.stops=[];this.whistled=new Set();this.missed=new Set();
     this.whistleUntil=-1;this.lastStoke=-10;this.dwell=null;
-    this.career=null;
+    this.career=null;this.manualWater=false;this.waterWarned=false;
     this.sections=[{id:'lake-crossing',name:'Lake bridge',s:world.routeLength*.37,radius:35,limit:4.45},
       {id:'farm-crossing',name:'Farm crossing',s:world.routeLength*.76,radius:24,limit:5}];
   }
@@ -43,7 +43,8 @@ class NSRailway {
     else{
       e.fire=Math.max(.10,e.fire-dt*.0019);
       e.pressure=Math.max(3.2,Math.min(11.8,e.pressure+dt*(e.fire*.075-.023-(aboard?sim.train.throttle*.035:0))));
-      e.water=Math.max(0,e.water-dt*(.006+(aboard?sim.train.throttle*.008:0)));
+      // Manual water turns the tank into a real resource: roughly four minutes at full power.
+      e.water=Math.max(0,e.water-dt*(this.manualWater?.05+(aboard?sim.train.throttle*.35:0):.006+(aboard?sim.train.throttle*.008:0)));
       if(e.water<5)e.pressure=Math.min(e.pressure,6);
     }
     const instruction=this.instruction(sim);
@@ -55,6 +56,10 @@ class NSRailway {
     const station=this.world.stationAt(sim.train.s);
     if(aboard&&station&&Math.abs(sim.train.speed)<.22){if(!this.dwell||this.dwell.index!==station.index)this.dwell={index:station.index,since:sim.time};}else this.dwell=null;
     this.apply(sim);
+    if(!this.manualWater||this.assisted){this.waterWarned=false;return null;}
+    if(e.water>50)this.waterWarned=false;
+    else if(e.water<30&&!this.waterWarned){this.waterWarned=true;return `Water low · ${Math.round(e.water)}%. Stop alongside a station water crane and hold T.`;}
+    return null;
   }
   action(name,sim){
     if(sim.player.mode!=='train')return 'Board the locomotive first.';
@@ -92,8 +97,8 @@ class NSRailway {
     if(sim.delivery.completed<1||index!==sim.delivery.completed%3||this.stops.some(stop=>stop.station===station.name))return 'This stop has already been entered in the ledger.';
     const promptPost=this.service==='freight'&&this.cargo==='mail'&&sim.time-(this.career?.startedAt||0)<sim.delivery.completed*120?4:0;
     this.earnings+=Math.max(8,Math.round(base+promptPost-Math.min(10,this.overspeed*.1)));
-    this.stops.push({station:station.name,time:sim.time});this.engine.coal=100;this.engine.water=100;
-    return `${this.service==='passenger'?'Passengers served':'Freight handed over'} at ${station.name}. Supplies topped up. ${this.earnings} shillings earned.`;
+    this.stops.push({station:station.name,time:sim.time});this.engine.coal=100;if(!this.manualWater||this.assisted)this.engine.water=100;
+    return `${this.service==='passenger'?'Passengers served':'Freight handed over'} at ${station.name}. ${this.manualWater&&!this.assisted?'Coal loaded; station water crane available.':'Supplies topped up.'} ${this.earnings} shillings earned.`;
   }
   serialize(){return{version:1,service:this.service,cargo:this.cargo,assisted:this.assisted,engine:{...this.engine},overspeed:this.overspeed,earnings:this.earnings,stops:this.stops.map(s=>({...s})),whistled:[...this.whistled],missed:[...this.missed],whistleUntil:this.whistleUntil,lastStoke:this.lastStoke,dwell:this.dwell?{...this.dwell}:null,...(this.career?{career:{...this.career}}:{})};}
   restore(data,sim){
