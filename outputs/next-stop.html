@@ -35,7 +35,8 @@ SOFTWARE.
 *{box-sizing:border-box}body{margin:0;overflow:hidden}button,input,select{font:inherit;color:var(--ink)}button{cursor:pointer;background:#ded0a9;border:1px solid #887950;border-radius:0;padding:9px 14px;box-shadow:inset 0 0 0 2px #e9ddbd}button:hover{background:#f0e3bf}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #77531d;outline-offset:3px}button.primary{background:#35402d;color:#efe6cc;border-color:#263222;box-shadow:inset 0 0 0 2px #62704d}button.primary:hover{background:#46513c}button.small{font-size:12px;padding:7px 10px}button:disabled{opacity:.5;cursor:default}input,select{border:1px solid var(--line);border-radius:0;background:#f0e6ca;padding:9px 10px}
 #world{display:block;width:100vw;height:100vh;touch-action:none}header{position:absolute;right:18px;top:15px;pointer-events:none}.brand{display:none}nav{pointer-events:auto}#pause-button{background:#26291fe6;color:#e8dfc2;border:1px solid #b5a47b;padding:7px 12px;box-shadow:none;font-size:12px}#status{position:absolute;left:18px;top:18px;color:#efe5cb;font:11px "Courier New",monospace;text-shadow:1px 1px #131710;background:#25291d88;padding:5px 8px}
 #hud{position:absolute;left:18px;right:18px;bottom:18px;display:flex;align-items:end;justify-content:space-between;gap:20px;pointer-events:none}.ticket{background:#e6dab8ed;border:1px solid #8f805f;border-left:4px solid #6c7249;padding:9px 12px;max-width:310px;box-shadow:2px 3px 0 #22261c60}.eyebrow{font:10px "Courier New",monospace;letter-spacing:1px;text-transform:uppercase;color:#716343}#journey-label{font-size:9px}#objective{font-size:17px;line-height:1.2;margin:4px 0}#hint{font:11px "Courier New",monospace;line-height:1.4;color:#514b38}#field-hint{font:10px "Courier New",monospace;line-height:1.4;margin-top:4px;color:#595a36}#journey-ticket[data-approach=brake]{border-left-color:#934825}#journey-ticket[data-approach=brake] #hint{color:#8a351d;font-weight:bold}#journey-ticket[data-approach=ready]{border-left-color:#406039}
-#instruments{display:flex;align-items:center;gap:12px;padding:10px 14px;color:#ddce9d;background:#25271f;border:2px solid #6e6040;border-radius:5px;box-shadow:inset 0 0 0 1px #b9a367,2px 3px 0 #141a1499}body[data-mode=foot] #instruments{display:none}.gauge{font:10px "Courier New",monospace}.gauge label{display:block;font-size:9px;text-transform:uppercase;color:#a79b76;margin-bottom:5px}.gauge strong{font-size:19px;font-weight:normal}.gauge small{font-size:9px}.gauge:first-child{position:relative;text-align:center;min-width:90px;height:90px;padding-top:31px;border:3px solid #ad9560;border-radius:50%;background:radial-gradient(circle,#e3d8b9 0 62%,#332e20 63%);color:#302c20}.gauge:first-child label{position:absolute;top:17px;left:0;right:0;color:#786c4f;font-size:8px}.gauge:first-child:after{content:"";position:absolute;width:2px;height:26px;background:#8e3f29;left:calc(50% - 1px);top:5px;transform-origin:50% 39px;transform:rotate(var(--needle,-115deg))}.gauge:first-child strong{position:relative;z-index:1;font-size:22px}.gauge:first-child small{display:block}.gauge:nth-child(n+2){min-width:41px}.gauge:nth-child(n+2) strong{font-size:15px}
+#instruments{display:flex;align-items:center;gap:12px;padding:10px 14px;color:#ddce9d;background:#25271f;border:2px solid #6e6040;border-radius:5px;box-shadow:inset 0 0 0 1px #b9a367,2px 3px 0 #141a1499}body[data-mode=foot] #instruments{display:none}.gauge{font:10px "Courier New",monospace}.gauge label{display:block;font-size:9px;text-transform:uppercase;color:#a79b76;margin-bottom:5px}.gauge strong{font-size:19px;font-weight:normal}.gauge small{font-size:9px}
+#water-label.low{color:#e07a4f}.gauge:first-child{position:relative;text-align:center;min-width:90px;height:90px;padding-top:31px;border:3px solid #ad9560;border-radius:50%;background:radial-gradient(circle,#e3d8b9 0 62%,#332e20 63%);color:#302c20}.gauge:first-child label{position:absolute;top:17px;left:0;right:0;color:#786c4f;font-size:8px}.gauge:first-child:after{content:"";position:absolute;width:2px;height:26px;background:#8e3f29;left:calc(50% - 1px);top:5px;transform-origin:50% 39px;transform:rotate(var(--needle,-115deg))}.gauge:first-child strong{position:relative;z-index:1;font-size:22px}.gauge:first-child small{display:block}.gauge:nth-child(n+2){min-width:41px}.gauge:nth-child(n+2) strong{font-size:15px}
 #toast{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);max-width:min(460px,88vw);background:#e9dfc0f2;border:1px solid #98885b;color:#3d3626;padding:9px 14px;font-size:13px;text-align:center;pointer-events:none;opacity:0;transition:opacity .15s}#toast.visible{opacity:1}#diagnostics{position:absolute;top:55px;left:18px;background:#1b231ce8;color:#dacfaa;font:10px monospace;padding:12px;white-space:pre;pointer-events:none}
 #menu{position:absolute;z-index:2;inset:0;background:#15201885;display:grid;place-items:center;padding:20px}#menu[hidden],.view[hidden],[hidden]{display:none!important}.card{position:relative;width:min(510px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:linear-gradient(100deg,#ddd0ae,#ebe0c2 47%,#ded3b3);border:1px solid #7a6b4d;outline:4px solid #b5a581;outline-offset:-8px;box-shadow:4px 8px 0 #161d1366;padding:35px;color:var(--ink)}.card h1{font-size:65px;line-height:.98;margin:20px 0 15px;letter-spacing:-2px;font-weight:normal}.card h2{font-size:31px;line-height:1.1;margin:12px 0 20px;font-weight:normal}.card p{font-size:15px;line-height:1.6;color:#60583f}.card .eyebrow{text-align:center;font-size:10px}.divider{border:0;border-top:1px solid #aa9971;margin:22px 0}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.field{display:block;margin:14px 0;font-size:13px;color:#5a513b}.field span{display:block;margin-bottom:6px}.field input:not([type=checkbox]),.field select{width:100%}.field.check{display:flex;align-items:center;gap:9px}.field.check input{width:17px;height:17px;accent-color:#576341}.route-strip{display:flex;align-items:center;justify-content:space-between;gap:9px;font:10px "Courier New",monospace;margin:23px 0}.route-strip i{height:1px;flex:1;background:#958563}kbd{display:inline-block;border:1px solid #a89972;padding:2px 5px;font:11px "Courier New",monospace}.controls{display:grid;grid-template-columns:105px 1fr;gap:12px;font-size:13px;line-height:1.4}.controls dd{margin:0;color:#655b43}.note{font:11px/1.6 "Courier New",monospace!important}.menu-status{min-height:18px;color:#785329!important}#journal-list,#village-list{list-style:none;padding:0;margin:18px 0 24px}#journal-list li,#village-list li{border-top:1px solid #b3a27c;padding:15px 0 0;margin:14px 0}#journal-list strong,#village-list strong{font-size:16px;color:#574c35}#journal-list .discovered strong,#village-list .discovered strong{color:#4c6339}#journal-list p,#village-list p{font-size:13px;margin:8px 0}.high-contrast{--muted:#332b1c;--line:#625639}.high-contrast .ticket{background:#f6efd9}.high-contrast #hint{color:#262214}.reduced-motion *{transition:none!important}#fatal{position:absolute;z-index:3;inset:0;display:grid;place-items:center;background:#242a20;padding:25px}#fatal pre{white-space:pre-wrap;font:11px monospace;color:#743c26}
 @media(max-width:760px){header{right:12px;top:12px}#status{left:12px;top:14px;font-size:10px}#hud{left:12px;right:12px;bottom:12px;gap:12px}.ticket{max-width:270px;padding:8px 10px}#objective{font-size:15px}#instruments{gap:9px;padding:7px 10px}.gauge:first-child{min-width:75px;height:75px;padding-top:24px}.gauge:first-child label{top:12px}.gauge:first-child:after{transform-origin:50% 32px;height:22px;top:3px}.gauge:first-child strong{font-size:19px}.card{padding:28px}.card h1{font-size:56px}}
@@ -51,13 +52,13 @@ R reverse while stopped, C camera; mouse capture or drag/arrow-key look; Esc pau
 <canvas id="world" aria-label="Next Stop three-dimensional world rendered as coloured glyph cells" tabindex="0"></canvas>
 <header><nav aria-label="Game menu"><button id="pause-button" class="small" title="Pause · Escape">Pause</button></nav></header>
 <div id="status">Generating valley…</div>
-<section id="hud" aria-label="Journey status"><div class="ticket" id="journey-ticket"><div class="eyebrow" id="journey-label">Your first departure</div><div id="objective">Find your train.</div><div id="hint">WASD walk · E board · H help</div><div id="field-hint" hidden></div><div id="work-hint" hidden></div></div><div id="instruments"><div class="gauge"><label>SPEED</label><strong id="speed">0.0</strong> <small>km/h</small></div><div class="gauge"><label>POWER</label><strong id="throttle">0</strong><small>%</small></div><div class="gauge"><label>BRAKE</label><strong id="brake">0</strong><small>%</small></div><div class="gauge"><label>STEAM</label><strong id="pressure">9.2</strong><small> bar</small><label>FIRE <span id="fire">72</span>%</label></div></div></section>
+<section id="hud" aria-label="Journey status"><div class="ticket" id="journey-ticket"><div class="eyebrow" id="journey-label">Your first departure</div><div id="objective">Find your train.</div><div id="hint">WASD walk · E board · H help</div><div id="field-hint" hidden></div><div id="work-hint" hidden></div></div><div id="instruments"><div class="gauge"><label>SPEED</label><strong id="speed">0.0</strong> <small>km/h</small></div><div class="gauge"><label>POWER</label><strong id="throttle">0</strong><small>%</small></div><div class="gauge"><label>BRAKE</label><strong id="brake">0</strong><small>%</small></div><div class="gauge"><label>STEAM</label><strong id="pressure">9.2</strong><small> bar</small><label>FIRE <span id="fire">72</span>%</label><label id="water-label" hidden>WATER <span id="water">100</span>%</label></div></div></section>
 <div id="toast" role="status" aria-live="polite"></div><pre id="diagnostics" hidden></pre>
 <section id="menu" aria-label="Journey menu"><div class="card" role="dialog" aria-modal="true" aria-labelledby="menu-heading">
-<div id="start-view" class="view"><div class="eyebrow">Pinebank &amp; Valley Railway</div><h1 id="menu-heading">Next Stop</h1><p>The morning goods train is waiting at Pinebank.<br>Take the branch line through farms, woods and mountain weather. Or stay on foot: carry parcels, tend lamps and sort letters.</p><div class="route-strip"><span>PINEBANK</span><i></i><span>BELLWEATHER</span><i></i><span>STONEHAVEN</span></div><fieldset class="service-choice"><legend>CHOOSE YOUR MORNING TURN</legend><label><input type="radio" name="service" value="freight" checked>Goods train <small>milk, post and coal</small></label><label><input type="radio" name="service" value="passenger">Passenger local <small>workers, market and home</small></label><label><input type="radio" name="service" value="explore">Free running <small>no delivery obligations</small></label></fieldset><label class="field" id="cargo-choice"><span>Freight manifest</span><select id="cargo"><option value="mixed">Mixed goods · milk, post and coal</option><option value="timber">Timber turn · heavier wagons</option><option value="mail">Mail train · prompt arrival bonus</option></select></label><div class="row"><button id="continue-button" hidden>Continue last journey</button><button id="start-button" class="primary">Start journey</button><button id="start-help">Controls</button></div><hr class="divider"><p class="note">Bring the freight home, or linger at a station.<br>The valley is yours to explore.</p></div>
+<div id="start-view" class="view"><div class="eyebrow">Pinebank &amp; Valley Railway</div><h1 id="menu-heading">Next Stop</h1><p>The morning goods train is waiting at Pinebank.<br>Take the branch line through farms, woods and mountain weather. Or stay on foot: mend a station fence, fish by the lake, or shelter beside a waiting-room fire.</p><div class="route-strip"><span>PINEBANK</span><i></i><span>BELLWEATHER</span><i></i><span>STONEHAVEN</span></div><fieldset class="service-choice"><legend>CHOOSE YOUR MORNING TURN</legend><label><input type="radio" name="service" value="freight" checked>Goods train <small>milk, post and coal</small></label><label><input type="radio" name="service" value="passenger">Passenger local <small>workers, market and home</small></label><label><input type="radio" name="service" value="explore">Free running <small>no delivery obligations</small></label></fieldset><label class="field" id="cargo-choice"><span>Freight manifest</span><select id="cargo"><option value="mixed">Mixed goods · milk, post and coal</option><option value="timber">Timber turn · heavier wagons</option><option value="mail">Mail train · prompt arrival bonus</option></select></label><div class="row"><button id="continue-button" hidden>Continue last journey</button><button id="start-button" class="primary">Start journey</button><button id="start-help">Controls</button></div><hr class="divider"><p class="note">Bring the freight home, or linger at a station.<br>The valley is yours to explore.</p></div>
 <div id="pause-view" class="view" hidden><div class="eyebrow">Time stands still</div><h2>Journey paused</h2><p>Your train and delivery are right where you left them.</p><div class="row"><button class="primary resume-button">Resume journey</button><button id="journal-button">Journal</button><button id="help-button">Controls</button><button id="settings-button">Settings</button><button id="pause-settings" hidden>Settings</button></div></div>
-<div id="help-view" class="view" hidden><div class="eyebrow">Pocket guide</div><h2>How to travel</h2><dl class="controls"><dt><kbd>W A S D</kbd></dt><dd>Walk. In the cab, W/S raises or lowers power.</dd><dt><kbd>E</kbd></dt><dd>Board nearby train. At the destination, deliver while stopped. Otherwise leave while stopped.</dd><dt><kbd>Space</kbd></dt><dd>Hold to brake. Begin braking before the platform.</dd><dt><kbd>C</kbd> / <kbd>R</kbd></dt><dd>Switch cab/chase view. Reverse direction while stopped.</dd><dt>Mouse / arrows</dt><dd>Click world to capture mouse. Drag to look if capture is unavailable. Arrow keys also look.</dd><dt><kbd>Esc</kbd> / <kbd>H</kbd></dt><dd>Pause / guide. Escape releases mouse.</dd><dt><kbd>F</kbd></dt><dd>Centre the train camera on the railway.</dd><dt><kbd>B</kbd> / <kbd>V</kbd></dt><dd>Add coal to the fire / sound the whistle. Ease power for bridges and crossings. Pressure supplies the engine’s pull.</dd><dt><kbd>T</kbd></dt><dd>Use parcels and noticeboards on foot. Hold T for 3 seconds beside a lamp to refill it.</dd><dt><kbd>1 2 3</kbd></dt><dd>At a post-sorting board, choose the sack matching the letter’s address: Pinebank, Bellweather, Stonehaven.</dd><dt><kbd>L</kbd></dt><dd>Light or put away your hand lantern. Night visibility can be adjusted in Settings.</dd><dt><kbd>J</kbd></dt><dd>Open your journal, station noticeboard and paint workshop. Discover places on foot along station platforms.</dd></dl><hr class="divider"><p class="note">Destination and interaction hints appear at the bottom. Settings provides weather, portable saves, and recovery.</p><button class="primary close-menu">Back to journey</button></div>
-<div id="settings-view" class="view" hidden><div class="eyebrow">Station office</div><h2>Journey settings</h2><label class="field"><span>Glyph size</span><select id="quality"><option value="coarse">Large · faster</option><option value="standard" selected>Classic · balanced</option><option value="fine">Small · more detail</option></select></label><label class="field"><span>Weather</span><select id="weather"><option value="auto">Changing skies</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="fog">Fog</option></select></label><label class="field check"><input type="checkbox" id="reduced-motion">Reduced camera motion</label><label class="field check"><input type="checkbox" id="fire-assist">Automatic fireman · relaxed driving</label><label class="field"><span>Railway sound volume</span><input type="range" id="sound-volume" min="0" max="100" value="55"></label><label class="field check"><input type="checkbox" id="sound-muted">Mute sound</label><label class="field"><span>Night visibility · <output id="night-brightness-value">100%</output></span><input type="range" id="night-brightness" min="70" max="140" value="100" aria-label="Night visibility"></label><label class="field check"><input type="checkbox" id="high-contrast">High-contrast interface</label><label class="field check"><input type="checkbox" id="debug">Show glyph IDs and diagnostics</label><label class="field"><span>World seed · new valley resets journey</span><input id="seed" maxlength="64" value="NEXT-STOP" autocomplete="off"></label><div class="row"><button id="regenerate">New valley</button><button id="recover">Return to safe station</button></div><hr class="divider"><div class="row"><button id="export">Export save</button><button id="import">Import save</button><input type="file" id="save-file" accept="application/json,.json" hidden></div><p class="note">JSON saves travel with you, even when browser storage is unavailable.</p><p id="local-save-status" class="note">Local progress saves every ten seconds and when you pause. Export JSON for a portable backup.</p><p id="menu-status" class="menu-status" role="status"></p><button class="primary close-menu">Back to journey</button></div>
+<div id="help-view" class="view" hidden><div class="eyebrow">Pocket guide</div><h2>How to travel</h2><dl class="controls"><dt><kbd>W A S D</kbd></dt><dd>Walk. In the cab, W/S raises or lowers power.</dd><dt><kbd>E</kbd></dt><dd>Board nearby train. At the destination, deliver while stopped. Otherwise leave while stopped.</dd><dt><kbd>Space</kbd></dt><dd>Hold to brake. Begin braking before the platform.</dd><dt><kbd>C</kbd> / <kbd>R</kbd></dt><dd>Switch cab/chase view. Reverse direction while stopped.</dd><dt>Mouse / arrows</dt><dd>Click world to capture mouse. Drag to look if capture is unavailable. Arrow keys also look.</dd><dt><kbd>Esc</kbd> / <kbd>H</kbd></dt><dd>Pause / guide. Escape releases mouse.</dd><dt><kbd>F</kbd></dt><dd>Centre the train camera on the railway.</dd><dt><kbd>B</kbd> / <kbd>V</kbd></dt><dd>Add coal to the fire / sound the whistle. Ease power for bridges and crossings. Pressure supplies the engine’s pull.</dd><dt><kbd>T</kbd></dt><dd>Use parcels and noticeboards on foot. Hold T for lamps or the water crane. Enter waiting rooms, sit at benches, or cast and reel at the fishing jetty. J: Around the station gives directions.</dd><dt><kbd>X</kbd></dt><dd>Put away the fishing rod, stop a refill or stand from a bench. E leaves the waiting room.</dd><dt><kbd>1 2 3</kbd></dt><dd>At a post-sorting board, choose the sack matching the letter’s address: Pinebank, Bellweather, Stonehaven.</dd><dt><kbd>L</kbd></dt><dd>Light or put away your hand lantern. Night visibility can be adjusted in Settings.</dd><dt><kbd>J</kbd></dt><dd>Open your journal, station noticeboard and paint workshop. Discover places on foot along station platforms.</dd></dl><hr class="divider"><p class="note">Destination and interaction hints appear at the bottom. Settings provides weather, portable saves, and recovery.</p><button class="primary close-menu">Back to journey</button></div>
+<div id="settings-view" class="view" hidden><div class="eyebrow">Station office</div><h2>Journey settings</h2><label class="field"><span>Glyph size</span><select id="quality"><option value="coarse">Large · faster</option><option value="standard" selected>Classic · balanced</option><option value="fine">Small · more detail</option></select></label><label class="field"><span>Weather</span><select id="weather"><option value="auto">Changing skies</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="fog">Fog</option></select></label><label class="field check"><input type="checkbox" id="reduced-motion">Reduced camera motion</label><label class="field check"><input type="checkbox" id="fire-assist">Automatic fireman · relaxed driving</label><label class="field check"><input type="checkbox" id="manual-water">Use station water cranes · optional manual refills</label><p class="note">Off: station crews top up water when you deliver. On: the tank drains much faster under power, so plan crane stops. Automatic fireman always handles water. Cranes remain free to use either way.</p><label class="field"><span>Railway &amp; valley sound volume</span><input type="range" id="sound-volume" min="0" max="100" value="55"></label><label class="field check"><input type="checkbox" id="sound-muted">Mute sound</label><label class="field"><span>Night visibility · <output id="night-brightness-value">100%</output></span><input type="range" id="night-brightness" min="70" max="140" value="100" aria-label="Night visibility"></label><label class="field check"><input type="checkbox" id="high-contrast">High-contrast interface</label><label class="field check"><input type="checkbox" id="debug">Show glyph IDs and diagnostics</label><label class="field"><span>World seed · new valley resets journey</span><input id="seed" maxlength="64" value="NEXT-STOP" autocomplete="off"></label><div class="row"><button id="regenerate">New valley</button><button id="recover">Return to safe station</button></div><hr class="divider"><div class="row"><button id="export">Export save</button><button id="import">Import save</button><input type="file" id="save-file" accept="application/json,.json" hidden></div><p class="note">JSON saves travel with you, even when browser storage is unavailable.</p><p id="local-save-status" class="note">Local progress saves every ten seconds and when you pause. Export JSON for a portable backup.</p><p id="menu-status" class="menu-status" role="status"></p><button class="primary close-menu">Back to journey</button></div>
 <div id="journal-view" class="view" hidden>
 <div class="eyebrow">Letters from the valley</div><h2>Field journal</h2>
 <nav id="journal-pages" class="journal-pages" role="tablist" aria-label="Journal pages">
@@ -74,6 +75,12 @@ R reverse while stopped, C camera; mouse capture or drag/arrow-key look; Esc pau
 <p class="note">Finish at Pinebank, then take another circuit. Your world, parcels, field notes and purse stay with you.</p>
 </section>
 <section id="page-work" role="tabpanel" aria-labelledby="tab-work" data-journal-panel="work">
+<details id="station-life" class="ledger"><summary>Around the station</summary>
+<p id="station-life-summary"></p><div class="row"><button class="small" data-activity="crane">Find water crane</button><button class="small" data-activity="door">Find waiting room</button><button class="small" data-activity="project">Find repair bench</button><button class="small" data-activity="fish">Find fishing jetty</button></div>
+<p class="note">Follow the ticket, then T to use. Hold T at the crane. Fishing: T to cast, T when the float dips; X puts the rod away. Waiting room: WASD to stroll, T at the bench to sit, E to leave.</p>
+<h3>Leave something better</h3><p id="station-projects"></p><div class="row"><button class="small" id="repair-fence">Repair fence · 12 shillings</button><button class="small" id="repair-fireplace">Restore fireplace · 18 shillings</button></div>
+<p class="note">Buy repairs on foot beside this station’s repair bench. Coins come from the same purse as paints and boots. Finished projects stay with the station.</p><p id="fish-log"></p>
+</details>
 <h3 id="village-summary">Station noticeboard</h3><p id="village-wallet"></p>
 <label class="field">Show work<select id="work-filter"><option value="local">Nearby station</option><option value="all">All stations</option><option value="completed">Completed work</option></select></label>
 <ol id="village-list"></ol><div class="row"><button id="return-work" class="small" hidden>Return unfinished work</button><button id="renew-work" class="small">Collect a new work round</button></div>
@@ -104,6 +111,7 @@ class NSWorld {
     this.size = 1000;
     this.resolution = 129;
     this.waterLevel = 0;
+    this.lake = Object.freeze({ x: 55, z: -157, rx: 188, rz: 121 });
     this.heights = new Float32Array(this.resolution * this.resolution);
     this.objects = [];
     this.route = [];
@@ -218,7 +226,7 @@ class NSWorld {
         h=6+noise*1.6+Math.sin(wx*.016+this._phase)*Math.cos(wz*.013)*4;
         h+=foothill*foothill*22+Math.pow(ridge,1.15)*(95+this._noise(wx,wz,72)*92)*crest;
       }
-      const lake = ((wx - 55) / 188) ** 2 + ((wz + 157) / 121) ** 2;
+      const lake = ((wx - this.lake.x) / this.lake.rx) ** 2 + ((wz - this.lake.z) / this.lake.rz) ** 2;
       if (lake < 1.24) {
         const basin = -3.5 + Math.min(lake, 1) * 2 + this._noise(wx, wz, 36) * .25;
         const blend = Math.max(0, Math.min(1, (lake - 1) / .24));
@@ -492,7 +500,7 @@ class NSSimulation {
     } else {
       // An unattended locomotive stays safely braked.
       this.train.throttle = 0; this.train.brake = 1;
-      this._walk(dt, input);
+      if(this.stationLife?.indoor)this.stationLife.walk(dt,input,this);else this._walk(dt, input);
     }
     this._trainStep(dt);
     if (this.player.mode === 'train') {
@@ -647,6 +655,7 @@ class NSSimulation {
     return 'E: leave train · W/S: throttle · R: direction · C: camera';
   }
   camera(dt = 1 / 60) {
+    if(this.stationLife?.indoor)return this.stationLife.camera(this);
     let position, target;
     const alpha = Math.max(0, Math.min(1, Number.isFinite(this.renderAlpha) ? this.renderAlpha : 1));
     const p = { ...this.player };
@@ -1012,7 +1021,7 @@ class NSRailway {
     this.engine={fire:.72,pressure:9.2,coal:100,water:100};
     this.overspeed=0;this.earnings=0;this.stops=[];this.whistled=new Set();this.missed=new Set();
     this.whistleUntil=-1;this.lastStoke=-10;this.dwell=null;
-    this.career=null;
+    this.career=null;this.manualWater=false;this.waterWarned=false;
     this.sections=[{id:'lake-crossing',name:'Lake bridge',s:world.routeLength*.37,radius:35,limit:4.45},
       {id:'farm-crossing',name:'Farm crossing',s:world.routeLength*.76,radius:24,limit:5}];
   }
@@ -1050,7 +1059,8 @@ class NSRailway {
     else{
       e.fire=Math.max(.10,e.fire-dt*.0019);
       e.pressure=Math.max(3.2,Math.min(11.8,e.pressure+dt*(e.fire*.075-.023-(aboard?sim.train.throttle*.035:0))));
-      e.water=Math.max(0,e.water-dt*(.006+(aboard?sim.train.throttle*.008:0)));
+      // Manual water turns the tank into a real resource: roughly four minutes at full power.
+      e.water=Math.max(0,e.water-dt*(this.manualWater?.05+(aboard?sim.train.throttle*.35:0):.006+(aboard?sim.train.throttle*.008:0)));
       if(e.water<5)e.pressure=Math.min(e.pressure,6);
     }
     const instruction=this.instruction(sim);
@@ -1062,6 +1072,10 @@ class NSRailway {
     const station=this.world.stationAt(sim.train.s);
     if(aboard&&station&&Math.abs(sim.train.speed)<.22){if(!this.dwell||this.dwell.index!==station.index)this.dwell={index:station.index,since:sim.time};}else this.dwell=null;
     this.apply(sim);
+    if(!this.manualWater||this.assisted){this.waterWarned=false;return null;}
+    if(e.water>50)this.waterWarned=false;
+    else if(e.water<30&&!this.waterWarned){this.waterWarned=true;return `Water low · ${Math.round(e.water)}%. Stop alongside a station water crane and hold T.`;}
+    return null;
   }
   action(name,sim){
     if(sim.player.mode!=='train')return 'Board the locomotive first.';
@@ -1099,8 +1113,8 @@ class NSRailway {
     if(sim.delivery.completed<1||index!==sim.delivery.completed%3||this.stops.some(stop=>stop.station===station.name))return 'This stop has already been entered in the ledger.';
     const promptPost=this.service==='freight'&&this.cargo==='mail'&&sim.time-(this.career?.startedAt||0)<sim.delivery.completed*120?4:0;
     this.earnings+=Math.max(8,Math.round(base+promptPost-Math.min(10,this.overspeed*.1)));
-    this.stops.push({station:station.name,time:sim.time});this.engine.coal=100;this.engine.water=100;
-    return `${this.service==='passenger'?'Passengers served':'Freight handed over'} at ${station.name}. Supplies topped up. ${this.earnings} shillings earned.`;
+    this.stops.push({station:station.name,time:sim.time});this.engine.coal=100;if(!this.manualWater||this.assisted)this.engine.water=100;
+    return `${this.service==='passenger'?'Passengers served':'Freight handed over'} at ${station.name}. ${this.manualWater&&!this.assisted?'Coal loaded; station water crane available.':'Supplies topped up.'} ${this.earnings} shillings earned.`;
   }
   serialize(){return{version:1,service:this.service,cargo:this.cargo,assisted:this.assisted,engine:{...this.engine},overspeed:this.overspeed,earnings:this.earnings,stops:this.stops.map(s=>({...s})),whistled:[...this.whistled],missed:[...this.missed],whistleUntil:this.whistleUntil,lastStoke:this.lastStoke,dwell:this.dwell?{...this.dwell}:null,...(this.career?{career:{...this.career}}:{})};}
   restore(data,sim){
@@ -1132,7 +1146,7 @@ class NSVillage {
   constructor(world,railway=null){
     this.world=world;this.railway=railway;this.completed=new Map();this.selected=null;this.carrying=null;this.sorting=null;this.repair=null;
     this.round=0;this.pastEarnings=0;this.pastCompleted=0;this.renewedServices=0;this.gear=[];
-    this.paint='original';this.owned=['original'];this.touched=false;
+    this.paint='original';this.owned=['original'];this.touched=false;this.stationSpending=0;
     const people=['Nell','Edda','Tomas'];
     const anchor=(station,along)=>{
       for(const side of [4.4,5.2,3.8,-4.4]){
@@ -1153,7 +1167,7 @@ class NSVillage {
   }
   updateOrders(){this.orders=this.world.stations.map((_,i)=>this.orderTable[(this.orderHash+i+this.round)%this.orderTable.length]);}
   get earnings(){return this.pastEarnings+[...this.completed.values()].reduce((sum,value)=>sum+value,0);}
-  get wallet(){return this.earnings+(this.railway?.totalEarnings||0)-(this.owned.length-1)*20-(this.gear.includes('boots')?40:0);}
+  get wallet(){return this.earnings+(this.railway?.totalEarnings||0)-(this.owned.length-1)*20-(this.gear.includes('boots')?40:0)-this.stationSpending;}
   get title(){const count=this.pastCompleted+this.completed.size;return count>=(this.world.version===1?6:9)?'Friend of the branch line':count>=6?'Trusted neighbour':count>=3?'Valley helper':'New arrival';}
   apply(sim){sim.walkScale=this.gear.includes('boots')?1.12:1;}
   canRenew(sim){return !this.carrying&&!this.sorting&&!this.repair&&this.round<100000&&(this.jobs.filter(job=>job.kind!=='lamp').every(job=>this.completed.has(job.id))||(this.railway?.completedServices(sim)||0)>this.renewedServices);}
@@ -1218,7 +1232,7 @@ class NSVillage {
   }
   serialize(){return{version:this.round||this.gear.length?2:1,completed:this.jobs.filter(job=>this.completed.has(job.id)).map(job=>({id:job.id,reward:this.completed.get(job.id)})),selected:this.selected,carrying:this.carrying?{...this.carrying}:null,sorting:this.sorting?{...this.sorting}:null,paint:this.paint,owned:this.owned.slice(),...(this.round||this.gear.length?{round:this.round,pastEarnings:this.pastEarnings,pastCompleted:this.pastCompleted,renewedServices:this.renewedServices,gear:this.gear.slice()}:{})};}
   restore(data,sim){
-    if(data===undefined){Object.assign(this,{completed:new Map(),selected:null,carrying:null,sorting:null,repair:null,paint:'original',owned:['original'],touched:false,round:0,pastEarnings:0,pastCompleted:0,renewedServices:0,gear:[]});this.updateOrders();this.apply(sim);return;}
+    if(data===undefined){Object.assign(this,{completed:new Map(),selected:null,carrying:null,sorting:null,repair:null,paint:'original',owned:['original'],touched:false,round:0,pastEarnings:0,pastCompleted:0,renewedServices:0,gear:[],stationSpending:0});this.updateOrders();this.apply(sim);return;}
     const fail=()=>{throw Error('Invalid save: station work or workshop state is unsupported.');};
     if(!data||Array.isArray(data)||![1,2].includes(data.version)||!Array.isArray(data.completed)||data.completed.length>this.jobs.length)fail();
     const round=data.version===2?data.round:0,pastEarnings=data.version===2?data.pastEarnings:0,pastCompleted=data.version===2?data.pastCompleted:0,renewedServices=data.version===2?data.renewedServices:0,gear=data.version===2?data.gear:[];
@@ -1234,7 +1248,7 @@ class NSVillage {
     if(carrying&&sorting||carrying&&data.selected!==carrying.id||sorting&&data.selected!==sorting.id)fail();
     if(!Array.isArray(data.owned)||data.owned.length<1||data.owned.length>3||data.owned[0]!=='original'||new Set(data.owned).size!==data.owned.length||data.owned.some(id=>!['original','green','ochre'].includes(id))||!data.owned.includes(data.paint))fail();
     if((data.owned.length-1)*20+gear.length*40>pastEarnings+[...completed.values()].reduce((sum,n)=>sum+n,0)+(this.railway?.totalEarnings||0))fail();
-    Object.assign(this,{completed,selected:data.selected,carrying:carrying?{id:carrying.id,started:carrying.started}:null,sorting:sorting?{id:sorting.id,progress:sorting.progress,streak:sorting.streak}:null,paint:data.paint,owned:data.owned.slice(),repair:null,touched:true,round,pastEarnings,pastCompleted,renewedServices,gear:gear.slice()});this.updateOrders();this.apply(sim);
+    Object.assign(this,{completed,selected:data.selected,carrying:carrying?{id:carrying.id,started:carrying.started}:null,sorting:sorting?{id:sorting.id,progress:sorting.progress,streak:sorting.streak}:null,paint:data.paint,owned:data.owned.slice(),repair:null,touched:true,round,pastEarnings,pastCompleted,renewedServices,gear:gear.slice(),stationSpending:0});this.updateOrders();this.apply(sim);
   }
   objects(sim){
     const objects=[];
@@ -1258,6 +1272,315 @@ class NSVillage {
       if(!this.completed.has(post.id))add(post,.9,.70,-.8,.30,.03,.30,32);
     }
     return objects;
+  }
+}
+
+
+// Optional station rituals. Transient activities never change world descriptors.
+class NSStationLife {
+  static get CRANE_ALONG(){return -14;}
+  constructor(world,village,railway){
+    this.world=world;this.village=village;this.railway=railway;this.projects=new Set();this.fishRecords=[];this.manualWater=false;this.touched=false;
+    this.indoor=null;this.refill=null;this.fishing=null;this.casts=0;
+    const anchor=(station,along,side=4.4)=>{
+      for(const offset of [side,5.2,3.8,-4.4]){
+        const x=station.x+Math.cos(station.yaw)*offset+Math.sin(station.yaw)*along,z=station.z-Math.sin(station.yaw)*offset+Math.cos(station.yaw)*along,surface=world.surfaceAt(x,z);
+        if(surface.walkable&&!world.blocked(x,surface.height,z))return{x,y:surface.height,z};
+      }
+      throw Error('No safe station-life position at '+station.name);
+    };
+    this.sites=world.stations.map((station,index)=>{
+      const x=station.x+Math.cos(station.yaw)*11,z=station.z-Math.sin(station.yaw)*11;
+      return{index,station,crane:anchor(station,NSStationLife.CRANE_ALONG),door:anchor(station,0,6.5),project:anchor(station,23),fish:null,room:{x,y:world.heightAt(x,z)+.08,z,yaw:station.yaw}};
+    });
+    // Find actual water from the nearest lake-side platform; no fishing on land.
+    const lake=world.lake,site=this.sites.slice().sort((a,b)=>Math.hypot(a.station.x-lake.x,a.station.z-lake.z)-Math.hypot(b.station.x-lake.x,b.station.z-lake.z))[0];
+    for(const along of [-25,-23,25,0]){
+      const start=anchor(site.station,along),length=Math.hypot(lake.x-start.x,lake.z-start.z),dx=(lake.x-start.x)/length,dz=(lake.z-start.z)/length;let previous=start;
+      for(let distance=.4;distance<Math.min(length,100);distance+=.4){
+        const x=start.x+dx*distance,z=start.z+dz*distance,surface=world.surfaceAt(x,z);
+        if(!surface.walkable){if(world.heightAt(x+dx*3,z+dz*3)<world.waterLevel&&previous.y>.08)site.fish={...previous,dx,dz};break;}
+        if(world.blocked(x,surface.height,z)||surface.height-previous.y>.55||previous.y-surface.height>1.8)break;
+        previous={x,y:surface.height,z};
+      }
+      if(site.fish)break;
+    }
+  }
+  near(sim,point,radius=1.8){const p=sim.player;return !!point&&p.mode==='foot'&&Math.hypot(p.x-point.x,p.z-point.z)<=radius&&Math.abs(p.y-point.y)<1.5;}
+  setManualWater(value){if(typeof value!=='boolean')throw Error('Choose automatic or manual station water.');this.manualWater=value;this.railway.manualWater=value;this.touched=true;}
+  get spending(){return [...this.projects].reduce((sum,id)=>sum+(id.startsWith('fence-')?12:18),0);}
+  validProject(id){return typeof id==='string'&&/^(fence|fireplace)-[0-2]$/.test(id);}
+  canRepair(id,sim){if(this.indoor||sim.player.mode!=='foot'||!this.validProject(id)||this.projects.has(id)||this.village.wallet<(id.startsWith('fence-')?12:18))return false;return this.near(sim,this.sites[Number(id.slice(-1))].project);}
+  repair(id,sim){
+    if(!this.validProject(id))return 'Unknown station restoration.';
+    if(this.projects.has(id))return 'This restoration is already complete.';
+    if(!this.canRepair(id,sim))return 'Visit the station restoration bench with '+(id.startsWith('fence-')?12:18)+' shillings in the shared purse.';
+    this.projects.add(id);this.village.stationSpending=this.spending;this.touched=true;
+    return id.startsWith('fence-')?'Fence repaired. Fresh timber will welcome every future arrival.':'Fireplace restored. The waiting room now has a warm hearth.';
+  }
+  context(sim){
+    if(sim.player.mode!=='foot')return null;
+    if(this.indoor){const site=this.sites[this.indoor.index],p=this.indoor;
+      if(Math.hypot(p.x+2.7,p.z)<1.25)return{kind:'exit',site,hint:'T · return to the platform'};
+      if(Math.hypot(p.x-1,p.z+3)<1.65)return{kind:'bench',site,hint:p.seated?'T · stand from the bench':'T · sit and watch the weather'};
+      return null;
+    }
+    if(this.village.carrying||this.village.sorting||this.village.repair)return null;
+    let nearest=null;
+    for(const site of this.sites)for(const kind of ['crane','door','project','fish']){
+      const point=site[kind];if(!this.near(sim,point,kind==='fish'?1.65:1.8))continue;
+      const distance=Math.hypot(sim.player.x-point.x,sim.player.z-point.z);
+      const hint=kind==='crane'?this.canRefill(sim,site)?`Hold T · water crane · ${Math.round(this.railway.engine.water)}%`:this.stoppedAt(sim,site)?'Water crane · draw the train up alongside the crane':'Water crane · stop the locomotive at this station':kind==='door'?'T · enter the waiting room':kind==='project'?'T · repair fence · 12 shillings · J for fireplace':this.fishing?.phase==='bite'?'T · reel in!':this.fishing?'T · lift the line early':'T · cast a line by the lake';
+      if(!nearest||distance<nearest.distance)nearest={kind,site,hint,distance};
+    }
+    return nearest;
+  }
+  stoppedAt(sim,site){return Math.abs(sim.train.speed)<.025&&this.world.stationAt(sim.train.s)?.index===site.index;}
+  // Locomotive plus two carriages span about 28 m behind train.s; the crane must sit within that span.
+  alongside(sim,site){const length=this.world.routeLength;let delta=((site.station.s+NSStationLife.CRANE_ALONG-sim.train.s)%length+length)%length;if(delta>length/2)delta-=length;return delta>=-28&&delta<=5;}
+  canRefill(sim,site){return !this.indoor&&this.near(sim,site.crane)&&this.stoppedAt(sim,site)&&this.alongside(sim,site);}
+  static clock(sim){return(8+(Number(sim.time)||0)/30)%24;}
+  // Deterministic per world and cast, so imports replay identically, but varied cast to cast.
+  roll(salt){return NSWorld.hash(this.world.seed+'|fish|'+this.casts+'|'+salt)/4294967296;}
+  fishWeights(sim){
+    const clock=NSStationLife.clock(sim),night=clock<6||clock>=20,dusk=!night&&(clock<8||clock>=17),rain=Math.max(0,Math.min(1,sim.weather?.rain||0)),fog=Math.max(0,Math.min(1,sim.weather?.fog||0));
+    return{Perch:night?.15:dusk?.35:.55,Roach:night?.6:dusk?.5:.3,Trout:.1+rain*.55+fog*.25};
+  }
+  pickSpecies(sim){const weights=this.fishWeights(sim),total=Object.values(weights).reduce((a,b)=>a+b,0);let roll=this.roll('species')*total;for(const [species,weight] of Object.entries(weights)){roll-=weight;if(roll<0)return species;}return 'Perch';}
+  interact(sim){
+    const context=this.context(sim);if(!context)return null;const {kind,site}=context;
+    if(kind==='exit'){this.leave(sim);return 'Back on the platform.';}
+    if(kind==='bench'){const p=this.indoor;p.seated=!p.seated;p.x=p.seated?.55:-.1;p.z=-3;sim.player.yaw=NSSimulation.angle(site.room.yaw-Math.PI/2);return p.seated?'Resting on the waiting-room bench. T or walk to stand.':'Back on your feet.';}
+    if(kind==='door'){this.cancelActivities();this.indoor={index:site.index,x:-2,z:0,seated:false};Object.assign(sim.player,site.door,{yaw:NSSimulation.angle(site.room.yaw+Math.PI/2),pitch:-.04});sim._camera=null;return 'Waiting room. Walk to the bench to rest; T by the door to leave.';}
+    if(kind==='project')return this.repair('fence-'+site.index,sim);
+    if(kind==='crane'){
+      if(!this.canRefill(sim,site))return this.stoppedAt(sim,site)?'Stop the train alongside the crane: ease forward or back until the tender is beside it.':'Stop the locomotive at this station before using the water crane.';
+      if(this.railway.engine.water>=100)return 'The water tank is full.';
+      this.refill={index:site.index,progress:0};this.fishing=null;return 'Keep T held beside the crane. A full tank takes six seconds.';
+    }
+    if(this.fishing){const catchable=this.fishing.phase==='bite'&&this.fishing.index===site.index;this.fishing=null;
+      if(!catchable)return 'The line comes up empty. Cast again when you feel ready.';
+      const species=this.pickSpecies(sim);let record=this.fishRecords.find(r=>r.species===species);const first=!record;
+      if(!record){record={species,count:0};this.fishRecords.push(record);}record.count=Math.min(9999,record.count+1);this.touched=true;
+      const lore={Perch:'Perch bite best in bright daylight.',Roach:'Roach feed at dusk and after dark.',Trout:'Trout rise in rain and mist.'}[species];
+      return species+' caught and released.'+(first?' New entry in your nature journal. '+lore:' Entered in your nature journal.');
+    }
+    this.casts=Math.min(1e6,this.casts+1);this.fishing={index:site.index,phase:'waiting',elapsed:0,biteAt:2.5+this.roll('bite')*4.5};this.refill=null;return 'Line cast. Watch for a bite; T to reel when the float dips.';
+  }
+  cancelActivities(){this.refill=null;this.fishing=null;}
+  cancel(sim){if(this.indoor?.seated){this.indoor.seated=false;this.indoor.x=-.1;this.indoor.z=-3;return 'Back on your feet.';}if(this.indoor){this.leave(sim);return 'Back on the platform.';}const message=this.fishing?'Rod put away.':this.refill?'Crane shut off.':null;this.cancelActivities();return message;}
+  leave(sim){if(!this.indoor)return;const site=this.sites[this.indoor.index];Object.assign(sim.player,site.door);this.indoor=null;this.cancelActivities();sim._camera=null;}
+  step(dt,sim,input={}){
+    if(!Number.isFinite(dt)||dt<=0)return null;dt=Math.min(dt,1/15);
+    if(this.refill){const site=this.sites[this.refill.index];if(!input.work||!this.canRefill(sim,site)||this.village.carrying||this.village.sorting){this.refill=null;}else{this.refill.progress+=dt;this.railway.engine.water=Math.min(100,this.railway.engine.water+dt*100/6);if(this.railway.engine.water>=100){this.refill=null;return 'Water tank full. Crane shut off.';}}}
+    if(this.fishing){const site=this.sites[this.fishing.index];if(this.indoor||!this.near(sim,site.fish,1.65)||this.village.carrying||this.village.sorting){this.fishing=null;return 'Line put away.';}
+      const f=this.fishing;f.elapsed+=dt;if(f.elapsed>=f.biteAt+5){this.fishing=null;return 'The fish slipped away. Cast again whenever you like.';}if(f.elapsed>=f.biteAt&&f.phase!=='bite'){f.phase='bite';return 'A bite! The float dips. Press T within five seconds to reel in.';}}
+    return null;
+  }
+  walk(dt,input,sim){
+    if(!this.indoor)return;let f=(input.forward?1:0)-(input.backward?1:0),r=(input.right?1:0)-(input.left?1:0),norm=Math.hypot(f,r);if(!norm)return;
+    const p=this.indoor,yaw=sim.player.yaw-this.sites[p.index].room.yaw,speed=3*dt;if(p.seated){p.seated=false;p.x=-.1;p.z=-3;}f/=norm;r/=norm;
+    const x=Math.max(-2.8,Math.min(2.8,p.x+(Math.sin(yaw)*f+Math.cos(yaw)*r)*speed)),z=Math.max(-6.5,Math.min(6.5,p.z+(Math.cos(yaw)*f-Math.sin(yaw)*r)*speed));
+    const blocked=(x,z)=>Math.abs(x-.2)<.85&&Math.abs(z-3.9)<.85||x>.25&&x<1.9&&z>-4.8&&z<-1.2;
+    if(!blocked(x,z)){p.x=x;p.z=z;}else{if(!blocked(x,p.z))p.x=x;if(!blocked(p.x,z))p.z=z;}
+  }
+  camera(sim){const p=this.indoor;if(!p)return null;const room=this.sites[p.index].room,c=Math.cos(room.yaw),s=Math.sin(room.yaw),eye=p.seated?1.1:1.68,position=[room.x+c*p.x+s*p.z,room.y+eye,room.z-s*p.x+c*p.z],cp=Math.cos(sim.player.pitch);return{position,target:[position[0]+Math.sin(sim.player.yaw)*cp*12,position[1]+Math.sin(sim.player.pitch)*12,position[2]+Math.cos(sim.player.yaw)*cp*12]};}
+  // Report the jetty only when it is audible; elsewhere the ambience scans the terrain for any shore.
+  acoustics(sim){const jetty=Math.min(Infinity,...this.sites.filter(s=>s.fish).map(s=>Math.hypot(sim.player.x-s.fish.x,sim.player.z-s.fish.z)));return{insideRoom:!!this.indoor,fireplace:!!this.indoor&&this.projects.has('fireplace-'+this.indoor.index),...(jetty<70?{waterDistance:jetty}:{})};}
+  serialize(){return this.touched?{version:1,manualWater:this.manualWater,projects:[...this.projects].sort(),fishRecords:this.fishRecords.map(r=>({...r}))}:undefined;}
+  restore(data){
+    const fail=()=>{throw Error('Invalid save: station life data is unsupported or unaffordable.');};
+    if(data===undefined){this.projects=new Set();this.fishRecords=[];this.casts=0;this.manualWater=false;this.railway.manualWater=false;this.village.stationSpending=0;this.touched=false;this.indoor=null;this.cancelActivities();return;}
+    if(!data||Array.isArray(data)||data.version!==1||typeof data.manualWater!=='boolean'||!Array.isArray(data.projects)||data.projects.length>6||new Set(data.projects).size!==data.projects.length||data.projects.some(id=>!this.validProject(id))||!Array.isArray(data.fishRecords)||data.fishRecords.length>3)fail();
+    const seen=new Set();for(const r of data.fishRecords){if(!r||!['Perch','Roach','Trout'].includes(r.species)||seen.has(r.species)||!Number.isInteger(r.count)||r.count<1||r.count>9999)fail();seen.add(r.species);}
+    const spending=data.projects.reduce((sum,id)=>sum+(id.startsWith('fence-')?12:18),0),available=this.village.wallet+this.village.stationSpending;if(spending>available)fail();
+    this.projects=new Set(data.projects);this.fishRecords=data.fishRecords.map(r=>({species:r.species,count:r.count}));this.casts=this.fishRecords.reduce((sum,r)=>sum+r.count,0);this.manualWater=data.manualWater;this.railway.manualWater=data.manualWater;this.village.stationSpending=spending;this.touched=true;this.indoor=null;this.cancelActivities();
+  }
+}
+
+
+// Station life stays numerical: bounded props, no world descriptor mutations.
+class NSStationScenery {
+  static objects(life,sim){
+    if(!life?.sites?.length)return[];
+    const objects=[],time=Number(sim.time)||0,motion=sim.settings?.reducedMotion ? .15 : 1;
+    const add=(origin,side,up,along,hx,hy,hz,material,type=0,info=0)=>{
+      const yaw=origin.yaw||0;
+      const object={x:origin.x+Math.cos(yaw)*side+Math.sin(yaw)*along,y:origin.y+up,z:origin.z-Math.sin(yaw)*side+Math.cos(yaw)*along,hx,hy,hz,yaw,material,type,info};
+      objects.push(object);return object;
+    };
+    const at=(point,site)=>({...point,yaw:site.station.yaw});
+    const repaired=(kind,index)=>life.projects.has(kind+'-'+index);
+    if(life.indoor){
+      const site=life.sites[life.indoor.index],r=site.room,lit=repaired('fireplace',site.index);
+      // Actual openings in a room shell. Camera walking bounds leave clearance
+      // from every wall, stove and bench; the world player remains at the door.
+      add(r,0,.02,0,3.08,.09,7.08,30);
+      add(r,0,3.6,0,3.1,.12,7.1,30);
+      for(const along of [-7,7])add(r,0,1.8,along,3.1,1.8,.12,25);
+      add(r,3,1.8,0,.12,1.8,7,25);
+      // Front wall: central door and two large windows, never opaque glass.
+      for(const along of [-6.1,-2.3,2.3,6.1])add(r,-3,1.8,along,.12,1.8,.88,25);
+      add(r,-3,3.13,0,.12,.47,1.42,25);
+      for(const along of [-4.25,4.25]){
+        add(r,-3,.5,along,.12,.5,1.08,25);
+        add(r,-3,3.2,along,.12,.4,1.08,25);
+        add(r,-3,1.9,along,.15,.85,.035,32);
+        add(r,-3,1.9,along,.15,.035,1.08,32);
+        add(r,-2.86,.94,along,.24,.09,1.17,30);
+      }
+      for(const along of [-1.42,1.42])add(r,-2.85,1.35,along,.17,1.35,.09,32);
+      add(r,-2.85,2.72,0,.17,.08,1.5,32);
+      // Bench faces the stove. Resting eye position is above its seat, clear
+      // of the back rest, so seated views never clip through furniture.
+      add(r,1,.47,-3,.55,.09,1.28,30);
+      add(r,1.55,.94,-3,.08,.40,1.28,30);
+      for(const along of [-3.95,-2.05])add(r,1,.22,along,.42,.22,.075,28);
+      add(r,.2,.11,3.9,1.05,.1,1.05,13);
+      add(r,.2,.57,3.9,.59,.37,.49,28);
+      add(r,.2,1.01,3.9,.69,.07,.59,28);
+      add(r,.2,2.25,4.08,.12,1.16,.12,28,5);
+      add(r,.2,.57,3.39,.43,.24,.03,lit?18:37);
+      if(lit){
+        add(r,.05,.58+Math.sin(time*7)*.035*motion,3.34,.14,.19,.055,18,1);
+        add(r,.35,.56+Math.sin(time*9+2)*.035*motion,3.34,.12,.17,.055,18,1);
+      }
+      add(r,2.42,1.2,5.8,.35,.05,.6,30);
+      add(r,2.42,1.42,5.8,.13,.18,.13,32,5);
+      add(r,2.35,2.8,-5.3,.04,.38,.6,34);
+      add(r,0,3.13,-1,.19,.19,.19,17,1);
+      return objects;
+    }
+    const eye=sim.player;
+    const nearest=life.sites.reduce((best,site)=>!best||Math.hypot(site.station.x-eye.x,site.station.z-eye.z)<Math.hypot(best.station.x-eye.x,best.station.z-eye.z)?site:best,null);
+    if(nearest&&Math.hypot(nearest.station.x-eye.x,nearest.station.z-eye.z)<140){
+      const site=nearest,c=at(site.crane,site),f=at(site.project,site),door=at(site.door,site),fixed=repaired('fence',site.index),lit=repaired('fireplace',site.index),flow=life.refill?.index===site.index;
+      // Cast iron base, turned column, elbow, overhanging spout and valve.
+      add(c,0,.10,0,.43,.10,.43,13,5);
+      add(c,0,1.75,0,.15,1.60,.15,28,5);
+      add(c,0,3.28,0,.25,.12,.25,28,5);
+      add(c,-1.15,3.28,0,1.15,.13,.13,28,4);
+      add(c,-2.26,2.94,0,.16,.35,.16,28,5);
+      add(c,.19,1.30,0,.06,.29,.29,27,4);
+      add(c,.21,1.3,0,.07,.045,.30,28);
+      add(c,0,2.02,0,.17,.08,.17,27,5);
+      if(flow)for(let i=0;i<3;i++){
+        const fall=((time*1.7*motion+i/3)%1);
+        add(c,-2.26,2.45-fall*1.45,0,.065,.24,.065,3,5);
+      }
+      for(const along of [-1.6,0,1.6])add(f,0,.57,along,.09,.57,.09,30);
+      for(const along of [-.8,.8]){
+        add(f,0,fixed?.85:.43,along,.065,.065,.75,30);
+        if(fixed)add(f,0,.36,along,.065,.065,.75,30);
+      }
+      // Porch lantern marks the doorway without adding an overlay or sign UI.
+      add(door,.35,2.55,1.06,.11,.13,.20,28);
+      add(door,.35,2.35,1.06,.12,.17,.12,17,1);
+      if(lit)add(at(site.room,site),-3.56,2.7,4,.035,.64,.78,17);
+      if(fixed)for(const along of [-1.25,1.25]){
+        add(f,.24,.17,along,.28,.17,.28,39,5);
+        add(f,.24,.49,along,.19,.16,.19,along<0?8:32,1);
+      }
+    }
+    // Only real water destinations receive fishing props. Platforms stay dry;
+    // bobber/line end at the precomputed water point, never at arbitrary land.
+    for(const site of life.sites){const fish=site.fish;if(!fish||Math.hypot(fish.x-eye.x,fish.z-eye.z)>80)continue;
+      const point=at(fish,site),active=life.fishing?.index===site.index,bite=active&&life.fishing.phase==='bite';
+      const tx=fish.waterX??fish.x+fish.dx*3,tz=fish.waterZ??fish.z+fish.dz*3;
+      if(!Number.isFinite(tx)||!Number.isFinite(tz))continue;
+      add(point,.5,.17,0,.28,.17,.28,30,5);
+      if(active){
+        const dx=tx-fish.x,dz=tz-fish.z,yaw=Math.atan2(dx,dz),origin={...fish,yaw};
+        const rod=add(origin,0,1.07,.65,.025,.025,.8,30,6,.39);
+        rod.y+=Math.sin(time*3)*.025*motion;
+        const tip={x:fish.x+Math.sin(yaw)*1.4,y:fish.y+1.4,z:fish.z+Math.cos(yaw)*1.4},dxLine=tx-tip.x,dzLine=tz-tip.z,dyLine=life.world.waterLevel+.08-tip.y;
+        const length=Math.hypot(dxLine,dzLine),lineYaw=Math.atan2(dxLine,dzLine);
+        add({x:(tip.x+tx)/2,y:(tip.y+life.world.waterLevel+.08)/2,z:(tip.z+tz)/2,yaw:lineYaw},0,0,0,.015,.015,Math.hypot(length,dyLine)/2,32,6,Math.atan2(dyLine,length));
+        add({...origin,x:tx,z:tz,y:life.world.waterLevel},0,(bite?-.03:.08)+Math.sin(time*(bite?13:2.8))*.045*motion,0,.085,.10,.085,8,1);
+        if(bite)for(const side of [-1,1])add({...origin,x:tx,z:tz,y:life.world.waterLevel},side*(.25+(.5+.5*Math.sin(time*5))*.16),.025,0,.15,.016,.035,32);
+      }
+    }
+    return objects;
+  }
+}
+
+
+// A fixed audio graph: four reusable noise loops and one quiet bird oscillator.
+// Everything passes through the game's transport, so pause and mute stay authoritative.
+class NSAmbience {
+  constructor(context,transport) {
+    this.context=context;this.nodes=[];this.sources=[];this.voices={};this.destroyed=false;this.noiseNames=['wind','rain','water','fire'];
+    this.nextUpdate=0;this.nextWaterCheck=0;this.lastRunning=null;this.waterDistance=96;
+    this.room=false;this.cab=false;this.fireplace=false;this.world=null;
+    try {
+      this.output=this._node(context.createGain());this.output.gain.value=1;this.output.connect(transport);
+      for(const [index,name] of this.noiseNames.entries()) {
+        const source=this._node(context.createBufferSource()),filter=this._node(context.createBiquadFilter()),gain=this._node(context.createGain());
+        const rate=Math.min(22050,context.sampleRate),duration=[7.3,4.9,5.7,5.1][index];
+        const buffer=context.createBuffer(1,Math.ceil(rate*duration),rate),samples=buffer.getChannelData(0);
+        let seed=8371+index*9173,soft=0,crackle=0;
+        for(let i=0;i<samples.length;i++) {
+          seed=(Math.imul(seed,1664525)+1013904223)>>>0;const noise=seed/2147483648-1;
+          soft=soft*.985+noise*.015;crackle*=.997;
+          if(name==='fire'&&noise>.999)crackle=.3+noise*.4;
+          const edge=Math.min(1,i/(rate*.012),(samples.length-1-i)/(rate*.012));
+          samples[i]=(name==='wind'?soft*4:name==='water'?soft*3+noise*.08:name==='fire'?noise*(.04+crackle):noise*.35)*edge;
+        }
+        source.buffer=buffer;source.loop=true;filter.type=name==='fire'?'highpass':'lowpass';
+        filter.frequency.value=name==='fire'?550:1800;filter.Q.value=.5;gain.gain.value=0;
+        source.connect(filter);filter.connect(gain);gain.connect(this.output);this.sources.push(source);source.start();
+        this.voices[name]={source,filter,gain,target:0,cutoff:filter.frequency.value};
+      }
+      this.bird=this._node(context.createOscillator());this.bird.type='sine';this.bird.frequency.value=1900;
+      this.birdGain=this._node(context.createGain());this.birdGain.gain.value=0;
+      this.bird.connect(this.birdGain);this.birdGain.connect(this.output);this.sources.push(this.bird);this.bird.start();
+    } catch(error) {this.destroy();throw error;}
+  }
+  _node(node) {this.nodes.push(node);return node;}
+  _approach(parameter,value,time,seconds=.3) {parameter.setTargetAtTime(value,time,seconds);}
+  update(sim,life,running) {
+    if(this.destroyed)return;
+    const now=this.context.currentTime;
+    if(now<this.nextUpdate&&running===this.lastRunning)return;
+    this.nextUpdate=now+.08;this.lastRunning=running;
+    const player=sim.player,weather=sim.weather,rain=Math.max(0,Math.min(1,weather?.rain||0));
+    const acoustic=typeof life?.acoustics==='function'?life.acoustics(sim):null;
+    this.room=!!acoustic?.insideRoom;this.cab=player.mode==='train'&&sim.cameraMode==='cab';this.fireplace=this.room&&!!acoustic?.fireplace;
+    if(sim.world!==this.world) {this.world=sim.world;this.nextWaterCheck=0;}
+    if(Number.isFinite(acoustic?.waterDistance))this.waterDistance=Math.max(0,acoustic.waterDistance);
+    else if(now>=this.nextWaterCheck) {
+      this.nextWaterCheck=now+.75;this.waterDistance=96;
+      const world=this.world;
+      if(typeof world?.heightAt==='function')for(let ring=0;ring<3;ring++)for(let direction=0;direction<12;direction++) {
+        const distance=ring===0?8:ring===1?24:52,angle=direction*Math.PI/6,x=player.x+Math.sin(angle)*distance,z=player.z+Math.cos(angle)*distance;
+        if(Math.abs(x)<=499&&Math.abs(z)<=499&&world.heightAt(x,z)<world.waterLevel+.02)this.waterDistance=Math.min(this.waterDistance,distance);
+      }
+    }
+    const active=running?1:0,shelter=this.room?.19:this.cab?.40:1;
+    const wind=this.voices.wind,wet=this.voices.rain,water=this.voices.water,fire=this.voices.fire;
+    wind.target=active*(.026+.025*rain)*shelter*(.84+.16*Math.sin((sim.time||0)*.19));wind.cutoff=this.room?280:this.cab?440:1250;
+    wet.target=active*rain*.055*(this.room?.55:this.cab?.70:1);wet.cutoff=this.room?560:this.cab?1000:6200;
+    water.target=active*Math.max(0,1-this.waterDistance/70)*.075*shelter;water.cutoff=this.room?460:1800;
+    fire.target=active*(this.fireplace?.08:0);fire.cutoff=550;
+    for(const name of this.noiseNames) {
+      const voice=this.voices[name];this._approach(voice.gain.gain,voice.target,now);this._approach(voice.filter.frequency,voice.cutoff,now,.45);
+    }
+    // Reuse one oscillator. Two tiny chirps per long phrase, only in fair daylight.
+    const time=sim.time||0,phase=(time%19+19)%19,chirp=phase<.22?phase:phase>.38&&phase<.60?phase-.38:-1;
+    const daylight=Math.sin(1.05+time*Math.PI*2/720)>.12;
+    const birdLevel=active&&daylight&&rain<.45&&chirp>=0?.009*shelter*Math.sin(chirp/.22*Math.PI):0;
+    this._approach(this.birdGain.gain,birdLevel,now,.025);
+    this._approach(this.bird.frequency,1750+(chirp<0?0:Math.sin(chirp/.22*Math.PI)*1150),now,.025);
+  }
+  diagnostics() {
+    return {destroyed:this.destroyed,loopSources:4,birdOscillators:1,insideRoom:this.room,cab:this.cab,fireplace:this.fireplace,waterDistance:this.waterDistance,rainCutoff:this.voices.rain?.cutoff||0};
+  }
+  destroy() {
+    if(this.destroyed)return;this.destroyed=true;
+    if(this.output)this.output.gain.value=0;
+    for(const source of this.sources)try{source.stop();}catch{}
+    for(const node of this.nodes)try{node.disconnect();}catch{}
+    this.nodes.length=0;this.sources.length=0;
   }
 }
 
@@ -1310,6 +1633,8 @@ class NSVillage {
   uniform float u_far;
   uniform vec3 u_lamps[3];
   uniform vec4 u_lantern;
+  uniform vec4 u_stationGlow;
+  uniform float u_shelter;
   uniform float u_nightBrightness;
   uniform int u_paint;
   uniform vec3 u_lampCare;
@@ -1742,6 +2067,10 @@ class NSVillage {
     vec3 toLantern=u_lantern.xyz-hit.p;float lanternDistance=length(toLantern);
     float lanternGlow=pow(max(0.0,1.0-lanternDistance/15.0),2.0)*u_lantern.w;
     colour+=base*vec3(1.0,.76,.39)*lanternGlow*max(.26,dot(hit.n,toLantern/max(.01,lanternDistance)))*mix(2.5,.35,day);
+    vec3 toHearth=u_stationGlow.xyz-hit.p;float hearthDistance=length(toHearth);
+    float hearthGlow=pow(max(0.0,1.0-hearthDistance/12.0),2.0)*u_stationGlow.w;
+    hearthGlow*=.96+.04*sin(u_time*5.3);
+    colour+=base*vec3(1.0,.62,.24)*hearthGlow*max(.30,dot(hit.n,toHearth/max(.01,hearthDistance)));
     if (hit.material==9) colour=base*mix(1.12,.62,day);
     for(int i=0;i<3;i++){
       vec3 toLamp=u_lamps[i]-hit.p;float d=length(toLamp);
@@ -1913,7 +2242,7 @@ class NSVillage {
     }
     // Sparse rain records live in cell state. Near surfaces occlude drops;
     // depth and deterministic column phase prevent a uniform full-screen veil.
-    if (u_weather.x>.02 && distance>4.0) {
+    if (u_weather.x>.02 && distance>mix(4.0,22.0,u_shelter)) {
       vec2 cell=floor(gl_FragCoord.xy);
       float fall=floor(u_time*16.0*u_motion);
       float rain=hash21(vec2(cell.x+floor(fall*.25),floor((cell.y+fall)/3.0)));
@@ -2104,7 +2433,7 @@ class NSVillage {
       this.sceneUniforms = uniforms(gl,this.sceneProgram,[
         'terrain','objects','resolution','objectCount','shadowCount','size','water',
         'heightRange','viewport','cellSize','eye','forward','right','up','sun',
-        'headPosition','headDirection','time','weather','motion','far','lamps','labels','stars','lantern','nightBrightness','paint','lampCare'
+        'headPosition','headDirection','time','weather','motion','far','lamps','labels','stars','lantern','stationGlow','shelter','nightBrightness','paint','lampCare'
       ]);
       this.displayUniforms = uniforms(gl,this.displayProgram,[
         'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
@@ -2180,15 +2509,28 @@ class NSVillage {
     }
 
     _uploadObjects(sim,eye) {
-      const dynamic=[...(typeof sim.dynamicObjects==='function' ? sim.dynamicObjects() : []),...(sim.village?.objects(sim)||[])];
+      const life=sim.stationLife,indoor=life?.indoor,room=indoor?life.sites[indoor.index].room:null;
+      const stationObjects=typeof NSStationScenery!=='undefined'?NSStationScenery.objects(life,sim):[];
+      const ordinary=[...(typeof sim.dynamicObjects==='function' ? sim.dynamicObjects() : []),...(sim.village?.objects(sim)||[])];
+      // Indoor shell must be written first, leaving nearby room furniture intact
+      // under the fixed GPU record cap. Outdoors all train/village props retain
+      // priority; reserve 32 records for static silhouettes and rails.
+      const dynamic=indoor?[...stationObjects,...ordinary].slice(0,224):[...ordinary,...stationObjects.slice(0,Math.max(0,224-ordinary.length))];
       const staticCapacity=Math.max(0,MAX_OBJECTS-dynamic.length);
       const previous=this._selectionPosition;
-      if (!previous || this._selectionCapacity!==staticCapacity ||
+      const roomKey=indoor?indoor.index:-1;
+      if (!previous || this._selectionRoom!==roomKey || this._selectionCapacity!==staticCapacity ||
           Math.hypot(eye[0]-previous[0],eye[2]-previous[1])>5) {
         const prevSelected = new Set((this._selection || []).map(s => s.entry.object));
         const candidates=[];
         for (const entry of this.staticObjects) {
           const o=entry.object;
+          if(room){
+            const dx=o.x-room.x,dz=o.z-room.z,side=dx*Math.cos(room.yaw)-dz*Math.sin(room.yaw),along=dx*Math.sin(room.yaw)+dz*Math.cos(room.yaw);
+            // Replace only the existing station shell and its attached trim.
+            // World descriptors, collisions, terrain and distant scenery stay exact.
+            if(Math.abs(side)<4.5&&Math.abs(along)<9.5)continue;
+          }
           const distance=Math.hypot(o.x-eye[0],o.z-eye[2]);
           if (distance-entry.radius>420) continue;
           const wasSelected=prevSelected.has(o);
@@ -2207,6 +2549,7 @@ class NSVillage {
         });
         this._selectionPosition=[eye[0],eye[2]];
         this._selectionCapacity=staticCapacity;
+        this._selectionRoom=roomKey;
       }
       let count=0;
       const write=object => {
@@ -2277,6 +2620,11 @@ class NSVillage {
       gl.uniform3fv(u.sun,sun); gl.uniform3fv(u.headPosition,headPosition); gl.uniform3fv(u.headDirection,headDirection);
       const walker=sim.player,lanternOn=walker?.mode==='foot'&&sim.settings?.lantern!==false;
       gl.uniform4fv(u.lantern,lanternOn?[walker.x+Math.cos(walker.yaw)*.35,walker.y+1.0,walker.z-Math.sin(walker.yaw)*.35,1]:[0,0,0,0]);
+      const life=sim.stationLife,roomSite=life?.indoor?life.sites[life.indoor.index]:life?.sites?.find(site=>life.projects.has('fireplace-'+site.index)&&Math.hypot(site.room.x-eye[0],site.room.z-eye[2])<28);
+      let stationGlow=[0,0,0,0];
+      if(roomSite){const room=roomSite.room,lit=life.projects.has('fireplace-'+roomSite.index);stationGlow=[room.x+Math.sin(room.yaw)*3.8,room.y+1.2,room.z+Math.cos(room.yaw)*3.8,life.indoor?(lit?1.9:.62):.8];}
+      gl.uniform4fv(u.stationGlow,stationGlow);
+      gl.uniform1f(u.shelter,life?.indoor||walker?.mode==='train'&&sim.cameraMode==='cab'?1:0);
       gl.uniform1f(u.nightBrightness,sim.settings?.nightBrightness??1);
       gl.uniform1i(u.paint,sim.village?.paint==='green'?1:sim.village?.paint==='ochre'?2:0);
       gl.uniform3fv(u.lampCare,[0,1,2].map(index=>sim.village?.completed.has('lamp-'+index)?1:0));
@@ -2370,6 +2718,7 @@ class NSGame {
     this.world=new NSWorld('NEXT-STOP'); this.sim=new NSSimulation(this.world);this.exploration=new NSExploration(this.world);
     this.railway=new NSRailway(this.world);
     this.village=new NSVillage(this.world,this.railway);this.sim.village=this.village;
+    this.stationLife=new NSStationLife(this.world,this.village,this.railway);this.sim.stationLife=this.stationLife;this.activitySelection=null;this.boarded=false;
     this.renderer=new NSGlyphRenderer(canvas,this.world);
     this.accumulator=0; this.previous=0; this.lastUI=0; this.toastUntil=0;
     this.width=window.innerWidth; this.height=window.innerHeight;
@@ -2393,6 +2742,9 @@ class NSGame {
     this.click('journal-button',()=>this.openMenu('journal'));
     this.listen(document.getElementById('village-list'),'click',event=>{const button=event.target.closest('button[data-job]');if(!button)return;this.notify(this.village.select(button.dataset.job));this.syncJournal();this.el['journal-view'].querySelector('.close-menu').focus();});
     this.listen(document.getElementById('workshop'),'click',event=>{const button=event.target.closest('button[data-paint],button[data-gear]');if(!button)return;this.notify(button.dataset.gear?this.village.buyGear(button.dataset.gear):this.village.buyPaint(button.dataset.paint));this.village.apply(this.sim);this.syncJournal();});
+    this.listen(document.getElementById('station-life'),'click',event=>{const button=event.target.closest('[data-activity]');if(!button)return;if(this.village.carrying||this.village.sorting){this.notify('Finish your parcel or letters first, or return them at the noticeboard.');return;}const kind=button.dataset.activity;let site=this.nearestSite();if(!site[kind])site=this.stationLife.sites.filter(s=>s[kind]).sort((a,b)=>Math.hypot(this.sim.player.x-a[kind].x,this.sim.player.z-a[kind].z)-Math.hypot(this.sim.player.x-b[kind].x,this.sim.player.z-b[kind].z))[0];if(!site){this.notify('No fishing water is accessible in this valley. Other station activities remain available.');return;}this.activitySelection={kind,index:site.index};this.village.selected=null;this.syncJournal();this.notify(this.activityName(kind)+' at '+site.station.name+'. Follow the ticket on foot.');});
+    for(const kind of ['fence','fireplace'])this.click('repair-'+kind,()=>{this.notify(this.stationLife.repair(kind+'-'+this.nearestSite().index,this.sim));this.syncJournal();});
+    this.listen(document.getElementById('manual-water'),'change',event=>{this.stationLife.setManualWater(event.target.checked);this.notify(event.target.checked?'Manual water refills selected. Hold T at a crane with your train stopped alongside.':'Station crews will top up water when you deliver.');});
     this.listen(document.getElementById('journal-pages'),'click',event=>{const button=event.target.closest('[data-journal-page]');if(button)this.showJournalPage(button.dataset.journalPage);});
     this.listen(document.getElementById('journal-pages'),'keydown',event=>{const tabs=[...document.querySelectorAll('[data-journal-page]')],index=tabs.indexOf(event.target);if(index<0||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;this.showJournalPage(tabs[next].dataset.journalPage);tabs[next].focus();});
     this.listen(document.getElementById('work-filter'),'change',()=>{this.villageSignature=null;this.syncJournal();});
@@ -2413,7 +2765,7 @@ class NSGame {
     this.listen(document.getElementById('night-brightness'),'input',event=>{this.sim.settings.nightBrightness=Number(event.target.value)/100;document.getElementById('night-brightness-value').textContent=event.target.value+'%';});
     this.listen(this.el.debug,'change',()=>{this.debug=this.el.debug.checked;this.el.diagnostics.hidden=!this.debug;});
     this.click('regenerate',()=>{try{this.regenerate(this.el.seed.value);this.notify('New valley ready. Start beside your train.');}catch(error){this.report(error);}});
-    this.click('recover',()=>{this.notify(this.sim.recover()||'Returned to a safe station.');});
+    this.click('recover',()=>{this.stationLife.leave(this.sim);this.stationLife.cancelActivities();this.activitySelection=null;this.notify(this.sim.recover()||'Returned to a safe station.');});
     this.click('export',()=>this.exportSave());this.click('import',async()=>{if(!this.host.readSave){document.getElementById('save-file').click();return;}try{this.restore(await this.host.readSave());this.notify('Host save restored.');}catch(error){this.report(error);}});
     this.listen(document.getElementById('save-file'),'change',async event=>{const file=event.target.files[0];if(!file)return;try{if(file.size>1048576)throw new Error('Save is too large (maximum 1 MB).');this.restore(JSON.parse(await file.text()));this.notify('Save imported. Journey restored.');}catch(error){this.report(error);}finally{event.target.value='';}});
     const held={KeyW:'forward',KeyS:'backward',KeyA:'left',KeyD:'right',Space:'brake',KeyT:'work',ArrowLeft:'lookLeft',ArrowRight:'lookRight',ArrowUp:'lookUp',ArrowDown:'lookDown'};
@@ -2428,7 +2780,7 @@ class NSGame {
       if(!this.running)return;
       if(!event.repeat&&['Digit1','Digit2','Digit3'].includes(event.code)){const count=this.village.completed.size,message=this.village.sort(Number(event.code.at(-1))-1,this.sim);if(message){event.preventDefault();this.notify(message);if(this.village.completed.size>count)this.soundFavour();}return;}
       if(held[event.code]){event.preventDefault();this.input[held[event.code]]=true;}
-      if(!event.repeat){const action={KeyE:'interact',KeyC:'camera',KeyF:'recenter',KeyR:'reverse',KeyB:'stoke',KeyV:'whistle',KeyL:'lantern',KeyT:'work'}[event.code];if(action){event.preventDefault();this.act(action);}}
+      if(!event.repeat){const action={KeyE:'interact',KeyC:'camera',KeyF:'recenter',KeyR:'reverse',KeyB:'stoke',KeyV:'whistle',KeyL:'lantern',KeyT:'work',KeyX:'cancel-activity'}[event.code];if(action){event.preventDefault();this.act(action);}}
     });
     this.listen(window,'keyup',event=>{if(held[event.code])this.input[held[event.code]]=false;});
     this.listen(window,'blur',()=>{this.input={};if(this.running)this.openMenu('pause');});
@@ -2442,13 +2794,21 @@ class NSGame {
   }
   start(){if(this.destroyed)return;if(!this.started&&!this.restored){this.railway.service=document.querySelector('input[name=service]:checked').value;this.railway.cargo=document.getElementById('cargo').value;this.railway.configure(this.sim);}this.started=true;this.resume();this.ensureAudio();this.notify('E · board. J · station work and field notes. L · hand lantern.');}
   act(action){
-    if(action==='work'){const count=this.village.completed.size;this.notify(this.village.interact(this.sim)||(this.village.sorting?'Finish your letters at the noticeboard, or J: return unfinished work.':'Move beside a parcel, lamp or noticeboard. J lists station work.'));if(this.village.completed.size>count)this.soundFavour();return;}
+    if(action==='cancel-activity'){this.notify(this.stationLife.cancel(this.sim));return;}
+    if(action==='interact'&&this.stationLife.indoor){this.stationLife.leave(this.sim);this.notify('Back on the platform.');return;}
+    if(action==='work'){
+      const count=this.village.completed.size,life=this.stationLife,context=life.context(this.sim);
+      const useLife=life.indoor||life.fishing||life.refill||(!(this.village.carrying||this.village.sorting)&&context);
+      const message=useLife?life.interact(this.sim):this.village.interact(this.sim);
+      this.notify(message||(this.village.sorting?'Finish your letters at the noticeboard, or J: return unfinished work.':'Move beside station work, a crane, waiting-room door or jetty. J: Around the station.'));
+      if(this.village.completed.size>count)this.soundFavour();this.syncJournal();return;
+    }
     if(action==='lantern'){this.sim.settings.lantern=this.sim.settings.lantern===false;this.notify(this.sim.settings.lantern?'Hand lantern lit.':'Hand lantern put away. Moonlight still guides your feet.');return;}
     if(action==='stoke'||action==='whistle'){const message=this.railway.action(action,this.sim);this.notify(message);if(action==='whistle'&&this.sim.player.mode==='train')this.soundWhistle();return;}
     const before=this.sim.delivery.completed,index=this.sim.delivery.index,mode=this.sim.player.mode;
     if(action==='interact'&&mode==='train'&&Math.abs(this.sim.train.speed)<=.22){const waiting=this.railway.waiting(this.sim);if(waiting){this.notify(waiting);return;}}
     let message=this.sim.action(action);
-    if(this.sim.delivery.completed>before){const earnings=this.railway.earnings;this.railway.recordStop(this.sim,index);message=`${this.world.stations[index].name} served · +${this.railway.earnings-earnings} shillings · ${this.railway.grade()}. Coal and water replenished.`;this.soundBell();this.el.toast.classList.add('service-reward');}
+    if(this.sim.delivery.completed>before){const earnings=this.railway.earnings;this.railway.recordStop(this.sim,index);message=`${this.world.stations[index].name} served · +${this.railway.earnings-earnings} shillings · ${this.railway.grade()}. Coal replenished. ${this.stationLife.manualWater&&!this.railway.assisted?'Water crane available on the platform.':'Water topped up by the station crew.'}`;this.soundBell();this.el.toast.classList.add('service-reward');}
     else this.el.toast.classList.remove('service-reward');
     if(action==='interact'&&mode==='foot'&&this.sim.player.mode==='train')message=this.railway.job(this.sim)+' · B: fire · V: whistle';
     this.notify(message);
@@ -2462,7 +2822,8 @@ class NSGame {
     if(this.soundMuted||this.soundVolume===0||this.destroyed)return false;
     const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return false;
     try{if(!this.audio){this.audio=new Audio();this.audioMaster=this.audio.createGain();this.audioMaster.connect(this.audio.destination);this.audioTransport=this.audio.createGain();this.audioTransport.connect(this.audioMaster);this.syncAudio();
-      this.steamBuffer=this.audio.createBuffer(1,Math.ceil(this.audio.sampleRate*.22),this.audio.sampleRate);const samples=this.steamBuffer.getChannelData(0);let seed=17137,soft=0;for(let i=0;i<samples.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;soft=soft*.58+((seed/4294967296)*2-1)*.42;samples[i]=soft;}}
+      this.steamBuffer=this.audio.createBuffer(1,Math.ceil(this.audio.sampleRate*.22),this.audio.sampleRate);const samples=this.steamBuffer.getChannelData(0);let seed=17137,soft=0;for(let i=0;i<samples.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;soft=soft*.58+((seed/4294967296)*2-1)*.42;samples[i]=soft;}
+        try{this.ambience=new NSAmbience(this.audio,this.audioTransport);}catch(error){this.ambience=null;this.host.onError?.(error);}}
       if(this.audio.state==='suspended')this.audio.resume().catch(()=>{});this.audioTransport.gain.value=this.running?1:0;return this.audio.state!=='closed';
     }catch{return false;}
   }
@@ -2499,16 +2860,16 @@ class NSGame {
   setInput(state){this.input={...this.input,...state};}
   tick(now){
     if(this.destroyed)return;const elapsed=this.previous?Math.max(0,(now-this.previous)/1000):0;this.previous=now;
-    if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){this.railway.step(1/60,this.sim);this.village.apply(this.sim);this.sim.step(1/60,this.input);const message=this.village.step(1/60,this.sim,this.input);if(message){this.notify(message);this.soundFavour();}this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
+    if(this.running&&!document.hidden){this.accumulator+=Math.min(elapsed,.15);let steps=0;while(this.accumulator>=1/60&&steps<9){const railwayMessage=this.railway.step(1/60,this.sim);if(railwayMessage)this.notify(railwayMessage);this.village.apply(this.sim);this.sim.step(1/60,this.input);const message=this.village.step(1/60,this.sim,this.input);if(message){this.notify(message);this.soundFavour();}const activityMessage=this.stationLife.step(1/60,this.sim,this.input);if(activityMessage){this.notify(activityMessage);if(/caught|restored|repaired/i.test(activityMessage))this.soundFavour();}this.input.lookX=0;this.input.lookY=0;this.accumulator-=1/60;steps++;}}
     this.sim.renderAlpha=this.running?this.accumulator*60:1;
-    this.updateTrainSound();
+    this.updateTrainSound();this.ambience?.update(this.sim,this.stationLife,this.running&&!document.hidden);
     if(this.running&&now-this.lastCheckpoint>10000){this.checkpoint();this.lastCheckpoint=now;}
     try{if(!this.renderer.lost){this.renderer.render(this.sim,this.sim.camera(Math.min(elapsed,.05)),{quality:this.sim.settings.quality,debug:this.debug,reducedMotion:this.sim.settings.reducedMotion});}}catch(error){this.pause();this.showFatal(error);return;}
     if(this.running&&elapsed>0&&elapsed<.25){this.frames.push(elapsed*1000);if(this.frames.length>600)this.frames.shift();}
     if(now-this.lastUI>150){this.updateUI(now);this.lastUI=now;}this.raf=requestAnimationFrame(this.tick);
   }
   updateUI(now){
-    const train=this.sim.train;document.body.dataset.mode=this.sim.player.mode;
+    const train=this.sim.train;document.body.dataset.mode=this.sim.player.mode;if(this.sim.player.mode==='train')this.boarded=true;
     this.el.objective.textContent=this.sim.delivery.finished?'The valley is yours':this.sim.delivery.started?this.world.stations[this.sim.delivery.index].name:'Pinebank departure';this.el.hint.textContent=this.sim.hint();
     this.el['journey-label'].textContent=this.sim.player.mode==='train'?`${this.sim.delivery.finished?'Free running':`${this.railway.service==='passenger'?'Passenger local':'Goods train'} · ${this.sim.delivery.completed}/3 stops`} · ${this.sim.train.direction===1?'forward':'reverse'}`:NSJourney.label(this.sim);
     const stationWork=this.village.target(this.sim.player),target=stationWork||this.exploration.target(this.sim.player);
@@ -2518,7 +2879,7 @@ class NSGame {
     if(this.approach){const a=this.approach;this.el.hint.textContent=a.phase==='cruise'?`${Math.ceil(a.distance)} m to platform`:a.phase==='approach'?`Platform ${Math.ceil(a.distance)} m · ease power`:a.phase==='ready'?(a.kind==='delivery'?(this.railway.waiting(this.sim)||`E · ${this.railway.service==='passenger'?'serve passengers':'hand over freight'}`):'E · leave train'):a.phase==='departure'?'W · open the regulator':a.hint;}
     const route=this.railway.instruction(this.sim),work=document.getElementById('work-hint');work.hidden=this.sim.player.mode!=='train';
     work.textContent=route?`${route.name} · ${Math.round(route.limit*3.6)} km/h${route.whistled?'':' · V: whistle'}`:!this.railway.assisted&&this.railway.engine.fire<.50?`Fire ${Math.round(this.railway.engine.fire*100)}% · B: add coal`:this.railway.job(this.sim);
-    document.getElementById('pressure').textContent=this.railway.engine.pressure.toFixed(1);document.getElementById('fire').textContent=Math.round(this.railway.engine.fire*100);
+    document.getElementById('pressure').textContent=this.railway.engine.pressure.toFixed(1);document.getElementById('fire').textContent=Math.round(this.railway.engine.fire*100);const manualWater=this.railway.manualWater&&!this.railway.assisted;document.getElementById('water-label').hidden=!manualWater;if(manualWater){document.getElementById('water').textContent=Math.round(this.railway.engine.water);document.getElementById('water-label').classList.toggle('low',this.railway.engine.water<30);}
     this.syncRailwayLedger();
     const discovery=this.running?this.exploration.discover(this.sim.player):null;
     if(discovery)this.notify(`Field note: ${discovery.name} · ${this.exploration.count}/${this.exploration.total} places discovered. J opens your journal.`);
@@ -2532,15 +2893,16 @@ class NSGame {
       else if(stationWork)this.el.hint.textContent=this.village.carrying?'Carry the parcel to the porter · T: hand over':'Walk to station work · T: use';
     }
     if(this.sim.delivery.finished&&target&&!(this.sim.player.mode==='foot'&&stationWork))this.el.objective.textContent=target.record.name;
+    this.updateStationHint();
     this.el.speed.textContent=(Math.abs(train.speed)*3.6).toFixed(1);this.el.throttle.textContent=Math.round(train.throttle*100);this.el.brake.textContent=Math.round((this.input.brake?1:train.brake||0)*100);
     document.getElementById('instruments').style.setProperty('--needle',`${-115+Math.min(40,Math.abs(train.speed)*3.6)/40*230}deg`);
     const weather=this.sim.weather;const w=(weather.rain||0)>.45?'RAIN':(weather.fog||0)>.45?'FOG':'CLEAR';const clock=(8+this.sim.time/30)%24;this.el.status.textContent=`${String(Math.floor(clock)).padStart(2,'0')}:${String(Math.floor(clock%1*60)).padStart(2,'0')} · ${w} · ${this.world.seed}`;
     if(now>this.toastUntil)this.el.toast.classList.remove('visible');
     if(this.debug){const d=this.renderer.diagnostics(),sorted=this.frames.slice().sort((a,b)=>a-b),mid=sorted[Math.floor(sorted.length/2)]||0,p95=sorted[Math.floor(sorted.length*.95)]||0;this.el.diagnostics.textContent=`DIRECT GLYPH CELLS\n${JSON.stringify(d,null,2)}\nFrame median ${mid.toFixed(1)} ms / p95 ${p95.toFixed(1)} ms\nSeed checksum ${this.world.checksum()}\nF3 toggles diagnostics`;}
   }
-  syncSettings(){document.getElementById('night-brightness').value=Math.round((this.sim.settings.nightBrightness??1)*100);document.getElementById('night-brightness-value').textContent=document.getElementById('night-brightness').value+'%';document.getElementById('sound-volume').value=Math.round(this.soundVolume*100);document.getElementById('sound-muted').checked=this.soundMuted;this.el.quality.value=this.sim.settings.quality||'standard';this.el.weather.value=this.sim.settings.weatherMode||'auto';this.el.seed.value=this.world.seed;this.el['reduced-motion'].checked=!!this.sim.settings.reducedMotion;this.el['high-contrast'].checked=!!this.sim.settings.highContrast;document.body.classList.toggle('reduced-motion',!!this.sim.settings.reducedMotion);document.body.classList.toggle('high-contrast',!!this.sim.settings.highContrast);}
+  syncSettings(){document.getElementById('manual-water').checked=this.stationLife.manualWater;document.getElementById('night-brightness').value=Math.round((this.sim.settings.nightBrightness??1)*100);document.getElementById('night-brightness-value').textContent=document.getElementById('night-brightness').value+'%';document.getElementById('sound-volume').value=Math.round(this.soundVolume*100);document.getElementById('sound-muted').checked=this.soundMuted;this.el.quality.value=this.sim.settings.quality||'standard';this.el.weather.value=this.sim.settings.weatherMode||'auto';this.el.seed.value=this.world.seed;this.el['reduced-motion'].checked=!!this.sim.settings.reducedMotion;this.el['high-contrast'].checked=!!this.sim.settings.highContrast;document.body.classList.toggle('reduced-motion',!!this.sim.settings.reducedMotion);document.body.classList.toggle('high-contrast',!!this.sim.settings.highContrast);}
   syncJournal(){
-    this.syncVillage();
+    this.syncVillage();this.syncStationLife();
     const signature=this.world.seed+'|'+this.world.version+'|'+this.exploration.serialize().visited.join(',')+'|'+this.exploration.selected;
     if(signature===this.journalSignature)return;this.journalSignature=signature;
     this.el['journal-count'].textContent=`${this.exploration.count} of ${this.exploration.total} places discovered`;
@@ -2578,22 +2940,42 @@ class NSGame {
     for(const button of document.querySelectorAll('[data-paint]')){const paint=button.dataset.paint,owned=this.village.owned.includes(paint);button.disabled=this.village.paint===paint||(!owned&&this.village.wallet<20);button.textContent=(paint==='original'?'Original paint':paint==='green'?'Forest green':'Ochre brass')+(this.village.paint===paint?' · applied':owned?'':' · 20 shillings');}
     const boots=document.querySelector('[data-gear=boots]'),ownedBoots=this.village.gear.includes('boots');boots.disabled=ownedBoots||this.village.wallet<40;boots.textContent=ownedBoots?'Walking boots · owned':'Walking boots · 40 shillings';
   }
+  nearestSite(){return this.stationLife.sites.reduce((a,b)=>Math.hypot(this.sim.player.x-a.door.x,this.sim.player.z-a.door.z)<Math.hypot(this.sim.player.x-b.door.x,this.sim.player.z-b.door.z)?a:b);}
+  activityName(kind){return{crane:'Water crane',door:'Waiting room',project:'Repair bench',fish:'Fishing jetty'}[kind];}
+  syncStationLife(){
+    const life=this.stationLife,site=this.nearestSite(),done=kind=>life.projects.has(kind+'-'+site.index);
+    document.getElementById('station-life-summary').textContent=site.station.name+' · water '+Math.round(this.railway.engine.water)+'% · '+(life.manualWater&&!this.railway.assisted?'manual refills':'station crew refills');
+    document.getElementById('station-projects').textContent=site.station.name+': fence '+(done('fence')?'repaired':'needs mending')+' · waiting-room fireplace '+(done('fireplace')?'restored':'cold')+'.';
+    for(const kind of ['fence','fireplace']){const button=document.getElementById('repair-'+kind);button.disabled=!life.canRepair(kind+'-'+site.index,this.sim);button.textContent=(kind==='fence'?'Repair fence':'Restore fireplace')+(done(kind)?' · finished':' · '+(kind==='fence'?12:18)+' shillings');}
+    document.getElementById('fish-log').textContent=life.fishRecords.length?'Lake notebook · '+life.fishRecords.map(r=>r.species+' × '+r.count).join(' · '):'Lake notebook · no catches yet. Borrow a rod at the jetty; fish are returned to the water.';
+  }
+  updateStationHint(){
+    const life=this.stationLife;if(this.sim.player.mode!=='foot')return;
+    const context=life.context(this.sim);
+    if(life.indoor){this.el.objective.textContent=this.world.stations[life.indoor.index].name+' waiting room';this.el['journey-label'].textContent=life.indoor.seated?'Resting by the window':'Under shelter';this.el.hint.textContent=context?.hint||'WASD: stroll · T: bench or door · E: leave';this.el['field-hint'].textContent=life.projects.has('fireplace-'+life.indoor.index)?'The stove is warm. Rain carries on outside.':'The stove is cold. Repair it at the platform bench.';return;}
+    const firstDeparture=!this.boarded&&context?.kind==='door';
+    if(context&&!firstDeparture&&!(this.village.carrying||this.village.sorting)){this.el.hint.textContent=context.hint;if(life.fishing||life.refill)this.el.objective.textContent=life.fishing?'A quiet cast':'Taking water';}
+    const selected=this.activitySelection;if(!selected||this.village.carrying||this.village.sorting||this.village.selected)return;
+    const site=life.sites[selected.index],point=site?.[selected.kind];if(!point)return;
+    if(life.near(this.sim,point,2.5)){this.activitySelection=null;this.notify(this.activityName(selected.kind)+' reached. '+(context?.hint||''));return;}
+    this.el.objective.textContent=this.activityName(selected.kind);this.el['field-hint'].textContent=site.station.name+' · '+Math.ceil(Math.hypot(this.sim.player.x-point.x,this.sim.player.z-point.z))+' m '+NSExploration.bearing(this.sim.player,point)+' · J: journal';
+  }
   notify(message){if(!message)return;this.el.toast.textContent=message;this.el.toast.classList.add('visible');this.toastUntil=performance.now()+4500;if(!this.el.menu.hidden)this.el['menu-status'].textContent=message;}
   readLocalCheckpoint(){try{const text=localStorage.getItem('next-stop-checkpoint');this.localSaveAvailable=!!text&&text.length<=65536;}catch{this.localSaveAvailable=false;}const button=document.getElementById('continue-button');button.hidden=!this.localSaveAvailable;}
   checkpoint(){try{localStorage.setItem('next-stop-checkpoint',JSON.stringify(this.serialize()));this.localSaveAvailable=true;}catch{this.localSaveAvailable=false;}const status=document.getElementById('local-save-status');status.textContent=this.localSaveAvailable?'Local progress saved. Continue last journey after reopening this file.':'Local storage unavailable. Export a JSON save to keep progress.';}
   report(error){console.error(error);this.notify(error.message||String(error));this.host.onError?.(error);}
-  serialize(){return{...this.sim.serialize(),exploration:this.exploration.serialize(),railway:this.railway.serialize(),...(this.village.touched?{village:this.village.serialize()}:{})};}
+  serialize(){return{...this.sim.serialize(),exploration:this.exploration.serialize(),railway:this.railway.serialize(),...(this.village.touched?{village:this.village.serialize()}:{}),...(this.stationLife.touched?{stationLife:this.stationLife.serialize()}:{})};}
   restore(value){
     const data=typeof value==='string'?JSON.parse(value):value;
     if(!data||!data.world||typeof data.world.seed!=='string'||data.world.seed.length>64)throw new Error('Save contains an invalid world seed.');
-    const candidateWorld=new NSWorld(data.world.seed,data.world.version),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld,candidateRailway);candidate.restore(data);candidateExploration.restore(data.exploration);candidateRailway.restore(data.railway,candidate);candidateVillage.restore(data.village,candidate);candidate.village=candidateVillage;
-    this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.village=candidateVillage;this.restored=true;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();document.getElementById('fire-assist').checked=this.railway.assisted;this.resize(this.width,this.height);
+    const candidateWorld=new NSWorld(data.world.seed,data.world.version),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld,candidateRailway);candidate.restore(data);candidateExploration.restore(data.exploration);candidateRailway.restore(data.railway,candidate);candidateVillage.restore(data.village,candidate);candidate.village=candidateVillage;const candidateLife=new NSStationLife(candidateWorld,candidateVillage,candidateRailway);candidateLife.restore(data.stationLife,candidate);candidate.stationLife=candidateLife;
+    this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.village=candidateVillage;this.stationLife=candidateLife;this.activitySelection=null;this.boarded=true;this.restored=true;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();document.getElementById('fire-assist').checked=this.railway.assisted;this.resize(this.width,this.height);
   }
-  regenerate(seed){const value=String(seed).trim();if(!value||value.length>64)throw new Error('Use a world seed between 1 and 64 characters.');const candidateWorld=new NSWorld(value),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld,candidateRailway);candidate.settings={...this.sim.settings};candidate.village=candidateVillage;candidateRailway.service=this.railway.service;candidateRailway.cargo=this.railway.cargo;candidateRailway.assisted=this.railway.assisted;candidateRailway.configure(candidate);this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.village=candidateVillage;this.restored=false;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();}
+  regenerate(seed){const value=String(seed).trim();if(!value||value.length>64)throw new Error('Use a world seed between 1 and 64 characters.');const candidateWorld=new NSWorld(value),candidate=new NSSimulation(candidateWorld),candidateExploration=new NSExploration(candidateWorld),candidateRailway=new NSRailway(candidateWorld),candidateVillage=new NSVillage(candidateWorld,candidateRailway);candidate.settings={...this.sim.settings};candidate.village=candidateVillage;const candidateLife=new NSStationLife(candidateWorld,candidateVillage,candidateRailway);if(this.stationLife.manualWater)candidateLife.setManualWater(true);candidate.stationLife=candidateLife;candidateRailway.service=this.railway.service;candidateRailway.cargo=this.railway.cargo;candidateRailway.assisted=this.railway.assisted;candidateRailway.configure(candidate);this.renderer.setWorld(candidateWorld);this.world=candidateWorld;this.sim=candidate;this.exploration=candidateExploration;this.railway=candidateRailway;this.village=candidateVillage;this.stationLife=candidateLife;this.activitySelection=null;this.boarded=false;this.restored=false;this.input={};this.accumulator=0;this.syncSettings();this.syncJournal();}
   diagnostics(){const sorted=this.frames.slice().sort((a,b)=>a-b);return{frames:sorted.length,medianMs:sorted[Math.floor(sorted.length/2)]||0,p95Ms:sorted[Math.floor(sorted.length*.95)]||0,renderer:this.renderer.diagnostics(),seed:this.world.seed,checksum:this.world.checksum(),running:this.running};}
   async exportSave(){try{const data=this.serialize(),text=JSON.stringify(data,null,2);if(this.host.writeSave)await this.host.writeSave(text);else{const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='next-stop-save.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}try{localStorage.setItem('next-stop-save',text);}catch{this.notify('Save exported. Browser storage unavailable; keep your JSON file.');return;}this.notify('Save exported. Keep it for your next journey.');}catch(error){this.report(error);}}
   showFatal(error){document.getElementById('fatal').hidden=false;document.getElementById('fatal-message').textContent=error.message||'The renderer could not start.';document.getElementById('fatal-detail').textContent=error.stack||'';console.error(error);}
-  destroy(){if(this.destroyed)return;this.pause();this.destroyed=true;cancelAnimationFrame(this.raf);for(const remove of this.listeners)remove();this.listeners=[];this.renderer.destroy();if(this.audio&&this.audio.state!=='closed')this.audio.close().catch(error=>this.host.onError?.(error));}
+  destroy(){if(this.destroyed)return;this.pause();this.destroyed=true;cancelAnimationFrame(this.raf);for(const remove of this.listeners)remove();this.listeners=[];this.renderer.destroy();this.ambience?.destroy();if(this.audio&&this.audio.state!=='closed')this.audio.close().catch(error=>this.host.onError?.(error));}
 }
 window.NextStop={create:options=>new NSGame(options)};
 try{window.nextStopGame=window.NextStop.create({canvas:document.getElementById('world')});}catch(error){document.getElementById('fatal').hidden=false;document.getElementById('fatal-message').textContent=error.message;document.getElementById('fatal-detail').textContent=error.stack||'';console.error(error);}
