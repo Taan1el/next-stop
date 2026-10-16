@@ -771,6 +771,7 @@ class NSSimulation {
       weatherMode: choice(s.weatherMode, ['auto', 'clear', 'rain', 'fog'], 'weather mode'), highContrast: s.highContrast === undefined ? false : bool(s.highContrast, 'high contrast') };
     if(s.nightBrightness!==undefined)settings.nightBrightness=number(s.nightBrightness,.7,1.4,'night brightness');
     if(s.lantern!==undefined)settings.lantern=bool(s.lantern,'hand lantern');
+    if(s.inkOutlines!==undefined)settings.inkOutlines=bool(s.inkOutlines,'ink outlines');
     Object.assign(this, { time, weather: restoredWeather, weatherTarget, train, player, cameraMode, delivery, settings });
     this._lastRouteYaw = this.world.routeAt(train.s).yaw; this._camera = null;
     this._previousS = train.s; this._previousPlayer = { ...player }; this.renderAlpha = 1;

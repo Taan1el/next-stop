@@ -504,10 +504,18 @@
     return colour;
   }
 
+  // World-space size of one character cell at the hit. Patterns finer than a
+  // cell alias into per-frame letter changes, so they coarsen in octaves.
+  float g_footprint=0.0;
+  float lod(float frequency){return exp2(floor(log2(max(1.0,g_footprint*frequency))));}
+  bool resolves(float frequency){return g_footprint*frequency<.5;}
   uint glyphFor(Hit h,float light) {
-    float objPattern=hash21(floor(h.local.xz*2.4)+floor(h.local.y)*5.0);
-    float pattern=hash21(floor(h.p.xz*1.6)+floor(h.p.y)*7.0);
+    float lo=lod(2.4),lw=lod(1.6);
+    float objPattern=hash21(floor(h.local.xz*2.4/lo)+floor(h.local.y/lo+.5)*5.0+lo);
     bool side=abs(h.n.y)<.5;
+    // Ground and water are single-valued in x/z, so height only seeds vertical
+    // faces; otherwise contour lines and float noise at y=0 flip the hash.
+    float pattern=hash21(floor(h.p.xz*1.6/lw)+(side?floor(h.p.y/lw+.5)*7.0:0.0)+lw);
     if (h.material==1) {
       float distFade=smoothstep(35.0,120.0,h.t);
       if (distFade>0.7) return pattern>.48 ? 44u : 46u;
@@ -519,7 +527,7 @@
       return h.n.y<.6 ? (h.n.x*h.n.z>0.0 ? 47u : 92u) : pattern>.55 ? 37u : 58u;
     }
     if (h.material==3) return pattern>.67 ? 126u : pattern>.31 ? 61u : 45u;
-    if (h.material==4) return side ? (fract(h.local.y*.60)>.7 ? 45u : 124u) : 58u;
+    if (h.material==4) return side ? (resolves(.60)&&fract(h.local.y*.60)>.7 ? 45u : 124u) : 58u;
     if (h.material==5) return h.n.x>0.1 ? 47u : h.n.x<-.1 ? 92u : 61u;
     if (h.material==6) return side ? 124u : 61u;
     if (h.material==7) return side ? 124u : 61u;
@@ -528,11 +536,11 @@
     if (h.material==10) return side ? 45u : pattern>.5 ? 58u : 46u;
     if (h.material==11) {
       if (!side) return 43u;
-      float knothole=hash21(floor(h.local.yy*1.8)+h.info*13.0);
+      float lk=lod(1.8),knothole=hash21(floor(h.local.yy*1.8/lk)+h.info*13.0+lk);
       return knothole>.85 ? 35u : knothole>.65 ? 58u : 124u;
     }
     if (h.material==12) {
-      float folPattern=hash21(floor(h.local.xz*1.8)+floor(h.local.y*1.8)+h.info*19.0);
+      float lf=lod(1.8),folPattern=hash21(floor(h.local.xz*1.8/lf)+floor(h.local.y*1.8/lf)+h.info*19.0+lf);
       float facing=abs(dot(h.n,normalize(u_eye-h.p)));
       if (facing<.22) return folPattern>.5 ? 34u : 46u;
       if (h.info<.35) return folPattern>.68 ? 42u : folPattern>.32 ? 94u : 43u;
@@ -545,8 +553,8 @@
     if (h.material==19) return pattern>.7 ? 126u : pattern>.3 ? 58u : 46u;
     if (h.material==20) return 42u;
     if (h.material==23) return side ? (objPattern>.6 ? 35u : 72u) : 61u;
-    if (h.material==24) return fract(h.local.y*3.5)>.87?45u:objPattern>.7?58u:35u;
-    if (h.material==25||h.material==30) return fract(h.local.y*4.1)>.88?45u:124u;
+    if (h.material==24) return resolves(3.5)&&fract(h.local.y*3.5)>.87?45u:objPattern>.7?58u:35u;
+    if (h.material==25||h.material==30) return resolves(4.1)&&fract(h.local.y*4.1)>.88?45u:124u;
     if (h.material==26) return light>.40?43u:34u;
     if (h.material==27||h.material==38||h.material==39) return side?124u:61u;
     if (h.material==28) return objPattern>.6?35u:61u;
@@ -620,6 +628,7 @@
         }
       }
       float light=dot(colour,vec3(.2126,.7152,.0722));
+      g_footprint=hit.t*1.28*u_cellSize.y/u_viewport.y/max(.12,abs(dot(hit.n,-rd)));
       glyph=glyphFor(hit,light);
       // The lit material fills the cell; its glyph carries finer surface detail.
       // Keep fill constant within a cell so adjoining letters have no tile seams.
@@ -664,7 +673,8 @@
         foreground=mix(foreground,vec3(.57,.70,.75),.61);
       }
     }
-    out_record=uvec4(glyph,uint(material),uint(clamp(distance/u_far*255.0,0.0,255.0)),255u);
+    // Alpha carries log depth: fine near the eye, where silhouettes need it.
+    out_record=uvec4(glyph,uint(material),uint(clamp(distance/u_far*255.0,0.0,255.0)),uint(clamp(log2(1.0+distance)/log2(1.0+u_far)*255.0,0.0,255.0)));
     out_foreground=colourRecord(foreground);
     out_background=colourRecord(background);
   }`;
@@ -683,6 +693,26 @@
   uniform vec2 u_physical;
   uniform ivec2 u_grid;
   uniform bool u_debug;
+  uniform bool u_ink;
+  // Matches the scene's fixed 600 m far plane.
+  float depthOf(uvec4 record){return exp2(float(record.a)/255.0*log2(601.0))-1.0;}
+  bool selfLit(uint material){return material==0u||material==9u||material==17u||material==18u||material==19u||material==20u||material==26u||material==35u;}
+  bool inside(ivec2 cell){return all(greaterThanEqual(cell,ivec2(0)))&&all(lessThan(cell,u_grid));}
+  // A neighbour that is sky, or landscape farther than the surface through this cell and
+  // its opposite neighbour predicts, puts a silhouette edge here. Planes are
+  // affine in inverse depth across the screen, so grazing ground and water
+  // near the horizon never read as edges.
+  bool behind(ivec2 cell,ivec2 opposite,float depth){
+    if(!inside(cell))return false;
+    uvec4 other=texelFetch(u_records,cell,0);
+    if(other.g==0u)return true;
+    // Only landscape (grass, rock, water) counts as backdrop: object-over-object
+    // breaks such as roof slats and fences would scatter strokes into noise.
+    if(other.g>3u)return false;
+    float here=1.0/(depth+.5),there=1.0/(depthOf(other)+.5),predicted=here;
+    if(inside(opposite)){uvec4 back=texelFetch(u_records,opposite,0);if(back.g!=0u)predicted=max(here*.5,2.0*here-1.0/(depthOf(back)+.5));}
+    return there<predicted*.7;
+  }
   void main() {
     vec2 logical=gl_FragCoord.xy/u_physical*u_viewport;
     ivec2 cell=clamp(ivec2(floor(logical/u_cellSize)),ivec2(0),u_grid-ivec2(1));
@@ -691,6 +721,22 @@
     uint glyph=record.r;
     vec3 foreground=vec3(texelFetch(u_foreground,cell,0).rgb)/255.0;
     vec3 background=vec3(texelFetch(u_background,cell,0).rgb)/255.0;
+    // Ink outlines: the nearer side of each depth break is redrawn as an
+    // oriented stroke, like an engraving. Cells read their four neighbours only.
+    if(u_ink&&!selfLit(record.g)){
+      float depth=depthOf(record);
+      bool left=behind(cell+ivec2(-1,0),cell+ivec2(1,0),depth),right=behind(cell+ivec2(1,0),cell+ivec2(-1,0),depth),up=behind(cell+ivec2(0,1),cell+ivec2(0,-1),depth),down=behind(cell+ivec2(0,-1),cell+ivec2(0,1),depth);
+      int count=int(left)+int(right)+int(up)+int(down);
+      uint stroke=0u;
+      if(count==1||count==2){
+        if(up&&left||down&&right)stroke=47u;
+        else if(up&&right||down&&left)stroke=92u;
+        else if(left||right)stroke=124u;
+        else if(down)stroke=95u;
+        else stroke=45u;
+      }
+      if(stroke!=0u){glyph=stroke;foreground=mix(background*.32,foreground,.28);}
+    }
     vec2 ink=(inside-vec2(.15,.18))/vec2(.70,.64);
     bool on=false;
     if (ink.x>=0.0 && ink.x<1.0 && ink.y>=0.0 && ink.y<1.0) {
@@ -849,7 +895,7 @@
         'headPosition','headDirection','time','weather','motion','far','lamps','labels','stars','lantern','stationGlow','shelter','nightBrightness','paint','lampCare'
       ]);
       this.displayUniforms = uniforms(gl,this.displayProgram,[
-        'records','foreground','background','masks','viewport','cellSize','physical','grid','debug'
+        'records','foreground','background','masks','viewport','cellSize','physical','grid','debug','ink'
       ]);
       this.vao = gl.createVertexArray();
       this.starRecords=new Float32Array(64*4);
@@ -1053,7 +1099,7 @@
       const d=this.displayUniforms;
       gl.uniform2f(d.viewport,this.width,this.height); gl.uniform2fv(d.cellSize,this.cellSize);
       gl.uniform2f(d.physical,this.canvas.width,this.canvas.height); gl.uniform2i(d.grid,this.columns,this.rows);
-      gl.uniform1i(d.debug,Boolean(options.debug)); gl.drawArrays(gl.TRIANGLES,0,3);
+      gl.uniform1i(d.debug,Boolean(options.debug)); gl.uniform1i(d.ink,options.ink!==false); gl.drawArrays(gl.TRIANGLES,0,3);
       if (!this._validated) {
         const error=gl.getError();
         if (error!==gl.NO_ERROR) throw new Error('WebGL could not draw the glyph scene (GPU error '+error+').');
