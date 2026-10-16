@@ -14,7 +14,9 @@ A small rural railway game made of coloured letters. Take a steam train through 
 
 The player needs only that HTML file. No installation, server, internet connection, images, imported models or game engine are required. The MIT notice is included inside the file.
 
-Keyboard and mouse are required. Windows Chromium-based browsers have been tested; other WebGL2 browsers are not yet verified. Mobile touch controls are not implemented.
+Keyboard and mouse are recommended. Touch devices get an on-screen stick and buttons; they are checked in an emulated phone browser, not yet on physical devices. Windows Chromium-based browsers have been tested; other WebGL2 browsers are not yet verified.
+
+The title screen shows the train driving itself. Choose **Watch the line**, or open `next-stop.html#watch`, for a full-screen self-driving tour that suits a portfolio frame. Any key or tap returns to the title card.
 
 ## Life on the branch line
 
@@ -49,7 +51,7 @@ The locomotive has working wheel and rod animation, a rounded boiler and cab ins
 | J | Railway, Work, Notes and Workshop journal pages |
 | Esc / H | Pause / controls |
 
-Settings includes night brightness, sound volume/mute, glyph size, weather, reduced motion, high contrast, the automatic fireman and recovery to a safe station. Open **J → Work** for nearby jobs; choose **All stations** to plan further ahead. Select a job for directions. Finish or return an active parcel or letter round before refreshing work. **J → Railway** starts the next service; **Workshop** spends your shared purse. Use left/right arrows on the journal tabs to change pages.
+Settings includes ink outlines, night brightness, sound volume/mute, glyph size, weather, reduced motion, high contrast, the automatic fireman and recovery to a safe station. Open **J → Work** for nearby jobs; choose **All stations** to plan further ahead. Select a job for directions. Finish or return an active parcel or letter round before refreshing work. **J → Railway** starts the next service; **Workshop** spends your shared purse. Use left/right arrows on the journal tabs to change pages.
 
 ## Saving a journey
 
@@ -69,7 +71,7 @@ npm run build
 npm test
 ```
 
-Build output is [outputs/next-stop.html](outputs/next-stop.html). `npm test` runs numerical, save-fixture and renderer-resource checks plus the standalone packaging audit.
+Build output is [outputs/next-stop.html](outputs/next-stop.html). `npm run build:pages` writes a static site to `dist/pages/` (the same file as `index.html`, link-preview metadata and the preview image). `.github/workflows/pages.yml` builds, tests and publishes that site from `main` once GitHub Pages is set to deploy from GitHub Actions. `npm test` runs numerical, save-fixture and renderer-resource checks plus the standalone packaging audit.
 
 For offline browser checks:
 

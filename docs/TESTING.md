@@ -32,7 +32,7 @@ $env:NEXT_STOP_BROWSER_CHANNEL='msedge'
 npm run test:browser
 ```
 
-The serial browser suite covers service/cargo selection, keyboard menus, narrow layout, pause, actual volume/mute, JSON and host saves, invalid-save atomicity, generations 1/3 imports, context/lifecycle restoration, wheel-linked sound, colour views, fixed star positions, local continuation and storage denial. It runs with networking disabled after opening the local HTML.
+The serial browser suite covers service/cargo selection, keyboard menus, narrow layout, pause, actual volume/mute, JSON and host saves, invalid-save atomicity, generations 1/3 imports, context/lifecycle restoration, wheel-linked sound, colour views, fixed star positions, local continuation and storage denial. It runs with networking disabled after opening the local HTML. It also measures letter flicker (cells whose glyph changes for a 5 cm camera move; fails above 5%) and checks the self-driving title backdrop, watch mode and touch stick/buttons in an emulated phone.
 
 Two additional scripts walk the station jobs using ordinary controls and inspect five fixed night views. The walking run checks parcel export/import mid-task, lamp release/hold, wrong/correct letters, paint purchases, lantern/brightness controls, train boarding and continuation. Night fixtures compare actual glyph foreground/background luminance in the platform, meadow, rain and cab; lantern falloff is checked against the same meadow with it switched off. These thresholds guard readability, not artistic quality. Screenshot inspection supplements the assertions. Browser action timeouts allow 60 seconds for cold shader compilation.
 
@@ -63,4 +63,4 @@ The 0.1.0 release cleanup added the MIT notice without changing gameplay source.
 
 ## Limits
 
-Verified browser families are Chromium-based desktop browsers on Windows. Safari/Firefox and other operating systems need their own actual rendering tests before support is claimed. Touch controls are absent. A narrow-layout check verifies menu fit, not mobile playability. Synthesized sound state/pulses are tested; subjective listening quality is not asserted by headless automation.
+Verified browser families are Chromium-based desktop browsers on Windows. Safari/Firefox and other operating systems need their own actual rendering tests before support is claimed. Touch controls are verified with emulated touch input in Chromium only; physical phones and tablets remain untested. A narrow-layout check verifies menu fit. Synthesized sound state/pulses are tested; subjective listening quality is not asserted by headless automation.

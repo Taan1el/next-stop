@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Steadier letters: surface patterns coarsen with each cell's world-space footprint, and flat ground and water no longer reshuffle on float noise at integer heights. Measured letter flicker for a 5 cm camera move fell from 8.8% to 3.7% of lit cells.
+- Ink outlines draw engraved strokes along silhouettes against sky and landscape. Edges come from a log-depth byte and an inverse-depth plane test, so grazing ground and water stay clean. Toggle in Settings.
+- The title card now sits over a self-driving train with cinematic camera cuts. **Watch the line** (or `#watch` in the URL) shows it full screen; any key or tap returns. The backdrop runs a private simulation and never touches journeys or saves.
+- Touch controls: a stick for walking and power, plus mode-aware buttons for boarding, work, brake, coal, whistle, reverse, camera, journal and pause.
+- Station life: water cranes, waiting rooms, repairs and lake fishing, with weather and time-of-day catches, a faster manual-water drain and low-water warnings.
+- `npm run build:pages` packages a GitHub Pages site, and a workflow publishes it from main once Pages is enabled.
+
 ## 0.4.0
 
 - Lit material colours fill glyph cells more fully, with separate fill strengths for terrain, water, foliage, glass and metal. Subtle shading within letters adds surface relief; signs and self-lit materials keep their flat ink.
